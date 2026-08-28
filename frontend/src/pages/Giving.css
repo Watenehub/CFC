@@ -1,0 +1,356 @@
+.giving-page {
+  padding: 2rem 0 4rem;
+  background: var(--color-bg);
+}
+
+.giving-header {
+  text-align: center;
+  padding: 3rem 0;
+}
+
+.giving-header h1 {
+  font-size: 2.5rem;
+  color: var(--color-primary);
+  margin-bottom: 1rem;
+}
+
+.giving-subtitle {
+  font-size: 1.25rem;
+  color: var(--color-text-light);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.giving-intro {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: white;
+  padding: 4rem 2rem;
+  border-radius: var(--radius-xl);
+  margin-bottom: 3rem;
+}
+
+.giving-intro-content {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.giving-intro h2 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.giving-intro p {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.giving-principles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.principle-item {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(10px);
+}
+
+.principle-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.principle-item h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.principle-item p {
+  font-size: 0.875rem;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.giving-filters {
+  margin-bottom: 2rem;
+}
+
+.giving-filters h3 {
+  color: var(--color-primary);
+  margin-bottom: 1rem;
+}
+
+.filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.filter-btn {
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-border);
+  background: var(--color-bg-light);
+  color: var(--color-text);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.filter-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.filter-btn.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.giving-options {
+  margin-bottom: 3rem;
+}
+
+.giving-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+}
+
+.giving-card {
+  background: var(--color-bg-light);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: transform var(--transition-fast);
+}
+
+.giving-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.giving-poster {
+  position: relative;
+  height: 250px;
+  overflow: hidden;
+}
+
+.giving-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.giving-category-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-secondary);
+  color: var(--color-text-dark);
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.giving-content {
+  padding: 2rem;
+}
+
+.giving-content h3 {
+  font-size: 1.5rem;
+  color: var(--color-primary);
+  margin-bottom: 1rem;
+}
+
+.giving-description {
+  color: var(--color-text);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.giving-payment {
+  background: var(--color-bg);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  margin-bottom: 1.5rem;
+}
+
+.giving-payment h4 {
+  color: var(--color-primary);
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.payment-method,
+.payment-details {
+  margin-bottom: 1rem;
+}
+
+.payment-method strong,
+.payment-details strong {
+  color: var(--color-text-dark);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.payment-details pre {
+  background: var(--color-bg-dark);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0.5rem 0 0;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: var(--color-text);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-full {
+  width: 100%;
+}
+
+.giving-security {
+  background: var(--color-bg-light);
+  padding: 3rem;
+  border-radius: var(--radius-xl);
+  margin-bottom: 3rem;
+}
+
+.giving-security h2 {
+  text-align: center;
+  color: var(--color-primary);
+  margin-bottom: 2rem;
+}
+
+.security-features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.security-item {
+  text-align: center;
+  padding: 2rem;
+}
+
+.security-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.security-item h3 {
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+}
+
+.security-item p {
+  color: var(--color-text-light);
+  font-size: 0.875rem;
+}
+
+.giving-contact {
+  background: linear-gradient(135deg, var(--color-secondary) 0%, #d4a82a 100%);
+  color: var(--color-text-dark);
+  padding: 3rem;
+  border-radius: var(--radius-xl);
+  text-align: center;
+}
+
+.giving-contact-content {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.giving-contact h2 {
+  margin-bottom: 1rem;
+}
+
+.giving-contact p {
+  margin-bottom: 1.5rem;
+  opacity: 0.9;
+}
+
+.contact-info p {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.loading-state,
+.error-state,
+.empty-state {
+  text-align: center;
+  padding: 4rem 0;
+  font-size: 1.125rem;
+  color: var(--color-text-light);
+}
+
+.error-state {
+  color: var(--color-error);
+}
+
+@media (max-width: 1024px) {
+  .giving-principles {
+    grid-template-columns: 1fr;
+  }
+
+  .giving-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .security-features {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .giving-header h1 {
+    font-size: 2rem;
+  }
+
+  .giving-intro {
+    padding: 3rem 1.5rem;
+  }
+
+  .filter-buttons {
+    flex-direction: column;
+  }
+
+  .filter-btn {
+    width: 100%;
+  }
+}

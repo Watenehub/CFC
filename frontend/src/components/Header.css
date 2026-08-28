@@ -1,0 +1,293 @@
+.header {
+  background: var(--color-bg-light);
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+}
+
+.logo-image {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  object-fit: contain;
+}
+
+.logo-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+}
+
+.nav-list {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-item {
+  margin: 0;
+}
+
+.nav-item { position: relative; }
+.nav-item { position: relative; }
+
+.nav-about .about-link { cursor: pointer; display: inline-flex; align-items: center; }
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: var(--color-bg-light);
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-md);
+  min-width: 200px;
+  padding: 0.25rem 0;
+  display: none;
+  z-index: 1200;
+}
+
+.dropdown-link {
+  display: block;
+  padding: 0.5rem 1rem;
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.dropdown-link:hover { background: var(--color-bg-dark); color: var(--color-primary); }
+
+.nav-item:hover > .dropdown { display: block; }
+
+.dropdown.open { display: block; }
+
+/* Remove bullets and replace with uploaded image as an emoji-style icon */
+.dropdown, .dropdown ul, .dropdown li { list-style: none; margin: 0; padding: 0; }
+.dropdown-link {
+  display: flex;
+  align-items: center;
+}
+.dropdown-link::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-right: 0.6rem;
+  background-image: url('/CFC_CHURCH_PHOTO.jpg');
+  background-size: cover;
+  background-position: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.nav-link {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.nav-link:hover {
+  color: var(--color-primary);
+  background: var(--color-bg-dark);
+}
+
+.nav-link-active {
+  color: var(--color-primary);
+  background: var(--color-bg-dark);
+}
+
+/* Helper class for replacing inline emoji-like icons with the church photo */
+.image-icon {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  background-image: url('/CFC_CHURCH_PHOTO.jpg');
+  background-size: cover;
+  background-position: center;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.search-btn {
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+  color: var(--color-text-light);
+  transition: all var(--transition-fast);
+}
+
+.search-btn:hover {
+  color: var(--color-primary);
+  background: var(--color-bg-dark);
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.login-btn {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.login-btn:hover {
+  color: var(--color-primary);
+  background: var(--color-bg-dark);
+}
+
+/* By default, hide the login item inside the nav (desktop shows the header login button) */
+.nav-login {
+  display: none;
+}
+
+.register-btn {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: white;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.register-btn:hover {
+  background: var(--color-primary-dark);
+}
+
+.user-menu {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.dashboard-btn {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  background: var(--color-secondary);
+  color: var(--color-text-dark);
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.dashboard-btn:hover {
+  background: var(--color-secondary-light);
+}
+
+.logout-btn {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.logout-btn:hover {
+  color: var(--color-error);
+  background: var(--color-bg-dark);
+}
+
+.mobile-menu-btn {
+  display: none;
+  padding: 0.5rem;
+  color: var(--color-text);
+}
+
+@media (max-width: 1024px) {
+  .nav {
+    position: fixed;
+    top: 72px;
+    left: 0;
+    right: 0;
+    background: var(--color-bg-light);
+    box-shadow: var(--shadow-lg);
+    padding: 1rem;
+    transform: translateY(-100%);
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-normal);
+  }
+
+  .nav-open {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .nav-list {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .nav-link {
+    padding: 0.75rem 1rem;
+    width: 100%;
+  }
+
+  .mobile-menu-btn {
+    display: block;
+  }
+
+  .header-actions {
+    gap: 0.5rem;
+  }
+
+  /* On mobile, dropdowns should be static and visible as part of the nav stack */
+  .nav-about .dropdown {
+    position: static;
+    box-shadow: none;
+    padding-left: 0.5rem;
+  }
+
+  .nav-about .dropdown-link {
+    padding-left: 1.25rem;
+  }
+
+  /* On mobile, hide the header auth buttons and show the nav login link */
+  .auth-buttons {
+    display: none;
+  }
+
+  .nav-login {
+    display: block;
+  }
+}
+
+@media (max-width: 768px) {
+  .logo-text {
+    display: none;
+  }
+
+  .search-btn {
+    display: none;
+  }
+}

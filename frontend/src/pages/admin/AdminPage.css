@@ -1,0 +1,2 @@
+.admin-page { padding: 1.5rem; background: var(--color-bg-light); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); }
+.admin-page h2 { color: var(--color-primary); margin-bottom: 0.5rem; }
