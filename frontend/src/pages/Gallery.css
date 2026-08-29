@@ -1,0 +1,9 @@
+.gallery-page { padding: 4rem 0; }
+.gallery-section { margin-bottom: 3rem; }
+.gallery-category { font-size: 1.5rem; margin-bottom: 1rem; color: var(--color-primary); }
+.masonry-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+.gallery-item { position: relative; overflow: hidden; border-radius: 12px; }
+.gallery-item img { width: 100%; height: 220px; object-fit: cover; display: block; transition: transform 0.3s ease; }
+.gallery-item:hover img { transform: scale(1.05); }
+.gallery-overlay { position: absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0; transition: opacity 0.2s ease; background: linear-gradient(180deg, rgba(0,0,0,0.0), rgba(0,0,0,0.35)); }
+.gallery-item:hover .gallery-overlay { opacity:1; }

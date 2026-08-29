@@ -55,7 +55,7 @@ function SermonDetail() {
     id: 1,
     title: 'Walking in Faith: Trusting God\'s Plan',
     description: 'Discover how to trust God completely and walk in faith, even when the path is unclear. In this message, we explore the wisdom of Proverbs 3:5-6 and learn practical ways to lean not on our own understanding but to acknowledge God in all our ways.',
-    speaker: 'Pastor John Doe',
+    speaker: 'Nahashon Wachira',
     date: '2026-08-25',
     video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
     audio_url: '',

@@ -1,36 +1,62 @@
 .header {
-  background: var(--color-bg-light);
-  box-shadow: var(--shadow-sm);
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
+  height: var(--header-height);
+  transition: background var(--transition-normal), box-shadow var(--transition-normal);
 }
 
-.header-content {
+.header--transparent {
+  background: transparent;
+}
+
+.header--solid,
+.header--menu-open {
+  background: rgba(13, 59, 18, 0.97);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.header-inner {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 0;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .header-inner {
+    padding: 0 2.5rem;
+  }
 }
 
 .logo {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.625rem;
   text-decoration: none;
+  flex-shrink: 0;
 }
 
 .logo-image {
-  width: 56px;
-  height: 56px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--radius-full);
   object-fit: contain;
 }
 
 .logo-text {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 700;
-  color: var(--color-primary);
+  color: var(--color-white);
+  letter-spacing: -0.02em;
 }
 
 .nav {
@@ -41,253 +67,219 @@
 .nav-list {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.125rem;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
 .nav-item {
-  margin: 0;
+  position: relative;
 }
 
-.nav-item { position: relative; }
-.nav-item { position: relative; }
+.nav-item-mobile-only {
+  display: none;
+}
 
-.nav-about .about-link { cursor: pointer; display: inline-flex; align-items: center; }
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: var(--radius-full);
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  transition: color var(--transition-fast), background var(--transition-fast);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.nav-link:hover,
+.nav-link-active {
+  color: var(--color-white);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.caret {
+  transition: transform var(--transition-fast);
+}
+
+.about-link[aria-expanded="true"] .caret {
+  transform: rotate(180deg);
+}
 
 .dropdown {
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
-  background: var(--color-bg-light);
-  box-shadow: var(--shadow-lg);
-  border-radius: var(--radius-md);
-  min-width: 200px;
-  padding: 0.25rem 0;
+  background: var(--color-gray-900);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  min-width: 180px;
+  padding: 0.375rem;
   display: none;
   z-index: 1200;
+  list-style: none;
+  margin: 0;
+  box-shadow: var(--shadow-xl);
+}
+
+.nav-about:hover > .dropdown,
+.dropdown.open {
+  display: block;
 }
 
 .dropdown-link {
   display: block;
-  padding: 0.5rem 1rem;
-  color: var(--color-text);
+  padding: 0.625rem 1rem;
+  color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
-}
-
-.dropdown-link:hover { background: var(--color-bg-dark); color: var(--color-primary); }
-
-.nav-item:hover > .dropdown { display: block; }
-
-.dropdown.open { display: block; }
-
-/* Remove bullets and replace with uploaded image as an emoji-style icon */
-.dropdown, .dropdown ul, .dropdown li { list-style: none; margin: 0; padding: 0; }
-.dropdown-link {
-  display: flex;
-  align-items: center;
-}
-.dropdown-link::before {
-  content: '';
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  margin-right: 0.6rem;
-  background-image: url('/CFC_CHURCH_PHOTO.jpg');
-  background-size: cover;
-  background-position: center;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.nav-link {
-  padding: 0.5rem 1rem;
   border-radius: var(--radius-md);
-  color: var(--color-text);
-  font-weight: 500;
-  transition: all var(--transition-fast);
+  font-size: 0.9375rem;
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
 
-.nav-link:hover {
-  color: var(--color-primary);
-  background: var(--color-bg-dark);
-}
-
-.nav-link-active {
-  color: var(--color-primary);
-  background: var(--color-bg-dark);
-}
-
-/* Helper class for replacing inline emoji-like icons with the church photo */
-.image-icon {
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  background-image: url('/CFC_CHURCH_PHOTO.jpg');
-  background-size: cover;
-  background-position: center;
-  vertical-align: middle;
-  margin-right: 6px;
+.dropdown-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-white);
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 1rem;
-}
-
-.search-btn {
-  padding: 0.5rem;
-  border-radius: var(--radius-md);
-  color: var(--color-text-light);
-  transition: all var(--transition-fast);
-}
-
-.search-btn:hover {
-  color: var(--color-primary);
-  background: var(--color-bg-dark);
-}
-
-.auth-buttons {
-  display: flex;
   gap: 0.5rem;
+  flex-shrink: 0;
 }
 
-.login-btn {
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-md);
-  color: var(--color-text);
-  font-weight: 500;
+.header-cta {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1.125rem;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 0.875rem;
   transition: all var(--transition-fast);
+  text-decoration: none;
+  white-space: nowrap;
 }
 
-.login-btn:hover {
-  color: var(--color-primary);
-  background: var(--color-bg-dark);
+.header-cta--ghost {
+  color: rgba(255, 255, 255, 0.85);
 }
 
-/* By default, hide the login item inside the nav (desktop shows the header login button) */
-.nav-login {
+.header-cta--ghost:hover {
+  color: var(--color-white);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.header-cta--primary {
+  background: var(--color-accent);
+  color: var(--color-primary-dark);
+}
+
+.header-cta--primary:hover {
+  background: var(--color-accent-light);
+}
+
+.header-actions .header-cta--ghost:first-of-type {
   display: none;
-}
-
-.register-btn {
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-md);
-  background: var(--color-primary);
-  color: white;
-  font-weight: 500;
-  transition: all var(--transition-fast);
-}
-
-.register-btn:hover {
-  background: var(--color-primary-dark);
 }
 
 .user-menu {
   display: flex;
-  gap: 0.5rem;
-}
-
-.dashboard-btn {
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-md);
-  background: var(--color-secondary);
-  color: var(--color-text-dark);
-  font-weight: 500;
-  transition: all var(--transition-fast);
-}
-
-.dashboard-btn:hover {
-  background: var(--color-secondary-light);
-}
-
-.logout-btn {
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-md);
-  color: var(--color-text);
-  font-weight: 500;
-  transition: all var(--transition-fast);
-}
-
-.logout-btn:hover {
-  color: var(--color-error);
-  background: var(--color-bg-dark);
+  gap: 0.25rem;
 }
 
 .mobile-menu-btn {
   display: none;
   padding: 0.5rem;
-  color: var(--color-text);
+  color: var(--color-white);
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1100px) {
   .nav {
     position: fixed;
-    top: 72px;
+    top: var(--header-height);
     left: 0;
     right: 0;
-    background: var(--color-bg-light);
-    box-shadow: var(--shadow-lg);
-    padding: 1rem;
-    transform: translateY(-100%);
+    bottom: 0;
+    background: var(--color-primary-dark);
+    padding: 1.5rem;
+    transform: translateX(100%);
     opacity: 0;
     visibility: hidden;
-    transition: all var(--transition-normal);
+    transition: transform var(--transition-normal), opacity var(--transition-normal), visibility var(--transition-normal);
+    overflow-y: auto;
   }
 
   .nav-open {
-    transform: translateY(0);
+    transform: translateX(0);
     opacity: 1;
     visibility: visible;
   }
 
   .nav-list {
     flex-direction: column;
-    width: 100%;
+    align-items: stretch;
+    gap: 0.25rem;
   }
 
   .nav-link {
-    padding: 0.75rem 1rem;
+    padding: 0.875rem 1rem;
     width: 100%;
+    font-size: 1.0625rem;
+  }
+
+  .nav-item-mobile-only {
+    display: block;
+  }
+
+  .dropdown {
+    position: static;
+    box-shadow: none;
+    border: none;
+    background: rgba(255, 255, 255, 0.05);
+    margin-top: 0.25rem;
+    padding: 0.25rem;
+  }
+
+  .dropdown.open {
+    display: block;
+  }
+
+  .nav-about:hover > .dropdown {
+    display: none;
+  }
+
+  .nav-about .dropdown.open {
+    display: block;
   }
 
   .mobile-menu-btn {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .header-actions {
-    gap: 0.5rem;
-  }
-
-  /* On mobile, dropdowns should be static and visible as part of the nav stack */
-  .nav-about .dropdown {
-    position: static;
-    box-shadow: none;
-    padding-left: 0.5rem;
-  }
-
-  .nav-about .dropdown-link {
-    padding-left: 1.25rem;
-  }
-
-  /* On mobile, hide the header auth buttons and show the nav login link */
-  .auth-buttons {
+  .header-actions .header-cta--ghost,
+  .header-login-desktop {
     display: none;
   }
 
-  .nav-login {
-    display: block;
+  .header-actions .header-cta--primary {
+    display: none;
+  }
+
+  .user-menu {
+    display: none;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 480px) {
   .logo-text {
-    display: none;
-  }
-
-  .search-btn {
     display: none;
   }
 }

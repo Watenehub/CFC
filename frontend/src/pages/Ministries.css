@@ -1,68 +1,42 @@
-.ministries-page {
-  padding: 2rem 0 4rem;
-  background: var(--color-bg);
-}
-
-.ministries-header {
-  text-align: center;
-  padding: 3rem 0;
-}
-
-.ministries-header h1 {
-  font-size: 2.5rem;
-  color: var(--color-primary);
-  margin-bottom: 1rem;
-}
-
-.ministries-subtitle {
-  font-size: 1.25rem;
-  color: var(--color-text-light);
-  max-width: 600px;
-  margin: 0 auto;
-}
-
 .ministries-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
 }
 
-.ministry-card {
-  background: var(--color-bg-light);
-  border-radius: var(--radius-lg);
+.ministry-feature-frame {
+  background: var(--color-white);
+  border-radius: var(--radius-xl);
   overflow: hidden;
-  box-shadow: var(--shadow-md);
-  transition: transform var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-gray-200);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
 }
 
-.ministry-card:hover {
+.ministry-feature-frame:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
 }
 
-.ministry-image {
-  height: 200px;
-  overflow: hidden;
-}
-
-.ministry-image img {
+.ministry-feature-image {
   width: 100%;
-  height: 100%;
+  height: 220px;
   object-fit: cover;
 }
 
-.ministry-content {
+.ministry-feature-content {
   padding: 1.5rem;
 }
 
-.ministry-content h3 {
+.ministry-feature-title {
   font-size: 1.25rem;
+  font-weight: 700;
   color: var(--color-primary);
   margin-bottom: 0.75rem;
 }
 
-.ministry-description {
-  color: var(--color-text);
+.ministry-feature-description {
+  color: var(--color-gray-600);
   line-height: 1.6;
   margin-bottom: 1rem;
 }
@@ -71,34 +45,25 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .ministry-detail {
   display: flex;
   justify-content: space-between;
+  gap: 1rem;
   font-size: 0.875rem;
 }
 
 .detail-label {
-  color: var(--color-text-light);
+  color: var(--color-gray-500);
   font-weight: 500;
 }
 
 .detail-value {
-  color: var(--color-text);
+  color: var(--color-gray-800);
   font-weight: 600;
-}
-
-.loading-state,
-.error-state {
-  text-align: center;
-  padding: 4rem 0;
-  font-size: 1.125rem;
-  color: var(--color-text-light);
-}
-
-.error-state {
-  color: var(--color-error);
+  text-align: right;
 }
 
 @media (max-width: 1024px) {
@@ -108,10 +73,6 @@
 }
 
 @media (max-width: 640px) {
-  .ministries-header h1 {
-    font-size: 2rem;
-  }
-
   .ministries-grid {
     grid-template-columns: 1fr;
   }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import * as sermonsApi from '../api/sermons'
+import PageHero from '../components/PageHero'
 import './Sermons.css'
 
 function Sermons() {
@@ -45,9 +46,8 @@ function Sermons() {
   if (loading) {
     return (
       <div className="sermons-page">
-        <div className="container">
-          <div className="loading-state">Loading sermons...</div>
-        </div>
+        <PageHero eyebrow="Teaching" title="Sermons" subtitle="Messages from Cornerstone Family Chapel to encourage you in the Word." />
+        <div className="page-body"><div className="container"><div className="loading-state">Loading sermons...</div></div></div>
       </div>
     )
   }
@@ -55,9 +55,8 @@ function Sermons() {
   if (error) {
     return (
       <div className="sermons-page">
-        <div className="container">
-          <div className="error-state">{error}</div>
-        </div>
+        <PageHero eyebrow="Teaching" title="Sermons" subtitle="Messages from Cornerstone Family Chapel to encourage you in the Word." />
+        <div className="page-body"><div className="container"><div className="error-state">{error}</div></div></div>
       </div>
     )
   }
@@ -67,11 +66,11 @@ function Sermons() {
       id: 1,
       title: 'Walking in Faith: Trusting God\'s Plan',
       description: 'Discover how to trust God completely and walk in faith, even when the path is unclear.',
-      speaker: 'Pastor John Doe',
+      speaker: 'Nahashon Wachira',
       date: '2026-08-25',
       video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
       audio_url: '',
-      thumbnail: '/CFC_CHURCH_PHOTO.jpg',
+      thumbnail: '/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg',
       scripture: 'Proverbs 3:5-6',
       category: 'Faith',
       tags: ['faith', 'trust', 'proverbs']
@@ -80,11 +79,11 @@ function Sermons() {
       id: 2,
       title: 'The Power of Prayer',
       description: 'Learn how prayer can transform your life and deepen your relationship with God.',
-      speaker: 'Pastor Jane Smith',
+      speaker: 'Nahashon Wachira',
       date: '2026-08-18',
       video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
       audio_url: '',
-      thumbnail: '/CFC_CHURCH_PHOTO.jpg',
+      thumbnail: '/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg',
       scripture: 'Philippians 4:6-7',
       category: 'Prayer',
       tags: ['prayer', 'philippians', 'peace']
@@ -93,11 +92,11 @@ function Sermons() {
       id: 3,
       title: 'Living with Purpose',
       description: 'Discover God\'s purpose for your life and how to walk it out daily.',
-      speaker: 'Pastor John Doe',
+      speaker: 'Nahashon Wachira',
       date: '2026-08-11',
       video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
       audio_url: '',
-      thumbnail: '/CFC_CHURCH_PHOTO.jpg',
+      thumbnail: '/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg',
       scripture: 'Jeremiah 29:11',
       category: 'Purpose',
       tags: ['purpose', 'jeremiah', 'calling']
@@ -106,11 +105,11 @@ function Sermons() {
       id: 4,
       title: 'Building Strong Families',
       description: 'Biblical principles for building and maintaining strong, godly families.',
-      speaker: 'Pastor Michael Johnson',
+      speaker: 'Nahashon Wachira',
       date: '2026-08-04',
       video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
       audio_url: '',
-      thumbnail: '/CFC_CHURCH_PHOTO.jpg',
+      thumbnail: '/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg',
       scripture: 'Joshua 24:15',
       category: 'Family',
       tags: ['family', 'joshua', 'marriage']
@@ -119,11 +118,11 @@ function Sermons() {
       id: 5,
       title: 'The Beatitudes: Blessed are the Poor in Spirit',
       description: 'Understanding the first beatitude and what it means to be poor in spirit.',
-      speaker: 'Pastor John Doe',
+      speaker: 'Nahashon Wachira',
       date: '2026-07-28',
       video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
       audio_url: '',
-      thumbnail: '/CFC_CHURCH_PHOTO.jpg',
+      thumbnail: '/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg',
       scripture: 'Matthew 5:3',
       category: 'Sermon on the Mount',
       tags: ['beatitudes', 'matthew', 'humility']
@@ -132,11 +131,11 @@ function Sermons() {
       id: 6,
       title: 'Overcoming Anxiety',
       description: 'Find peace and overcome anxiety through faith in God\'s promises.',
-      speaker: 'Pastor Jane Smith',
+      speaker: 'Nahashon Wachira',
       date: '2026-07-21',
       video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
       audio_url: '',
-      thumbnail: '/CFC_CHURCH_PHOTO.jpg',
+      thumbnail: '/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg',
       scripture: '1 Peter 5:7',
       category: 'Mental Health',
       tags: ['anxiety', 'peace', '1-peter']
@@ -157,13 +156,14 @@ function Sermons() {
 
   return (
     <div className="sermons-page">
+      <PageHero
+        eyebrow="Teaching"
+        title="Sermons"
+        subtitle="Browse recent messages from our pulpit. Search by title, speaker, or Scripture."
+        image="/images/cornerstone/page_01/page01_photo002_worship_service_participants.jpg"
+      />
+      <div className="page-body page-body--white">
       <div className="container">
-        <section className="sermons-header">
-          <h1>Sermons</h1>
-          <p className="sermons-subtitle">
-            Browse our collection of messages to encourage and equip you in your faith journey
-          </p>
-        </section>
 
         <section className="sermons-filters">
           <div className="search-bar">
@@ -231,6 +231,7 @@ function Sermons() {
             ))}
           </div>
         )}
+      </div>
       </div>
     </div>
   )

@@ -6,6 +6,7 @@ import Ministries from './pages/Ministries'
 import Sermons from './pages/Sermons'
 import SermonDetail from './pages/SermonDetail'
 import WatchLive from './pages/WatchLive'
+import Gallery from './pages/Gallery'
 import Events from './pages/Events'
 import EventDetail from './pages/EventDetail'
 import Giving from './pages/Giving'
@@ -54,6 +55,7 @@ function AppRoutes() {
       <Route path="/sermons" element={<Sermons />} />
       <Route path="/sermons/:id" element={<SermonDetail />} />
       <Route path="/watch-live" element={<WatchLive />} />
+      <Route path="/gallery" element={<Gallery />} />
       <Route path="/events" element={<Events />} />
       <Route path="/events/:id" element={<EventDetail />} />
       <Route path="/give" element={<Giving />} />
@@ -86,6 +88,7 @@ function AppRoutes() {
           </ProtectedRoute>
         } 
       />
+      <Route path="/media/gallery" element={<ProtectedRoute allowedRoles={["admin","media"]}><Gallery /></ProtectedRoute>} />
       
       <Route 
         path="/secretary/*" 

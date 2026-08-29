@@ -1,0 +1,69 @@
+Cornerstone original photos manifest
+
+Place the original photographs from the newsletter into this folder using their exact filenames.
+
+Expected filenames (use exact names):
+- page01_photo001_praise_and_worship_team_group.jpg
+- page01_photo002_worship_service_participants.jpg
+- page01_photo000_pastor_portrait.jpg
+- page02_photo005_conference_fellowship_table.jpg
+- page02_photo006_conference_participants.jpg
+- page02_photo007_good_soil_conference_panel.jpg
+- page02_photo008_good_soil_conference_gathering.jpg
+- page03_photo010_pastors_leaders_conference_prayer.jpg
+- page03_photo012_pastors_leaders_conference_gathering.jpg
+- page03_photo014_conference_audience.jpg
+- page03_photo015_conference_participants.jpg
+- page04_photo016_marriage_conference_speakers.jpg
+- page04_photo017_marriage_conference_group_discussion.jpg
+- page04_photo018_marriage_conference_fellowship.jpg
+- page04_photo019_marriage_conference_discussion.jpg
+- page05_photo022_membership_class_group.jpg
+- page05_photo023_membership_worship_participants.jpg
+- page05_photo024_membership_class_speakers.jpg
+- page06_photo025_children_ministry_teaching.jpg
+- page06_photo026_children_ministry_group.jpg
+- page06_photo027_children_praying.jpg
+- page06_photo028_children_and_adults_ministry_group.jpg
+- page07_photo030_praise_and_worship_team_group.jpg
+- page07_photo031_praise_and_worship_team.jpg
+- page07_photo032_music_extravaganza.jpg
+- page07_photo033_worship_night.jpg
+- page07_photo034_hymn_sunday.jpg
+- page07_photo035_drummer.jpg
+- page07_photo036_bass_guitarist.jpg
+- page07_photo037_musician.jpg
+- page08_photo039_media_camera_operator.jpg
+- page08_photo040_media_camera_operator.jpg
+- page08_photo041_media_camera_operator.jpg
+- page08_photo042_media_control_room.jpg
+- page08_photo043_media_camera_operator.jpg
+- page08_photo044_media_technical_team.jpg
+- page08_photo045_media_technical_team.jpg
+- page09_photo047_medical_camp_health_outreach.jpg
+- page09_photo048_medical_camp_consultation.jpg
+- page09_photo049_medical_camp_consultation.jpg
+- page09_photo050_church_medical_camp_exterior.jpg
+- page09_photo051_medical_camp_service.jpg
+- page09_photo052_medical_camp_organizer_portrait.jpg
+- page10_photo055_medical_camp_tents_site.jpg
+- page10_photo058_medical_camp_community_gathering.jpg
+- page10_photo061_medical_camp_gathering.jpg
+- page10_photo062_medical_camp_consultation.jpg
+- page10_photo063_community_outreach.jpg
+- page10_photo064_community_outreach_group.jpg
+- page10_photo065_community_outreach_event.jpg
+- page11_photo067_community_painting_project.jpg
+- page11_photo068_community_painting_project.jpg
+- page11_photo069_community_painting_project.jpg
+- page11_photo070_community_painting_project.jpg
+- page11_photo071_community_painting_project.jpg
+- page11_photo072_community_outreach_team.jpg
+- page11_photo073_community_painting_project.jpg
+- page11_photo074_community_painting_project.jpg
+- page12_photo075_drum_set.jpg
+- page12_photo076_clinic_project_site.jpg
+- page12_photo077_media_room.jpg
+- page12_photo078_children_community_gathering.jpg
+
+Do NOT edit or modify the original files. Copy them into this folder verbatim.

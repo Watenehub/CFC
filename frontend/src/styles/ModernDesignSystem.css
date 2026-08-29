@@ -28,6 +28,8 @@
   --shadow-premium: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   --shadow-soft: 0 10px 40px -10px rgba(0, 0, 0, 0.15);
   --shadow-glow: 0 0 40px rgba(30, 64, 175, 0.3);
+  --container-max-width: 1200px;
+  --page-gutter: 1rem;
 }
 
 /* ============================================
@@ -37,7 +39,9 @@
 /* FRAME TYPE 1 - HERO MINISTRY SHOWCASE FRAME */
 .hero-showcase-frame {
   position: relative;
-  display: inline-block;
+  display: block;
+  width: 100%;
+  height: 100%;
   overflow: visible;
 }
 
@@ -63,6 +67,10 @@
 
 .hero-showcase-image {
   position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   clip-path: polygon(10% 0%, 90% 0%, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0% 90%, 0% 10%);
   box-shadow: var(--shadow-premium);
   transition: transform 0.5s ease, box-shadow 0.5s ease;
@@ -391,6 +399,61 @@
   transition: all 0.3s ease;
   box-shadow: var(--shadow-soft);
   gap: 0.5rem;
+}
+
+/* Legacy .btn and .btn-primary normalization to premium style */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn-primary {
+  background: var(--gradient-primary);
+  color: var(--color-pure-white);
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--color-royal-blue);
+  border: 2px solid var(--color-royal-blue);
+}
+
+/* Container utility */
+.container {
+  width: 100%;
+  max-width: var(--container-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: calc(var(--page-gutter) * 2);
+  padding-right: calc(var(--page-gutter) * 2);
+}
+
+/* Card improvements */
+.glass-card, .action-card, .management-card, .ministry-feature-frame, .sermon-card {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Responsive helpers */
+@media (max-width: 900px) {
+  .sermon-card, .sermon-card .sermon-thumbnail, .sermon-card .sermon-info {
+    display: block;
+    width: 100%;
+  }
+  .hero {
+    grid-template-columns: 1fr;
+    padding: 2rem 0;
+  }
 }
 
 .btn-premium-primary {

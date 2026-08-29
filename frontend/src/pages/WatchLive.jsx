@@ -43,21 +43,21 @@ function WatchLive() {
     {
       id: 1,
       title: 'Sunday Service - August 25, 2026',
-      thumbnail: '/chapel.jpg',
+      thumbnail: '/images/cornerstone/page_08/page08_photo042_media_control_room.jpg',
       date: 'August 25, 2026',
       videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
     },
     {
       id: 2,
       title: 'Sunday Service - August 18, 2026',
-      thumbnail: '/chapel.jpg',
+      thumbnail: '/images/cornerstone/page_08/page08_photo042_media_control_room.jpg',
       date: 'August 18, 2026',
       videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
     },
     {
       id: 3,
       title: 'Sunday Service - August 11, 2026',
-      thumbnail: '/chapel.jpg',
+      thumbnail: '/images/cornerstone/page_08/page08_photo042_media_control_room.jpg',
       date: 'August 11, 2026',
       videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
     }
@@ -107,7 +107,7 @@ function WatchLive() {
             <div className="live-info">
               <p><strong>Current Service:</strong> Sunday Morning Worship</p>
               <p><strong>Started:</strong> 9:00 AM</p>
-              <p><strong>Speaker:</strong> Pastor John Doe</p>
+              <p><strong>Speaker:</strong> Nahashon Wachira</p>
             </div>
           </section>
         ) : (
@@ -149,7 +149,7 @@ function WatchLive() {
                 <div className="detail-icon">👨‍👩‍👧‍👦</div>
                 <div className="detail-text">
                   <h3>Speaker</h3>
-                  <p>Pastor John Doe</p>
+                  <p>Nahashon Wachira</p>
                 </div>
               </div>
               <div className="service-detail-item">

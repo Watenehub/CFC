@@ -1,11 +1,13 @@
-import './AdminPage.css'
+import DashboardLayout from '../../components/DashboardLayout'
 
 function Settings() {
   return (
-    <div className="admin-page">
-      <h2>System Settings</h2>
-      <p>System configuration options will be available here.</p>
-    </div>
+    <DashboardLayout role="admin" title="Settings">
+      <div className="admin-page">
+        <h2>Church website settings</h2>
+        <p>Service times, contact details, and livestream links can be updated here when the settings form is connected.</p>
+      </div>
+    </DashboardLayout>
   )
 }
 

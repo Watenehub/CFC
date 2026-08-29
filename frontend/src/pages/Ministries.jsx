@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import * as ministriesApi from '../api/ministries'
+import PageHero from '../components/PageHero'
 import './Ministries.css'
-import '../styles/ModernDesignSystem.css'
-import '../utils/scrollAnimations'
 
 function Ministries() {
   const [ministries, setMinistries] = useState([])
@@ -26,32 +24,12 @@ function Ministries() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="ministries-page">
-        <div className="container">
-          <div className="loading-state">Loading ministries...</div>
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="ministries-page">
-        <div className="container">
-          <div className="error-state">{error}</div>
-        </div>
-      </div>
-    )
-  }
-
   const ministriesList = ministries.length > 0 ? ministries : [
     {
       id: 1,
       name: 'Youth Ministry',
       description: 'Empowering the next generation to grow in faith and serve with purpose.',
-      leader: 'Pastor Michael Johnson',
+      leader: 'Nahashon Wachira',
       meeting_time: 'Fridays 6:00 PM',
       location: 'Youth Center',
       contact: 'youth@cornerstonechapel.org',
@@ -65,7 +43,7 @@ function Ministries() {
       meeting_time: '<em>To be updated</em>',
       location: '<em>To be updated</em>',
       contact: '<em>To be updated</em>',
-      image: '/chapel.jpg'
+      image: '/images/cornerstone/page_06/page06_photo026_children_ministry_group.jpg'
     },
     {
       id: 3,
@@ -95,7 +73,7 @@ function Ministries() {
       meeting_time: '<em>To be updated</em>',
       location: '<em>To be updated</em>',
       contact: '<em>To be updated</em>',
-      image: '/chapel.jpg'
+      image: '/images/cornerstone/page_07/page07_photo030_praise_and_worship_team_group.jpg'
     },
     {
       id: 6,
@@ -105,7 +83,7 @@ function Ministries() {
       meeting_time: 'Sundays 8:00 AM',
       location: 'Media Room',
       contact: 'media@cornerstonechapel.org',
-      image: '/chapel.jpg'
+      image: '/images/cornerstone/page_08/page08_photo042_media_control_room.jpg'
     },
     {
       id: 7,
@@ -135,49 +113,75 @@ function Ministries() {
       meeting_time: '<em>To be updated</em>',
       location: '<em>To be updated</em>',
       contact: '<em>To be updated</em>',
-      image: '/chapel.jpg'
+      image: '/images/cornerstone/page_10/page10_photo064_community_outreach_group.jpg'
     }
   ]
 
+  if (loading) {
+    return (
+      <div className="ministries-page">
+        <PageHero eyebrow="Serve" title="Our Ministries" subtitle="Find your place to serve and grow" />
+        <div className="page-body">
+          <div className="container">
+            <div className="loading-state">Loading ministries...</div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="ministries-page">
+        <PageHero eyebrow="Serve" title="Our Ministries" subtitle="Find your place to serve and grow" />
+        <div className="page-body">
+          <div className="container">
+            <div className="error-state">{error}</div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="ministries-page">
-      <div className="container">
-        <section className="ministries-header">
-          <h1 className="fade-up">Our Ministries</h1>
-          <p className="ministries-subtitle fade-up">
-            Find your place to serve and grow in faith
-          </p>
-        </section>
-
-        <div className="ministries-grid">
-          {ministriesList.map((ministry) => (
-            <div key={ministry.id} className="ministry-feature-frame fade-up">
-              <img src={ministry.image || '/chapel.jpg'} alt={ministry.name} className="ministry-feature-image" />
-              <div className="ministry-feature-content">
-                <h3 className="ministry-feature-title">{ministry.name}</h3>
-                <p className="ministry-feature-description">{ministry.description}</p>
-                <div className="ministry-details">
-                  <div className="ministry-detail">
-                    <span className="detail-label">Leader:</span>
-                    <span className="detail-value">{ministry.leader}</span>
+      <PageHero
+        eyebrow="Serve"
+        title="Our Ministries"
+        subtitle="Find your place to serve and grow"
+      />
+      <div className="page-body">
+        <div className="container">
+          <div className="ministries-grid">
+            {ministriesList.map((ministry) => (
+              <div key={ministry.id} className="ministry-feature-frame fade-up">
+                <img src={ministry.image || '/chapel.jpg'} alt={ministry.name} className="ministry-feature-image" />
+                <div className="ministry-feature-content">
+                  <h3 className="ministry-feature-title">{ministry.name}</h3>
+                  <p className="ministry-feature-description">{ministry.description}</p>
+                  <div className="ministry-details">
+                    <div className="ministry-detail">
+                      <span className="detail-label">Leader:</span>
+                      <span className="detail-value">{ministry.leader}</span>
+                    </div>
+                    <div className="ministry-detail">
+                      <span className="detail-label">Meeting Time:</span>
+                      <span className="detail-value">{ministry.meeting_time}</span>
+                    </div>
+                    <div className="ministry-detail">
+                      <span className="detail-label">Location:</span>
+                      <span className="detail-value">{ministry.location}</span>
+                    </div>
+                    <div className="ministry-detail">
+                      <span className="detail-label">Contact:</span>
+                      <span className="detail-value">{ministry.contact}</span>
+                    </div>
                   </div>
-                  <div className="ministry-detail">
-                    <span className="detail-label">Meeting Time:</span>
-                    <span className="detail-value">{ministry.meeting_time}</span>
-                  </div>
-                  <div className="ministry-detail">
-                    <span className="detail-label">Location:</span>
-                    <span className="detail-value">{ministry.location}</span>
-                  </div>
-                  <div className="ministry-detail">
-                    <span className="detail-label">Contact:</span>
-                    <span className="detail-value">{ministry.contact}</span>
-                  </div>
+                  <button type="button" className="btn btn-primary">Learn More</button>
                 </div>
-                <button className="ministry-feature-button">Learn More</button>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>

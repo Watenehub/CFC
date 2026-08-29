@@ -1,11 +1,13 @@
-import './AdminPage.css'
+import DashboardLayout from '../../components/DashboardLayout'
 
 function Giving() {
   return (
-    <div className="admin-page">
-      <h2>Manage Giving</h2>
-      <p>Giving management tools will appear here.</p>
-    </div>
+    <DashboardLayout role="admin" title="Giving">
+      <div className="admin-page">
+        <h2>Giving records</h2>
+        <p>Review campaigns, offerings, and recorded gifts. Management tools will appear here.</p>
+      </div>
+    </DashboardLayout>
   )
 }
 
