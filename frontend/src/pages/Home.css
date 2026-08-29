@@ -122,6 +122,42 @@
   background: var(--color-bg-light);
 }
 
+.welcome-section {
+  padding: 4rem 0;
+  background: var(--color-bg-light);
+}
+
+.welcome-content {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.welcome-text {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: var(--color-text);
+  margin-bottom: 1rem;
+}
+
+.watch-live-cta {
+  padding: 4rem 0;
+  background: var(--color-bg-dark);
+}
+
+.watch-live-content {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.watch-live-text {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: var(--color-text);
+  margin-bottom: 1rem;
+}
+
 .section-title {
   font-size: 2rem;
   font-weight: 700;
@@ -270,6 +306,23 @@
   background: var(--color-bg);
 }
 
+.events-intro {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: var(--color-text);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.events-subtitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
 .events-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -339,6 +392,11 @@
   background: var(--color-bg-light);
 }
 
+.featured-ministries {
+  padding: 4rem 0;
+  background: var(--color-bg-light);
+}
+
 .ministries-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -353,6 +411,16 @@
   text-align: center;
   box-shadow: var(--shadow-md);
   transition: transform var(--transition-fast);
+}
+
+.ministry-card.featured {
+  padding: 2.5rem;
+}
+
+.ministry-card.featured p {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 1rem;
 }
 
 .ministry-card:hover {
@@ -373,6 +441,29 @@
 
 .ministry-card p {
   color: var(--color-text-light);
+}
+
+.community-outreach {
+  padding: 4rem 0;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: white;
+}
+
+.outreach-content {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.outreach-content .section-title {
+  color: white;
+}
+
+.outreach-text {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  margin-bottom: 1rem;
+  opacity: 0.95;
 }
 
 .section-cta {

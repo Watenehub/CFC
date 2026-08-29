@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import './Prayer.css'
+import '../styles/ModernDesignSystem.css'
+import '../utils/scrollAnimations'
 
 function Prayer() {
   const [formData, setFormData] = useState({
@@ -75,51 +77,57 @@ function Prayer() {
     <div className="prayer-page">
       <div className="container">
         <section className="prayer-header">
-          <h1>Prayer Request</h1>
-          <p className="prayer-subtitle">
-            Share your prayer request with us. Our prayer team is ready to pray with you.
+          <h1 className="fade-up">We Would Love to Pray With You</h1>
+          <p className="prayer-subtitle fade-up">
+            You don't have to walk through life's challenges alone.
+          </p>
+          <p className="prayer-subtitle fade-up">
+            Share your prayer request with us, and allow our church family to stand with you in prayer, encouragement, and support.
           </p>
         </section>
 
         <section className="prayer-content">
           <div className="prayer-info">
-            <h2>How We Pray</h2>
-            <div className="prayer-steps">
-              <div className="prayer-step">
-                <div className="step-number">1</div>
-                <div className="step-content">
-                  <h3>Submit Your Request</h3>
-                  <p>Fill out the prayer request form with your needs and concerns.</p>
+            <div className="glass-card fade-up">
+              <h2>How We Pray</h2>
+              <div className="prayer-steps">
+                <div className="glass-card fade-up">
+                  <div className="step-number">1</div>
+                  <div className="step-content">
+                    <h3>Submit Your Request</h3>
+                    <p>Fill out the prayer request form with your needs and concerns.</p>
+                  </div>
+                </div>
+                <div className="glass-card fade-up">
+                  <div className="step-number">2</div>
+                  <div className="step-content">
+                    <h3>Prayer Team Prays</h3>
+                    <p>Our dedicated prayer team will pray for your request during our weekly prayer meetings.</p>
+                  </div>
+                </div>
+                <div className="glass-card fade-up">
+                  <div className="step-number">3</div>
+                  <div className="step-content">
+                    <h3>Follow Up</h3>
+                    <p>If you choose, we can follow up with you to see how you're doing.</p>
+                  </div>
                 </div>
               </div>
-              <div className="prayer-step">
-                <div className="step-number">2</div>
-                <div className="step-content">
-                  <h3>Prayer Team Prays</h3>
-                  <p>Our dedicated prayer team will pray for your request during our weekly prayer meetings.</p>
-                </div>
-              </div>
-              <div className="prayer-step">
-                <div className="step-number">3</div>
-                <div className="step-content">
-                  <h3>Follow Up</h3>
-                  <p>If you choose, we can follow up with you to see how you're doing.</p>
-                </div>
-              </div>
-            </div>
 
-            <div className="prayer-promise">
-              <div className="promise-icon">🙏</div>
-              <h3>God Hears Your Prayers</h3>
-              <p>
-                "The Lord is near to all who call on him, to all who call on him in truth." 
-                <span className="scripture-reference"> - Psalm 145:18</span>
-              </p>
+              <div className="prayer-promise">
+                <div className="promise-icon">🙏</div>
+                <h3>God Hears Your Prayers</h3>
+                <p>
+                  "The Lord is near to all who call on him, to all who call on him in truth." 
+                  <span className="scripture-reference"> - Psalm 145:18</span>
+                </p>
+              </div>
             </div>
           </div>
 
           <div className="prayer-form-container">
-            <h2>Submit Your Prayer Request</h2>
+            <div className="glass-card fade-up">
+              <h2>Submit Your Prayer Request</h2>
             
             {success && (
               <div className="success-message">
@@ -136,6 +144,7 @@ function Prayer() {
               </div>
             )}
 
+            </div>
             <form onSubmit={handleSubmit} className="prayer-form">
               <div className="form-group">
                 <label htmlFor="name">Name *</label>
@@ -248,18 +257,18 @@ function Prayer() {
 
               <button 
                 type="submit" 
-                className="btn btn-primary btn-full"
+                className="btn-premium btn-premium-primary btn-full"
                 disabled={loading}
               >
                 {loading ? 'Submitting...' : 'Submit Prayer Request'}
               </button>
             </form>
 
-            <div className="form-note">
+            <div className="glass-card form-note fade-up">
               <p>
                 <strong>Note:</strong> Your prayer request will be treated with care and confidentiality 
                 according to your privacy preference. For urgent prayer needs, please contact the church 
-                office directly at +254 700 000 000.
+                office directly.
               </p>
             </div>
           </div>

@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import * as enquiriesApi from '../api/enquiries'
 import './Contact.css'
+import '../styles/ModernDesignSystem.css'
+import '../utils/scrollAnimations'
 
 function Contact() {
   const [formData, setFormData] = useState({
@@ -49,78 +51,64 @@ function Contact() {
     <div className="contact-page">
       <div className="container">
         <section className="contact-header">
-          <h1>Contact Us</h1>
-          <p className="contact-subtitle">
-            We'd love to hear from you. Get in touch with us today.
+          <h1 className="fade-up">Contact Us</h1>
+          <p className="contact-subtitle fade-up">
+            We'd love to hear from you. Whether you have questions about our church, want to learn more about our ministries, or simply want to connect with our community, we're here to help.
+          </p>
+          <p className="contact-subtitle fade-up">
+            Reach out to us and we'll get back to you as soon as possible.
           </p>
         </section>
 
         <section className="contact-content">
           <div className="contact-info">
-            <h2>Get in Touch</h2>
-            
-            <div className="contact-details">
-              <div className="contact-item">
-                <div className="contact-icon image-icon" aria-hidden="true"></div>
-                <div className="contact-text">
-                  <h3>Address</h3>
-                  <p>123 Church Street</p>
-                  <p>Nairobi, Kenya</p>
+            <div className="glass-card fade-up">
+              <h2>Get in Touch</h2>
+              
+              <div className="contact-details">
+                <div className="contact-item">
+                  <div className="contact-icon image-icon" aria-hidden="true"></div>
+                  <div className="contact-text">
+                    <h3>Address</h3>
+                    <p><em>To be updated</em></p>
+                  </div>
+                </div>
+
+                <div className="contact-item">
+                  <div className="contact-icon">📞</div>
+                  <div className="contact-text">
+                    <h3>Phone</h3>
+                    <p><em>To be updated</em></p>
+                  </div>
+                </div>
+
+                <div className="contact-item">
+                  <div className="contact-icon">✉️</div>
+                  <div className="contact-text">
+                    <h3>Email</h3>
+                    <p><em>To be updated</em></p>
+                  </div>
+                </div>
+
+                <div className="contact-item">
+                  <div className="contact-icon image-icon" aria-hidden="true"></div>
+                  <div className="contact-text">
+                    <h3>Office Hours</h3>
+                    <p><em>To be updated</em></p>
+                  </div>
                 </div>
               </div>
 
-              <div className="contact-item">
-                <div className="contact-icon">📞</div>
-                <div className="contact-text">
-                  <h3>Phone</h3>
-                  <p>+254 700 000 000</p>
-                  <p>+254 700 000 001</p>
-                </div>
-              </div>
-
-              <div className="contact-item">
-                <div className="contact-icon">✉️</div>
-                <div className="contact-text">
-                  <h3>Email</h3>
-                  <p>info@cornerstonechapel.org</p>
-                  <p>enquiries@cornerstonechapel.org</p>
-                </div>
-              </div>
-
-              <div className="contact-item">
-                <div className="contact-icon image-icon" aria-hidden="true"></div>
-                <div className="contact-text">
-                  <h3>Office Hours</h3>
-                  <p>Monday - Friday: 8:00 AM - 5:00 PM</p>
-                  <p>Saturday: 9:00 AM - 1:00 PM</p>
-                  <p>Sunday: Closed</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="service-times-contact">
-              <h3>Service Times</h3>
-              <div className="service-time-item">
-                <span className="service-day">Sunday Worship</span>
-                <span className="service-time">9:00 AM - 11:00 AM</span>
-              </div>
-              <div className="service-time-item">
-                <span className="service-day">Sunday School</span>
-                <span className="service-time">10:30 AM - 11:30 AM</span>
-              </div>
-              <div className="service-time-item">
-                <span className="service-day">Wednesday Bible Study</span>
-                <span className="service-time">7:00 PM - 8:30 PM</span>
-              </div>
-              <div className="service-time-item">
-                <span className="service-day">Friday Prayer Meeting</span>
-                <span className="service-time">6:00 PM - 7:30 PM</span>
+              <div className="service-times-contact">
+                <h3>Service Times</h3>
+                <p><em>To be updated</em></p>
               </div>
             </div>
           </div>
 
           <div className="contact-form-container">
-            <h2>Send Us a Message</h2>
+            <div className="glass-card fade-up">
+              <h2>Send Us a Message</h2>
             
             {success && (
               <div className="success-message">
@@ -137,6 +125,7 @@ function Contact() {
               </div>
             )}
 
+            </div>
             <form onSubmit={handleSubmit} className="contact-form">
               <div className="form-row">
                 <div className="form-group">
@@ -213,7 +202,7 @@ function Contact() {
 
               <button 
                 type="submit" 
-                className="btn btn-primary btn-full"
+                className="btn-premium btn-premium-primary btn-full"
                 disabled={loading}
               >
                 {loading ? 'Sending...' : 'Send Message'}
@@ -237,7 +226,7 @@ function Contact() {
               <div className="map-icon">🗺️</div>
               <h3>Interactive Map</h3>
               <p>Map integration coming soon</p>
-              <p className="map-address">123 Church Street, Nairobi, Kenya</p>
+              <p className="map-address"><em>Address to be updated</em></p>
             </div>
           </div>
         </section>

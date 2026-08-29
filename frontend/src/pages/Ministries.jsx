@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import * as ministriesApi from '../api/ministries'
 import './Ministries.css'
+import '../styles/ModernDesignSystem.css'
+import '../utils/scrollAnimations'
 
 function Ministries() {
   const [ministries, setMinistries] = useState([])
@@ -53,17 +55,17 @@ function Ministries() {
       meeting_time: 'Fridays 6:00 PM',
       location: 'Youth Center',
       contact: 'youth@cornerstonechapel.org',
-      image: '/CFC_CHURCH_PHOTO.jpg'
+      image: '/chapel.jpg'
     },
     {
       id: 2,
-      name: 'Children\'s Ministry',
-      description: 'Nurturing young hearts in the love of Christ through engaging lessons and activities.',
-      leader: 'Sarah Williams',
-      meeting_time: 'Sundays 10:30 AM',
-      location: 'Children\'s Wing',
-      contact: 'children@cornerstonechapel.org',
-      image: '/CFC_CHURCH_PHOTO.jpg'
+      name: 'Children & Teens Ministry',
+      description: 'We desire to create an environment where children and young people can feel welcomed, connected, and encouraged to grow in their faith. Through Bible stories, interactive activities, fellowship, and service opportunities, the ministry seeks to nurture spiritual, social, and emotional growth while helping young people develop meaningful relationships within the church. The ministry also envisions a dedicated space where children can worship, learn, participate in activities, and grow together.',
+      leader: '<em>To be updated</em>',
+      meeting_time: '<em>To be updated</em>',
+      location: '<em>To be updated</em>',
+      contact: '<em>To be updated</em>',
+      image: '/chapel.jpg'
     },
     {
       id: 3,
@@ -73,7 +75,7 @@ function Ministries() {
       meeting_time: 'Saturdays 8:00 AM',
       location: 'Church Hall',
       contact: 'men@cornerstonechapel.org',
-      image: '/CFC_CHURCH_PHOTO.jpg'
+      image: '/chapel.jpg'
     },
     {
       id: 4,
@@ -83,17 +85,17 @@ function Ministries() {
       meeting_time: 'Tuesdays 6:00 PM',
       location: 'Fellowship Hall',
       contact: 'women@cornerstonechapel.org',
-      image: '/CFC_CHURCH_PHOTO.jpg'
+      image: '/chapel.jpg'
     },
     {
       id: 5,
-      name: 'Worship Ministry',
-      description: 'Leading the congregation in authentic praise and worship.',
-      leader: 'David Wilson',
-      meeting_time: 'Wednesdays 7:00 PM',
-      location: 'Sanctuary',
-      contact: 'worship@cornerstonechapel.org',
-      image: '/CFC_CHURCH_PHOTO.jpg'
+      name: 'Praise & Worship',
+      description: 'Our Praise & Worship ministry serves with dedication, giving their time, talents, and hearts to help create meaningful worship experiences. Through music, preparation, rehearsal, and service, the team seeks to uplift the congregation and help us connect more deeply in worship. We are grateful for everyone who serves behind the scenes and contributes to creating an atmosphere of worship, unity, and fellowship.',
+      leader: '<em>To be updated</em>',
+      meeting_time: '<em>To be updated</em>',
+      location: '<em>To be updated</em>',
+      contact: '<em>To be updated</em>',
+      image: '/chapel.jpg'
     },
     {
       id: 6,
@@ -103,7 +105,7 @@ function Ministries() {
       meeting_time: 'Sundays 8:00 AM',
       location: 'Media Room',
       contact: 'media@cornerstonechapel.org',
-      image: '/CFC_CHURCH_PHOTO.jpg'
+      image: '/chapel.jpg'
     },
     {
       id: 7,
@@ -113,7 +115,7 @@ function Ministries() {
       meeting_time: 'Sundays 8:30 AM',
       location: 'Main Entrance',
       contact: 'hospitality@cornerstonechapel.org',
-      image: '/CFC_CHURCH_PHOTO.jpg'
+      image: '/chapel.jpg'
     },
     {
       id: 8,
@@ -123,16 +125,16 @@ function Ministries() {
       meeting_time: 'Sundays 8:00 AM',
       location: 'Security Office',
       contact: 'security@cornerstonechapel.org',
-      image: '/CFC_CHURCH_PHOTO.jpg'
+      image: '/chapel.jpg'
     },
     {
       id: 9,
-      name: 'Outreach Ministry',
-      description: 'Serving our local community and spreading the love of Christ.',
-      leader: 'Esther Wanjiku',
-      meeting_time: 'Saturdays 10:00 AM',
-      location: 'Community Center',
-      contact: 'outreach@cornerstonechapel.org',
+      name: 'Community Outreach',
+      description: 'Community outreach is an important part of who we are. We believe that faith is expressed not only through worship, but also through compassion, kindness, generosity, and practical service. From supporting people in need to participating in community initiatives, we seek opportunities to uplift others and build meaningful relationships. Our desire is to be a beacon of hope in our community and beyond. Medical camps have provided opportunities to serve members of the wider community through health services, wellness activities, encouragement, and meaningful conversations.',
+      leader: '<em>To be updated</em>',
+      meeting_time: '<em>To be updated</em>',
+      location: '<em>To be updated</em>',
+      contact: '<em>To be updated</em>',
       image: '/chapel.jpg'
     }
   ]
@@ -141,21 +143,19 @@ function Ministries() {
     <div className="ministries-page">
       <div className="container">
         <section className="ministries-header">
-          <h1>Our Ministries</h1>
-          <p className="ministries-subtitle">
+          <h1 className="fade-up">Our Ministries</h1>
+          <p className="ministries-subtitle fade-up">
             Find your place to serve and grow in faith
           </p>
         </section>
 
         <div className="ministries-grid">
           {ministriesList.map((ministry) => (
-            <div key={ministry.id} className="ministry-card">
-              <div className="ministry-image">
-                <img src={ministry.image || '/CFC_CHURCH_PHOTO.jpg'} alt={ministry.name} />
-              </div>
-              <div className="ministry-content">
-                <h3>{ministry.name}</h3>
-                <p className="ministry-description">{ministry.description}</p>
+            <div key={ministry.id} className="ministry-feature-frame fade-up">
+              <img src={ministry.image || '/chapel.jpg'} alt={ministry.name} className="ministry-feature-image" />
+              <div className="ministry-feature-content">
+                <h3 className="ministry-feature-title">{ministry.name}</h3>
+                <p className="ministry-feature-description">{ministry.description}</p>
                 <div className="ministry-details">
                   <div className="ministry-detail">
                     <span className="detail-label">Leader:</span>
@@ -174,6 +174,7 @@ function Ministries() {
                     <span className="detail-value">{ministry.contact}</span>
                   </div>
                 </div>
+                <button className="ministry-feature-button">Learn More</button>
               </div>
             </div>
           ))}

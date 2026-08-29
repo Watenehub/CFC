@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import * as eventsApi from '../api/events'
 import './Events.css'
+import '../styles/ModernDesignSystem.css'
+import '../utils/scrollAnimations'
 
 function Events() {
   const [events, setEvents] = useState([])
@@ -53,7 +55,7 @@ function Events() {
       start_time: '18:00',
       end_time: '21:00',
       location: 'Main Sanctuary',
-      image: '/CFC_CHURCH_PHOTO.jpg',
+      image: '/chapel.jpg',
       organizer: 'Youth Ministry',
       registration_status: 'open',
       max_participants: 100,
@@ -67,7 +69,7 @@ function Events() {
       start_time: '08:00',
       end_time: '10:00',
       location: 'Church Hall',
-      image: '/CFC_CHURCH_PHOTO.jpg',
+      image: '/chapel.jpg',
       organizer: 'Men\'s Ministry',
       registration_status: 'open',
       max_participants: 50,
@@ -81,7 +83,7 @@ function Events() {
       start_time: '19:00',
       end_time: '20:30',
       location: 'Classroom A',
-      image: '/CFC_CHURCH_PHOTO.jpg',
+      image: '/chapel.jpg',
       organizer: 'Adult Ministry',
       registration_status: 'open',
       max_participants: 30,
@@ -95,7 +97,7 @@ function Events() {
       start_time: '09:00',
       end_time: '17:00',
       location: 'Retreat Center',
-      image: '/CFC_CHURCH_PHOTO.jpg',
+      image: '/chapel.jpg',
       organizer: 'Women\'s Ministry',
       registration_status: 'open',
       max_participants: 40,
@@ -109,7 +111,7 @@ function Events() {
       start_time: '10:00',
       end_time: '14:00',
       location: 'Various Locations',
-      image: '/CFC_CHURCH_PHOTO.jpg',
+      image: '/chapel.jpg',
       organizer: 'Outreach Ministry',
       registration_status: 'open',
       max_participants: null,
@@ -123,7 +125,7 @@ function Events() {
       start_time: '19:00',
       end_time: '21:00',
       location: 'Main Sanctuary',
-      image: '/CFC_CHURCH_PHOTO.jpg',
+      image: '/chapel.jpg',
       organizer: 'Worship Ministry',
       registration_status: 'open',
       max_participants: 200,
@@ -156,9 +158,15 @@ function Events() {
     <div className="events-page">
       <div className="container">
         <section className="events-header">
-          <h1>Events</h1>
-          <p className="events-subtitle">
-            Join us for upcoming events and activities
+          <h1 className="fade-up">Life Together</h1>
+          <p className="events-subtitle fade-up">
+            Church is more than a weekly gathering. It is a community where we learn, fellowship, serve, and grow together.
+          </p>
+          <p className="events-subtitle fade-up">
+            Throughout the year, Cornerstone Family Chapel participates in Bible conferences, leadership conferences, family-focused programs, membership classes, worship events, and community outreach initiatives.
+          </p>
+          <p className="events-subtitle fade-up">
+            Our events create opportunities to strengthen relationships, gain understanding, and encourage one another in our walk of faith.
           </p>
         </section>
 
@@ -171,16 +179,12 @@ function Events() {
           ) : (
             <div className="events-grid">
               {upcomingEvents.map((event) => (
-                <div key={event.id} className="event-card">
-                  <div className="event-image">
-                    <img src={event.image || '/CFC_CHURCH_PHOTO.jpg'} alt={event.title} />
-                    <div className="event-date-badge">
-                      {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                    </div>
-                  </div>
-                  <div className="event-content">
+                <div key={event.id} className="conference-showcase-frame fade-up">
+                  <div className="conference-label">Upcoming</div>
+                  <img src={event.image || '/chapel.jpg'} alt={event.title} className="conference-image" />
+                  <div className="conference-content">
                     <div className="event-organizer">{event.organizer}</div>
-                    <h3>{event.title}</h3>
+                    <h3 className="conference-title">{event.title}</h3>
                     <div className="event-meta">
                       <div className="meta-item">
                         <span className="meta-icon image-icon" aria-hidden="true"></span>
@@ -195,12 +199,12 @@ function Events() {
                         <span>{event.location}</span>
                       </div>
                     </div>
-                    <p className="event-description">{event.description}</p>
+                    <p className="conference-description">{event.description}</p>
                     <div className="event-footer">
                       <span className={`registration-status ${event.registration_status}`}>
                         {event.registration_status === 'open' ? 'Registration Open' : 'Registration Closed'}
                       </span>
-                      <Link to={`/events/${event.id}`} className="btn btn-primary">
+                      <Link to={`/events/${event.id}`} className="btn-premium btn-premium-primary">
                         View Details
                       </Link>
                     </div>
@@ -218,7 +222,7 @@ function Events() {
               {pastEvents.map((event) => (
                 <div key={event.id} className="event-card event-card-past">
                   <div className="event-image">
-                    <img src={event.image || '/CFC_CHURCH_PHOTO.jpg'} alt={event.title} />
+                    <img src={event.image || '/chapel.jpg'} alt={event.title} />
                     <div className="event-date-badge past">
                       {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </div>
@@ -239,7 +243,7 @@ function Events() {
                     <p className="event-description">{event.description}</p>
                     <div className="event-footer">
                       <span className="registration-status past">Past Event</span>
-                      <Link to={`/events/${event.id}`} className="btn btn-outline">
+                      <Link to={`/events/${event.id}`} className="btn-premium btn-premium-outline">
                         View Details
                       </Link>
                     </div>

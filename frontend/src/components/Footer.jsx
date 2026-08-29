@@ -8,18 +8,24 @@ function Footer() {
         <div className="footer-content">
           <div className="footer-section">
             <h3 className="footer-title">Cornerstone Family Chapel</h3>
+            <p className="footer-tagline">
+              Growing in faith. Serving with love. Reaching our community.
+            </p>
             <p className="footer-description">
-              A welcoming community of faith, worshiping together and growing in Christ.
+              Join us as we worship, learn, fellowship, and serve together.
             </p>
           </div>
 
           <div className="footer-section">
             <h4 className="footer-heading">Quick Links</h4>
             <ul className="footer-links">
-              <li><Link to="/about">About Us</Link></li>
+              <li><Link to="/">Home</Link></li>
+              <li><Link to="/about">About</Link></li>
               <li><Link to="/ministries">Ministries</Link></li>
               <li><Link to="/sermons">Sermons</Link></li>
+              <li><Link to="/watch-live">Watch Live</Link></li>
               <li><Link to="/events">Events</Link></li>
+              <li><Link to="/prayer">Prayer</Link></li>
               <li><Link to="/give">Give</Link></li>
               <li><Link to="/contact">Contact</Link></li>
             </ul>
@@ -28,20 +34,16 @@ function Footer() {
           <div className="footer-section">
             <h4 className="footer-heading">Service Times</h4>
             <ul className="footer-info">
-              <li>Sunday Worship: 9:00 AM</li>
-              <li>Sunday School: 10:30 AM</li>
-              <li>Bible Study: Wednesday 7:00 PM</li>
-              <li>Prayer Meeting: Friday 6:00 PM</li>
+              <li><em>Service times to be updated</em></li>
             </ul>
           </div>
 
           <div className="footer-section">
             <h4 className="footer-heading">Contact Us</h4>
             <ul className="footer-info">
-              <li>123 Church Street</li>
-              <li>Nairobi, Kenya</li>
-              <li>Phone: +254 700 000 000</li>
-              <li>Email: info@cornerstonechapel.org</li>
+              <li><em>Address to be updated</em></li>
+              <li><em>Phone to be updated</em></li>
+              <li><em>Email to be updated</em></li>
             </ul>
           </div>
         </div>

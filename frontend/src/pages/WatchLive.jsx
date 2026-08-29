@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import './WatchLive.css'
+import '../styles/ModernDesignSystem.css'
+import '../utils/scrollAnimations'
 
 function WatchLive() {
   const [isLive, setIsLive] = useState(true)
@@ -41,21 +43,21 @@ function WatchLive() {
     {
       id: 1,
       title: 'Sunday Service - August 25, 2026',
-      thumbnail: '/CFC_CHURCH_PHOTO.jpg',
+      thumbnail: '/chapel.jpg',
       date: 'August 25, 2026',
       videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
     },
     {
       id: 2,
       title: 'Sunday Service - August 18, 2026',
-      thumbnail: '/CFC_CHURCH_PHOTO.jpg',
+      thumbnail: '/chapel.jpg',
       date: 'August 18, 2026',
       videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
     },
     {
       id: 3,
       title: 'Sunday Service - August 11, 2026',
-      thumbnail: '/CFC_CHURCH_PHOTO.jpg',
+      thumbnail: '/chapel.jpg',
       date: 'August 11, 2026',
       videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
     }
@@ -71,9 +73,15 @@ function WatchLive() {
     <div className="watch-live-page">
       <div className="container">
         <section className="live-header">
-          <h1>Watch Live</h1>
-          <p className="live-subtitle">
-            Join us for worship from anywhere in the world
+          <h1 className="fade-up">Worship With Us Wherever You Are</h1>
+          <p className="live-subtitle fade-up">
+            Technology has opened another way for our church family to stay connected.
+          </p>
+          <p className="live-subtitle fade-up">
+            Through live broadcasts, those who cannot attend in person can still participate in our services and feel part of the church community. Our media team works diligently to make these broadcasts engaging and accessible.
+          </p>
+          <p className="live-subtitle fade-up">
+            Join us online and worship with us from wherever you are.
           </p>
         </section>
 
@@ -156,21 +164,19 @@ function WatchLive() {
         )}
 
         <section className="previous-streams">
-          <h2 className="section-title">Previous Services</h2>
+          <h2 className="section-title fade-up">Previous Services</h2>
           <div className="streams-grid">
             {previousStreams.map((stream) => {
               const embedUrl = getYouTubeEmbedUrl(stream.videoUrl)
               return (
-                <div key={stream.id} className="stream-card">
-                  <div className="stream-thumbnail">
-                    <img src={stream.thumbnail} alt={stream.title} />
-                  </div>
-                  <div className="stream-content">
-                    <h3>{stream.title}</h3>
+                <div key={stream.id} className="ministry-feature-frame fade-up">
+                  <img src={stream.thumbnail} alt={stream.title} className="ministry-feature-image" />
+                  <div className="ministry-feature-content">
+                    <h3 className="ministry-feature-title">{stream.title}</h3>
                     <p className="stream-date">{stream.date}</p>
                     {embedUrl && (
                       <button 
-                        className="btn btn-outline"
+                        className="ministry-feature-button"
                         onClick={() => {
                           const player = document.getElementById(`player-${stream.id}`)
                           if (player) {
@@ -203,17 +209,17 @@ function WatchLive() {
 
         <section className="live-info-section">
           <div className="info-cards">
-            <div className="info-card">
+            <div className="glass-card fade-up">
               <div className="info-icon">🌐</div>
               <h3>Watch Anywhere</h3>
               <p>Join our services from anywhere in the world through our live stream.</p>
             </div>
-            <div className="info-card">
+            <div className="glass-card fade-up">
               <div className="info-icon">💬</div>
               <h3>Interactive Chat</h3>
               <p>Connect with other viewers during the service through live chat.</p>
             </div>
-            <div className="info-card">
+            <div className="glass-card fade-up">
               <div className="info-icon">📱</div>
               <h3>Mobile Friendly</h3>
               <p>Watch on any device - phone, tablet, or computer.</p>
