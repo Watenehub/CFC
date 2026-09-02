@@ -214,11 +214,12 @@
     position: fixed;
     top: var(--header-height);
     left: 0;
-    right: 0;
+    right: auto;
     bottom: 0;
+    width: min(86vw, 360px);
     background: var(--color-primary-dark);
     padding: 1.5rem;
-    transform: translateX(100%);
+    transform: translateX(-100%);
     opacity: 0;
     visibility: hidden;
     transition: transform var(--transition-normal), opacity var(--transition-normal), visibility var(--transition-normal);
@@ -229,6 +230,19 @@
     transform: translateX(0);
     opacity: 1;
     visibility: visible;
+  }
+
+  .mobile-menu-backdrop {
+    position: fixed;
+    inset: var(--header-height) 0 0 0;
+    z-index: 999;
+    display: block;
+    background: rgba(5, 20, 8, 0.54);
+    cursor: pointer;
+  }
+
+  .nav {
+    z-index: 1001;
   }
 
   .nav-list {

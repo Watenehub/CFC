@@ -1,4 +1,4 @@
-from flask import Flask, Blueprint
+from flask import Flask, Blueprint, request
 from .config import Config
 from flask_cors import CORS
 import importlib
@@ -13,7 +13,7 @@ def create_app():
     app.config.from_object(Config)
 
     # Enable CORS for frontend dev server so auth requests with credentials work
-    CORS(app, resources={r"/api/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000"]}}, supports_credentials=True)
+    CORS(app, resources={r"/api/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001"]}}, supports_credentials=True)
 
     # Development secret key.
     # Move this to an environment variable before deployment.
@@ -45,10 +45,17 @@ def create_app():
             "message": "Cornerstone Family Chapel API is healthy"
         }
 
-    # Ensure CORS headers are present for development (frontend on localhost:3000)
+    # Ensure CORS headers are present for local frontend development.
     @app.after_request
     def add_cors_headers(response):
-        response.headers.setdefault('Access-Control-Allow-Origin', 'http://localhost:3000')
+        request_origin = request.headers.get('Origin')
+        allowed_origins = {
+            'http://localhost:3000',
+            'http://127.0.0.1:3000',
+            'http://localhost:3001',
+            'http://127.0.0.1:3001',
+        }
+        response.headers.setdefault('Access-Control-Allow-Origin', request_origin if request_origin in allowed_origins else 'http://localhost:3000')
         response.headers.setdefault('Access-Control-Allow-Credentials', 'true')
         response.headers.setdefault('Access-Control-Allow-Headers', 'Content-Type')
         response.headers.setdefault('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')

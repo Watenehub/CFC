@@ -96,6 +96,15 @@ function Header() {
           </ul>
         </nav>
 
+        {mobileMenuOpen && (
+          <button
+            type="button"
+            className="mobile-menu-backdrop"
+            aria-label="Close navigation menu"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+        )}
+
         <div className="header-actions">
           <Link to="/contact" className="header-cta header-cta--ghost">Contact</Link>
           <Link to="/watch-live" className="header-cta header-cta--primary">Watch Live</Link>
