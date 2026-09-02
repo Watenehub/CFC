@@ -55,11 +55,10 @@ function Header() {
           <div className="mobile-nav-header">
             <Link to="/" className="mobile-nav-brand" onClick={() => setMobileMenuOpen(false)}>
               <img src="/logo.png" alt="Cornerstone Family Chapel" />
-              <span>Cornerstone</span>
             </Link>
             <button type="button" className="mobile-nav-close" onClick={() => setMobileMenuOpen(false)} aria-label="Close navigation menu">&times;</button>
           </div>
-          <ul className="nav-list">
+          <ul className="nav-list desktop-nav-list">
             <li className="nav-item nav-about">
               <button
                 type="button"
@@ -101,6 +100,31 @@ function Header() {
               </li>
             )}
           </ul>
+          <ul className="mobile-nav-list">
+            <li><Link to="/" onClick={() => setMobileMenuOpen(false)}>Home</Link></li>
+            <li className="mobile-nav-about-item">
+              <button type="button" onClick={() => setAboutOpen(!aboutOpen)} aria-expanded={aboutOpen}>
+                <span>About Us</span><span className="mobile-nav-plus">{aboutOpen ? '-' : '+'}</span>
+              </button>
+              {aboutOpen && (
+                <ul className="mobile-nav-submenu">
+                  <li><Link to="/about" onClick={() => setMobileMenuOpen(false)}>Our Church</Link></li>
+                  <li><Link to="/pastors" onClick={() => setMobileMenuOpen(false)}>Pastors</Link></li>
+                  <li><Link to="/deacons" onClick={() => setMobileMenuOpen(false)}>Deacons</Link></li>
+                  <li><Link to="/gallery" onClick={() => setMobileMenuOpen(false)}>Gallery</Link></li>
+                </ul>
+              )}
+            </li>
+            <li><Link to="/sermons" onClick={() => setMobileMenuOpen(false)}>Sermons</Link></li>
+            <li><Link to="/give" onClick={() => setMobileMenuOpen(false)}>Giving</Link></li>
+            <li><Link to="/events" onClick={() => setMobileMenuOpen(false)}>Events</Link></li>
+            <li><Link to="/gallery" onClick={() => setMobileMenuOpen(false)}>Downloads</Link></li>
+            <li><Link to="/contact" onClick={() => setMobileMenuOpen(false)}>Contact Us</Link></li>
+          </ul>
+          <form className="mobile-nav-search" onSubmit={(event) => event.preventDefault()}>
+            <input type="search" placeholder="Search.." aria-label="Search website" />
+            <button type="submit" aria-label="Search">&#8594;</button>
+          </form>
         </nav>
 
         {mobileMenuOpen && (
