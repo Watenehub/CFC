@@ -139,38 +139,10 @@ function Giving() {
               Whether supporting the church's ministry, missions, community outreach, or a specific project, every contribution can help us serve others and extend the impact of the church.
             </p>
           </div>
-          <div className="giving-header-art fade-up">
-            <img src="/giving.png" alt="Giving supports Cornerstone Family Chapel ministry" />
-          </div>
         </section>
 
         <section className="giving-intro">
-          <div className="glass-card fade-up">
-            <h2>Why We Give</h2>
-            <p>
-              Giving is an act of worship and trust in God's provision. When we give, we acknowledge that 
-              everything we have comes from Him, and we participate in His work in the world. Your 
-              contributions support our church's mission to make disciples, serve our community, and 
-              spread the gospel.
-            </p>
-            <div className="giving-principles">
-              <div className="glass-card fade-up">
-                <div className="principle-icon">🙏</div>
-                <h3>Worship</h3>
-                <p>Giving is an act of worship and gratitude to God</p>
-              </div>
-              <div className="glass-card fade-up">
-                <div className="principle-icon">🤝</div>
-                <h3>Generosity</h3>
-                <p>God calls us to be generous with what He has given us</p>
-              </div>
-              <div className="glass-card fade-up">
-                <div className="principle-icon">🌱</div>
-                <h3>Growth</h3>
-                <p>Your giving helps the church grow and impact more lives</p>
-              </div>
-            </div>
-          </div>
+          <img src="/giving.png" alt="Cornerstone Family Chapel giving information" className="giving-banner-image" />
         </section>
 
         <section className="giving-filters">
