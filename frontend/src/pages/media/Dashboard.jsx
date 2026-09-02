@@ -32,9 +32,7 @@ function MediaDashboard() {
       <section className="dashboard-section">
         <h2>Media tools</h2>
         <div className="quick-actions-grid">
-          <Link to="/media/gallery" className="action-card"><span className="action-label">Open gallery</span></Link>
-          <Link to="/sermons" className="action-card"><span className="action-label">Sermon library</span></Link>
-          <Link to="/watch-live" className="action-card"><span className="action-label">Live stream page</span></Link>
+          <Link to="/admin/gallery" className="action-card"><span className="action-label">Gallery Studio</span></Link>
         </div>
       </section>
 

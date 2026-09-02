@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import * as eventsApi from '../api/events'
+import { readSiteContent } from '../data/siteContent'
 import './EventDetail.css'
 
 function EventDetail() {
@@ -15,6 +16,11 @@ function EventDetail() {
 
   const loadEvent = async () => {
     try {
+      const localEvent = readSiteContent().events.find((item) => String(item.id) === String(id))
+      if (localEvent) {
+        setEvent(localEvent)
+        return
+      }
       const data = await eventsApi.getEvent(id)
       setEvent(data)
     } catch (err) {
@@ -80,6 +86,29 @@ function EventDetail() {
 
   const isPastEvent = new Date(eventData.date) < new Date()
 
+  const addToCalendar = () => {
+    const start = `${eventData.date.replaceAll('-', '')}T${eventData.start_time.replace(':', '')}00`
+    const end = `${eventData.date.replaceAll('-', '')}T${eventData.end_time.replace(':', '')}00`
+    const calendarEvent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Cornerstone Family Chapel//Events//EN',
+      'BEGIN:VEVENT',
+      `UID:event-${eventData.id}@cornerstonechapel.org`,
+      `DTSTART:${start}`,
+      `DTEND:${end}`,
+      `SUMMARY:${eventData.title}`,
+      `DESCRIPTION:${eventData.description}`,
+      `LOCATION:${eventData.location}`,
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ].join('\r\n')
+    const link = document.createElement('a')
+    link.href = `data:text/calendar;charset=utf-8,${encodeURIComponent(calendarEvent)}`
+    link.download = `${eventData.title.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.ics`
+    link.click()
+  }
+
   return (
     <div className="event-detail-page">
       <div className="container">
@@ -127,6 +156,10 @@ function EventDetail() {
               <h2>About This Event</h2>
               <p>{eventData.description}</p>
             </div>
+
+            <button type="button" className="btn btn-calendar" onClick={addToCalendar}>
+              Add to Calendar
+            </button>
 
             {!isPastEvent && eventData.registration_status === 'open' && (
               <div className="event-registration">

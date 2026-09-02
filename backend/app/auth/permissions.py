@@ -14,11 +14,13 @@ ROLE_PERMISSIONS = {
         "manage_ministries",
         "manage_services",
         "manage_notifications"
+        ,"manage_gallery"
     ],
 
     "media": [
         "manage_events",
-        "manage_sermons"
+        "manage_sermons",
+        "manage_gallery"
     ],
 
     "secretary": [
@@ -44,7 +46,9 @@ def role_required(permission):
                     "error": "Authentication required"
                 }), 401
 
-            if not has_permission(user_role, permission):
+            session_permissions = session.get("permissions")
+            allowed = permission in session_permissions if session_permissions is not None else has_permission(user_role, permission)
+            if not allowed:
                 return jsonify({
                     "error": "Access denied",
                     "message": "You do not have permission to perform this action"

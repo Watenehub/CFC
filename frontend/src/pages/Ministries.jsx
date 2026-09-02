@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import * as ministriesApi from '../api/ministries'
+import { readSiteContent } from '../data/siteContent'
 import PageHero from '../components/PageHero'
 import './Ministries.css'
 
@@ -10,10 +11,21 @@ function Ministries() {
 
   useEffect(() => {
     loadMinistries()
+
+    const handleContentUpdate = () => loadMinistries()
+    window.addEventListener('cornerstone-content-updated', handleContentUpdate)
+
+    return () => window.removeEventListener('cornerstone-content-updated', handleContentUpdate)
   }, [])
 
   const loadMinistries = async () => {
     try {
+      const localContent = readSiteContent()
+      if (localContent.ministries?.length) {
+        setMinistries(localContent.ministries)
+        return
+      }
+
       const data = await ministriesApi.getMinistries()
       setMinistries(data)
     } catch (err) {
@@ -159,6 +171,7 @@ function Ministries() {
                 <div className="ministry-feature-content">
                   <h3 className="ministry-feature-title">{ministry.name}</h3>
                   <p className="ministry-feature-description">{ministry.description}</p>
+                  {ministry.encouragement && <p className="leader-encouragement">{ministry.encouragement}</p>}
                   <div className="ministry-details">
                     <div className="ministry-detail">
                       <span className="detail-label">Leader:</span>

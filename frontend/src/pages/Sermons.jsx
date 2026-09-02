@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import * as sermonsApi from '../api/sermons'
+import { readSiteContent } from '../data/siteContent'
 import PageHero from '../components/PageHero'
 import './Sermons.css'
 
@@ -14,10 +15,21 @@ function Sermons() {
 
   useEffect(() => {
     loadSermons()
+
+    const handleContentUpdate = () => loadSermons()
+    window.addEventListener('cornerstone-content-updated', handleContentUpdate)
+
+    return () => window.removeEventListener('cornerstone-content-updated', handleContentUpdate)
   }, [])
 
   const loadSermons = async () => {
     try {
+      const localContent = readSiteContent()
+      if (localContent.sermons?.length) {
+        setSermons(localContent.sermons)
+        return
+      }
+
       const data = await sermonsApi.getSermons()
       setSermons(data)
     } catch (err) {

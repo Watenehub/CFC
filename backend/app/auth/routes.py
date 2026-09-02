@@ -12,29 +12,29 @@ users = [
         "name": "System Admin",
         "email": "admin@cornerstonechapel.org",
         "password": generate_password_hash("admin123"),
-        "role": "admin"
+        "role": "admin",
+        "permissions": [
+            "manage_users", "manage_events", "manage_sermons", "manage_giving",
+            "manage_enquiries", "manage_pastors", "manage_deacons", "manage_ministries",
+            "manage_services", "manage_notifications", "manage_gallery"
+        ]
     },
     {
         "id": 2,
         "name": "Media Account",
         "email": "media@cornerstonechapel.org",
         "password": generate_password_hash("admin123"),
-        "role": "media"
+        "role": "media",
+        "permissions": ["manage_events", "manage_sermons", "manage_gallery"]
     },
     {
         "id": 3,
         "name": "Secretary Account",
         "email": "secretary@cornerstonechapel.org",
         "password": generate_password_hash("admin123"),
-        "role": "secretary"
+        "role": "secretary",
+        "permissions": ["manage_giving", "manage_enquiries"]
     },
-    {
-        "id": 4,
-        "name": "Member Account",
-        "email": "member@cornerstonechapel.org",
-        "password": generate_password_hash("member123"),
-        "role": "member"
-    }
 ]
 
 
@@ -62,6 +62,7 @@ def login():
 
     session["user_id"] = user["id"]
     session["role"] = user["role"]
+    session["permissions"] = user.get("permissions", [])
 
     return jsonify({
         "message": "Login successful",
@@ -69,7 +70,8 @@ def login():
             "id": user["id"],
             "name": user["name"],
             "email": user["email"],
-            "role": user["role"]
+            "role": user["role"],
+            "permissions": user.get("permissions", [])
         }
     })
 
@@ -99,7 +101,8 @@ def current_user():
         "id": user["id"],
         "name": user["name"],
         "email": user["email"],
-        "role": user["role"]
+        "role": user["role"],
+        "permissions": user.get("permissions", [])
     })
 
 
@@ -114,57 +117,9 @@ def logout():
 
 @auth_bp.route("/api/auth/register", methods=["POST"])
 def register():
-    data = request.get_json() or {}
-
-    name = data.get("name", "").strip()
-    email = data.get("email", "").strip().lower()
-    password = data.get("password", "")
-    role = (data.get("role") or "member").strip().lower()
-
-    allowed_roles = [
-        "admin",
-        "media",
-        "secretary",
-        "member"
-    ]
-
-    if not name or not email or not password:
-        return jsonify({
-            "error": "Name, email and password are required"
-        }), 400
-
-    if role not in allowed_roles:
-        return jsonify({
-            "error": "Invalid role",
-            "allowed_roles": allowed_roles
-        }), 400
-
-    if any(user["email"] == email for user in users):
-        return jsonify({
-            "error": "Email already exists"
-        }), 409
-
-    new_user = {
-        "id": len(users) + 1,
-        "name": name,
-        "email": email,
-        "password": generate_password_hash(password),
-        "role": role
-    }
-
-    users.append(new_user)
-    session["user_id"] = new_user["id"]
-    session["role"] = new_user["role"]
-
     return jsonify({
-        "message": "Registration successful",
-        "user": {
-            "id": new_user["id"],
-            "name": new_user["name"],
-            "email": new_user["email"],
-            "role": new_user["role"]
-        }
-    }), 201
+        "error": "Public registration is disabled. Ask an administrator to create a staff account."
+    }), 403
 
 
 @auth_bp.route("/api/auth/users", methods=["GET"])
@@ -190,12 +145,12 @@ def create_user():
     email = data.get("email", "").strip().lower()
     password = data.get("password", "")
     role = data.get("role", "").strip().lower()
+    permissions = data.get("permissions", [])
 
     allowed_roles = [
         "admin",
         "media",
-        "secretary",
-        "member"
+        "secretary"
     ]
 
     if not name or not email or not password or not role:
@@ -219,7 +174,8 @@ def create_user():
         "name": name,
         "email": email,
         "password": generate_password_hash(password),
-        "role": role
+        "role": role,
+        "permissions": permissions
     }
 
     users.append(new_user)
@@ -231,5 +187,37 @@ def create_user():
             "name": new_user["name"],
             "email": new_user["email"],
             "role": new_user["role"]
+            ,"permissions": new_user["permissions"]
         }
     }), 201
+
+
+@auth_bp.route("/api/auth/users/<int:user_id>", methods=["PUT"])
+@role_required("manage_users")
+def update_user(user_id):
+    user = next((item for item in users if item["id"] == user_id), None)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    data = request.get_json() or {}
+    user["name"] = data.get("name", user["name"]).strip()
+    user["email"] = data.get("email", user["email"]).strip().lower()
+    user["role"] = data.get("role", user["role"]).strip().lower()
+    user["permissions"] = data.get("permissions", user.get("permissions", []))
+    if data.get("password"):
+        user["password"] = generate_password_hash(data["password"])
+
+    return jsonify({"message": "User updated successfully", "user": {key: user[key] for key in ("id", "name", "email", "role", "permissions")}})
+
+
+@auth_bp.route("/api/auth/users/<int:user_id>", methods=["DELETE"])
+@role_required("manage_users")
+def delete_user(user_id):
+    global users
+    user = next((item for item in users if item["id"] == user_id), None)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    if user_id == session.get("user_id"):
+        return jsonify({"error": "You cannot remove your own account"}), 400
+    users = [item for item in users if item["id"] != user_id]
+    return jsonify({"message": "User removed successfully"})

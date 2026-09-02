@@ -152,10 +152,6 @@ function Home() {
           <div className="hero-overlay" />
         </div>
         <div className="hero-content container">
-          <h1 className="hero-title fade-up">Growing in Faith. Serving with Love.</h1>
-          <p className="hero-subtitle fade-up">
-            Cornerstone Family Chapel is a church family committed to God&apos;s Word, genuine fellowship, and sharing Christ&apos;s love with our community.
-          </p>
           <div className="hero-actions fade-up">
             <Link to="/about" className="btn btn-hero-solid">Plan a Visit</Link>
             <Link to="/watch-live" className="btn btn-outline-white">Watch Live</Link>

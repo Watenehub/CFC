@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import * as sermonsApi from '../api/sermons'
+import { readSiteContent } from '../data/siteContent'
 import './SermonDetail.css'
 
 function SermonDetail() {
@@ -15,6 +16,11 @@ function SermonDetail() {
 
   const loadSermon = async () => {
     try {
+      const localSermon = readSiteContent().sermons.find((item) => String(item.id) === String(id))
+      if (localSermon) {
+        setSermon(localSermon)
+        return
+      }
       const data = await sermonsApi.getSermon(id)
       setSermon(data)
     } catch (err) {

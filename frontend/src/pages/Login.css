@@ -97,6 +97,54 @@
   transition: border-color var(--transition-fast);
 }
 
+.password-field {
+  position: relative;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 3.25rem;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-light);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.password-toggle:hover:not(:disabled),
+.password-toggle:focus-visible {
+  background: var(--color-bg-dark);
+  color: var(--color-primary);
+  outline: none;
+}
+
+.password-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.password-toggle svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
 .form-group input:focus {
   outline: none;
   border-color: var(--color-primary);

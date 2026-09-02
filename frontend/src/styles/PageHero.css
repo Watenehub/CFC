@@ -1,6 +1,6 @@
 .page-hero {
   position: relative;
-  min-height: 320px;
+  min-height: 390px;
   display: flex;
   align-items: flex-end;
   overflow: hidden;
@@ -36,7 +36,7 @@
 .page-hero-content {
   position: relative;
   z-index: 1;
-  padding: 3rem 1.5rem 2.5rem;
+  padding: 4rem 1.5rem 3.5rem;
   width: 100%;
 }
 
@@ -54,7 +54,7 @@
   font-size: clamp(2rem, 5vw, 3rem);
   font-weight: 800;
   line-height: 1.1;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   color: var(--color-white);
   margin-bottom: 0.75rem;
 }
@@ -62,8 +62,8 @@
 .page-hero-subtitle {
   font-size: clamp(1rem, 2vw, 1.25rem);
   color: rgba(255, 255, 255, 0.85);
-  max-width: 600px;
-  line-height: 1.6;
+  max-width: 660px;
+  line-height: 1.7;
 }
 
 @media (min-width: 768px) {

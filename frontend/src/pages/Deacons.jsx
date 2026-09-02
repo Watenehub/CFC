@@ -1,6 +1,22 @@
 import './About.css'
+import { readSiteContent } from '../data/siteContent'
+import { useState, useEffect } from 'react'
 
 function Deacons() {
+  const [deacons, setDeacons] = useState(readSiteContent().deacons)
+
+  useEffect(() => {
+    const updateDeacons = () => setDeacons(readSiteContent().deacons)
+    updateDeacons()
+    window.addEventListener('cornerstone-content-updated', updateDeacons)
+    return () => window.removeEventListener('cornerstone-content-updated', updateDeacons)
+  }, [])
+
+  const leaders = deacons.length ? deacons : [
+    { name: 'Deacon Samuel Opiyo', role: 'Community outreach and member care', image: '/CFC_CHURCH_PHOTO.jpg' },
+    { name: 'Deaconess Mercy Wanjiru', role: 'Hospitality and small groups', image: '/CFC_CHURCH_PHOTO.jpg' },
+  ]
+
   return (
     <div className="about">
       <div className="container">
@@ -11,21 +27,16 @@ function Deacons() {
 
         <section className="about-section">
           <div className="leadership-grid">
-            <div className="leader-card">
-              <div className="leader-image">
-                <img src="/CFC_CHURCH_PHOTO.jpg" alt="Deacon" />
+            {leaders.map((member) => (
+              <div key={`${member.name}-${member.role}`} className="leader-card">
+                <div className="leader-image">
+                  <img src={member.image || '/CFC_CHURCH_PHOTO.jpg'} alt={member.name} />
+                </div>
+                <h3>{member.name}</h3>
+                <p className="leader-bio">{member.role}</p>
+                {member.encouragement && <p className="leader-encouragement">{member.encouragement}</p>}
               </div>
-              <h3>Deacon Samuel Opiyo</h3>
-              <p className="leader-bio">Serving in community outreach and member care.</p>
-            </div>
-
-            <div className="leader-card">
-              <div className="leader-image">
-                <img src="/CFC_CHURCH_PHOTO.jpg" alt="Deacon" />
-              </div>
-              <h3>Deaconess Mercy Wanjiru</h3>
-              <p className="leader-bio">Oversees hospitality and small groups.</p>
-            </div>
+            ))}
           </div>
         </section>
       </div>

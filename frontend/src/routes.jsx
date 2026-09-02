@@ -13,7 +13,6 @@ import Giving from './pages/Giving'
 import Prayer from './pages/Prayer'
 import Contact from './pages/Contact'
 import Login from './pages/Login'
-import Register from './pages/Register'
 import Pastors from './pages/Pastors'
 import Deacons from './pages/Deacons'
 import AdminDashboard from './pages/admin/Dashboard'
@@ -23,11 +22,13 @@ import AdminSermonsCreate from './pages/admin/SermonsCreate'
 import AdminEnquiries from './pages/admin/Enquiries'
 import AdminGiving from './pages/admin/Giving'
 import AdminSettings from './pages/admin/Settings'
+import AdminPeople from './pages/admin/PeopleManager'
+import GalleryManager from './pages/admin/GalleryManager'
 import MediaDashboard from './pages/media/Dashboard'
 import SecretaryDashboard from './pages/secretary/Dashboard'
 import MemberDashboard from './pages/member/Dashboard'
 
-function ProtectedRoute({ children, allowedRoles }) {
+function ProtectedRoute({ children, allowedRoles, permission }) {
   const { user, loading } = useAuth()
 
   if (loading) {
@@ -40,6 +41,11 @@ function ProtectedRoute({ children, allowedRoles }) {
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
     return <Navigate to="/dashboard" replace />
+  }
+
+  if (permission && user.role !== 'admin' && !user.permissions?.includes(permission)) {
+    const storedUser = JSON.parse(window.localStorage.getItem('cornerstone_site_content') || '{}').users?.find((item) => item.email === user.email)
+    if (!storedUser?.permissions?.includes(permission)) return <Navigate to="/dashboard" replace />
   }
 
   return children
@@ -63,7 +69,7 @@ function AppRoutes() {
       <Route path="/prayer" element={<Prayer />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      <Route path="/register" element={<Navigate to="/login" replace />} />
       <Route path="/pastors" element={<Pastors />} />
       <Route path="/deacons" element={<Deacons />} />
       
@@ -77,10 +83,16 @@ function AppRoutes() {
       />
       <Route path="/admin/users" element={<ProtectedRoute allowedRoles={["admin"]}><AdminUsers /></ProtectedRoute>} />
       <Route path="/admin/events/create" element={<ProtectedRoute allowedRoles={["admin"]}><AdminEventCreate /></ProtectedRoute>} />
+      <Route path="/admin/events/manage" element={<ProtectedRoute allowedRoles={["admin", "media", "secretary"]} permission="manage_events"><AdminEventCreate /></ProtectedRoute>} />
       <Route path="/admin/sermons/create" element={<ProtectedRoute allowedRoles={["admin"]}><AdminSermonsCreate /></ProtectedRoute>} />
+      <Route path="/admin/sermons/manage" element={<ProtectedRoute allowedRoles={["admin", "media", "secretary"]} permission="manage_sermons"><AdminSermonsCreate /></ProtectedRoute>} />
       <Route path="/admin/enquiries" element={<ProtectedRoute allowedRoles={["admin"]}><AdminEnquiries /></ProtectedRoute>} />
-      <Route path="/admin/giving" element={<ProtectedRoute allowedRoles={["admin"]}><AdminGiving /></ProtectedRoute>} />
+      <Route path="/admin/giving" element={<ProtectedRoute allowedRoles={["admin", "media", "secretary"]} permission="manage_giving"><AdminGiving /></ProtectedRoute>} />
       <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={["admin"]}><AdminSettings /></ProtectedRoute>} />
+      <Route path="/admin/ministries" element={<ProtectedRoute allowedRoles={["admin", "media", "secretary"]} permission="manage_ministries"><AdminPeople type="ministries" /></ProtectedRoute>} />
+      <Route path="/admin/pastors" element={<ProtectedRoute allowedRoles={["admin", "media", "secretary"]} permission="manage_pastors"><AdminPeople type="pastors" /></ProtectedRoute>} />
+      <Route path="/admin/deacons" element={<ProtectedRoute allowedRoles={["admin", "media", "secretary"]} permission="manage_deacons"><AdminPeople type="deacons" /></ProtectedRoute>} />
+      <Route path="/admin/gallery" element={<ProtectedRoute allowedRoles={["admin", "media", "secretary"]} permission="manage_gallery"><GalleryManager /></ProtectedRoute>} />
       
       <Route 
         path="/media/*" 
@@ -90,7 +102,7 @@ function AppRoutes() {
           </ProtectedRoute>
         } 
       />
-      <Route path="/media/gallery" element={<ProtectedRoute allowedRoles={["admin","media"]}><Gallery /></ProtectedRoute>} />
+      <Route path="/media/gallery" element={<Navigate to="/admin/gallery" replace />} />
       
       <Route 
         path="/secretary/*" 

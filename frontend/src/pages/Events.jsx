@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import * as eventsApi from '../api/events'
+import { readSiteContent } from '../data/siteContent'
 import './Events.css'
 import '../styles/ModernDesignSystem.css'
 import '../utils/scrollAnimations'
@@ -12,10 +13,21 @@ function Events() {
 
   useEffect(() => {
     loadEvents()
+
+    const handleContentUpdate = () => loadEvents()
+    window.addEventListener('cornerstone-content-updated', handleContentUpdate)
+
+    return () => window.removeEventListener('cornerstone-content-updated', handleContentUpdate)
   }, [])
 
   const loadEvents = async () => {
     try {
+      const localContent = readSiteContent()
+      if (localContent.events?.length) {
+        setEvents(localContent.events)
+        return
+      }
+
       const data = await eventsApi.getEvents()
       setEvents(data)
     } catch (err) {
@@ -55,7 +67,7 @@ function Events() {
       start_time: '18:00',
       end_time: '21:00',
       location: 'Main Sanctuary',
-      image: '/chapel.jpg',
+      image: '/images/cornerstone/page_07/page07_photo033_worship_night.jpg',
       organizer: 'Youth Ministry',
       registration_status: 'open',
       max_participants: 100,
@@ -69,7 +81,7 @@ function Events() {
       start_time: '08:00',
       end_time: '10:00',
       location: 'Church Hall',
-      image: '/chapel.jpg',
+      image: '/images/cornerstone/page_02/page02_photo005_conference_fellowship_table.jpg',
       organizer: 'Men\'s Ministry',
       registration_status: 'open',
       max_participants: 50,
@@ -83,7 +95,7 @@ function Events() {
       start_time: '19:00',
       end_time: '20:30',
       location: 'Classroom A',
-      image: '/chapel.jpg',
+      image: '/images/cornerstone/page_05/page05_photo022_membership_class_group.jpg',
       organizer: 'Adult Ministry',
       registration_status: 'open',
       max_participants: 30,
@@ -97,7 +109,7 @@ function Events() {
       start_time: '09:00',
       end_time: '17:00',
       location: 'Retreat Center',
-      image: '/chapel.jpg',
+      image: '/images/cornerstone/page_06/page06_photo026_children_ministry_group.jpg',
       organizer: 'Women\'s Ministry',
       registration_status: 'open',
       max_participants: 40,
@@ -111,7 +123,7 @@ function Events() {
       start_time: '10:00',
       end_time: '14:00',
       location: 'Various Locations',
-      image: '/chapel.jpg',
+      image: '/images/cornerstone/page_10/page10_photo064_community_outreach_group.jpg',
       organizer: 'Outreach Ministry',
       registration_status: 'open',
       max_participants: null,
@@ -125,7 +137,7 @@ function Events() {
       start_time: '19:00',
       end_time: '21:00',
       location: 'Main Sanctuary',
-      image: '/chapel.jpg',
+      image: '/images/cornerstone/page_07/page07_photo033_worship_night.jpg',
       organizer: 'Worship Ministry',
       registration_status: 'open',
       max_participants: 200,

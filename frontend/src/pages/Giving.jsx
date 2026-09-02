@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import * as givingApi from '../api/giving'
+import { readSiteContent } from '../data/siteContent'
 import './Giving.css'
 import '../styles/ModernDesignSystem.css'
 import '../utils/scrollAnimations'
@@ -12,10 +13,21 @@ function Giving() {
 
   useEffect(() => {
     loadGivingOptions()
+
+    const handleContentUpdate = () => loadGivingOptions()
+    window.addEventListener('cornerstone-content-updated', handleContentUpdate)
+
+    return () => window.removeEventListener('cornerstone-content-updated', handleContentUpdate)
   }, [])
 
   const loadGivingOptions = async () => {
     try {
+      const localContent = readSiteContent()
+      if (localContent.giving?.length) {
+        setGivingOptions(localContent.giving)
+        return
+      }
+
       const data = await givingApi.getGiving()
       setGivingOptions(data)
     } catch (err) {
@@ -117,13 +129,19 @@ function Giving() {
     <div className="giving-page">
       <div className="container">
         <section className="giving-header">
-          <h1 className="fade-up">Give With Purpose</h1>
-          <p className="giving-subtitle fade-up">
-            Your generosity helps us continue serving God, strengthening our ministries, supporting our community, and creating opportunities for people to grow in faith.
-          </p>
-          <p className="giving-subtitle fade-up">
-            Whether supporting the church's ministry, missions, community outreach, or a specific project, every contribution can help us serve others and extend the impact of the church.
-          </p>
+          <div className="giving-header-copy">
+            <span className="giving-eyebrow">Generosity in action</span>
+            <h1 className="fade-up">Give With Purpose</h1>
+            <p className="giving-subtitle fade-up">
+              Your generosity helps us continue serving God, strengthening our ministries, supporting our community, and creating opportunities for people to grow in faith.
+            </p>
+            <p className="giving-subtitle fade-up">
+              Whether supporting the church's ministry, missions, community outreach, or a specific project, every contribution can help us serve others and extend the impact of the church.
+            </p>
+          </div>
+          <div className="giving-header-art fade-up">
+            <img src="/giving.png" alt="Giving supports Cornerstone Family Chapel ministry" />
+          </div>
         </section>
 
         <section className="giving-intro">

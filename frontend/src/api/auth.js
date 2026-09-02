@@ -53,3 +53,11 @@ export const createUser = async (userData) => {
     body: JSON.stringify(userData),
   })
 }
+
+export const updateUser = async (userId, userData) => {
+  return apiCall(`/api/auth/users/${userId}`, { method: 'PUT', body: JSON.stringify(userData) })
+}
+
+export const deleteUser = async (userId) => {
+  return apiCall(`/api/auth/users/${userId}`, { method: 'DELETE' })
+}

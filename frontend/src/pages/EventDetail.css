@@ -193,6 +193,18 @@
   cursor: not-allowed;
 }
 
+.btn-calendar {
+  width: 100%;
+  margin-bottom: 2rem;
+  background: var(--color-secondary);
+  color: var(--color-text-dark);
+}
+
+.btn-calendar:hover {
+  background: var(--color-secondary-dark, var(--color-secondary));
+  transform: translateY(-2px);
+}
+
 .btn-large {
   width: 100%;
   padding: 1rem 2rem;

@@ -6,6 +6,7 @@
 
 .layout-main {
   flex: 1;
+  overflow: hidden;
 }
 
 .layout-main--offset {

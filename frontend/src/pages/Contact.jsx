@@ -1,10 +1,13 @@
 import { useState } from 'react'
+import { useEffect } from 'react'
 import * as enquiriesApi from '../api/enquiries'
+import { readSiteContent } from '../data/siteContent'
 import './Contact.css'
 import '../styles/ModernDesignSystem.css'
 import '../utils/scrollAnimations'
 
 function Contact() {
+  const [settings, setSettings] = useState(readSiteContent().settings)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -15,6 +18,12 @@ function Contact() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    const updateSettings = () => setSettings(readSiteContent().settings)
+    window.addEventListener('cornerstone-content-updated', updateSettings)
+    return () => window.removeEventListener('cornerstone-content-updated', updateSettings)
+  }, [])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -70,7 +79,7 @@ function Contact() {
                   <div className="contact-icon image-icon" aria-hidden="true"></div>
                   <div className="contact-text">
                     <h3>Address</h3>
-                    <p><em>To be updated</em></p>
+                    <p>{settings.address}</p>
                   </div>
                 </div>
 
@@ -78,7 +87,7 @@ function Contact() {
                   <div className="contact-icon">📞</div>
                   <div className="contact-text">
                     <h3>Phone</h3>
-                    <p><em>To be updated</em></p>
+                    <p>{settings.phone}</p>
                   </div>
                 </div>
 
@@ -86,7 +95,7 @@ function Contact() {
                   <div className="contact-icon">✉️</div>
                   <div className="contact-text">
                     <h3>Email</h3>
-                    <p><em>To be updated</em></p>
+                    <p>{settings.email}</p>
                   </div>
                 </div>
 
@@ -94,14 +103,14 @@ function Contact() {
                   <div className="contact-icon image-icon" aria-hidden="true"></div>
                   <div className="contact-text">
                     <h3>Office Hours</h3>
-                    <p><em>To be updated</em></p>
+                    <p>{settings.office_hours}</p>
                   </div>
                 </div>
               </div>
 
               <div className="service-times-contact">
                 <h3>Service Times</h3>
-                <p><em>To be updated</em></p>
+                <p>{settings.service_times}</p>
               </div>
             </div>
           </div>

@@ -53,7 +53,7 @@ function Header() {
 
         <nav className={`nav ${mobileMenuOpen ? 'nav-open' : ''}`} aria-label="Main navigation">
           <ul className="nav-list">
-            <li className="nav-item nav-about" onMouseLeave={() => setAboutOpen(false)}>
+            <li className="nav-item nav-about">
               <button
                 type="button"
                 className={`nav-link about-link ${isActive('/about') || isActive('/pastors') || isActive('/deacons') ? 'nav-link-active' : ''}`}

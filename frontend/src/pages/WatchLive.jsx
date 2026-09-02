@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
+import { readSiteContent } from '../data/siteContent'
 import './WatchLive.css'
 import '../styles/ModernDesignSystem.css'
 import '../utils/scrollAnimations'
 
 function WatchLive() {
+  const [settings, setSettings] = useState(readSiteContent().settings)
   const [isLive, setIsLive] = useState(true)
   const [nextService, setNextService] = useState({
     title: 'Sunday Morning Worship',
@@ -17,6 +19,12 @@ function WatchLive() {
     minutes: 0,
     seconds: 0
   })
+
+  useEffect(() => {
+    const updateSettings = () => setSettings(readSiteContent().settings)
+    window.addEventListener('cornerstone-content-updated', updateSettings)
+    return () => window.removeEventListener('cornerstone-content-updated', updateSettings)
+  }, [])
 
   useEffect(() => {
     if (!isLive) {
@@ -96,7 +104,7 @@ function WatchLive() {
               <iframe
                 width="100%"
                 height="500"
-                src="https://www.youtube.com/embed/live_stream?channel=UC_x5XG1OV2P6uZZ5FSM9Ttw"
+                src={settings.livestream_url}
                 title="Live Stream"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
