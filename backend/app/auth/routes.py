@@ -13,8 +13,7 @@ users = [
         "email": "admin@cornerstonechapel.org",
         "password": generate_password_hash("admin123"),
         "role": "admin"
-    }
-    ,
+    },
     {
         "id": 2,
         "name": "Media Account",
@@ -28,6 +27,13 @@ users = [
         "email": "secretary@cornerstonechapel.org",
         "password": generate_password_hash("admin123"),
         "role": "secretary"
+    },
+    {
+        "id": 4,
+        "name": "Member Account",
+        "email": "member@cornerstonechapel.org",
+        "password": generate_password_hash("member123"),
+        "role": "member"
     }
 ]
 
@@ -106,6 +112,61 @@ def logout():
     })
 
 
+@auth_bp.route("/api/auth/register", methods=["POST"])
+def register():
+    data = request.get_json() or {}
+
+    name = data.get("name", "").strip()
+    email = data.get("email", "").strip().lower()
+    password = data.get("password", "")
+    role = (data.get("role") or "member").strip().lower()
+
+    allowed_roles = [
+        "admin",
+        "media",
+        "secretary",
+        "member"
+    ]
+
+    if not name or not email or not password:
+        return jsonify({
+            "error": "Name, email and password are required"
+        }), 400
+
+    if role not in allowed_roles:
+        return jsonify({
+            "error": "Invalid role",
+            "allowed_roles": allowed_roles
+        }), 400
+
+    if any(user["email"] == email for user in users):
+        return jsonify({
+            "error": "Email already exists"
+        }), 409
+
+    new_user = {
+        "id": len(users) + 1,
+        "name": name,
+        "email": email,
+        "password": generate_password_hash(password),
+        "role": role
+    }
+
+    users.append(new_user)
+    session["user_id"] = new_user["id"]
+    session["role"] = new_user["role"]
+
+    return jsonify({
+        "message": "Registration successful",
+        "user": {
+            "id": new_user["id"],
+            "name": new_user["name"],
+            "email": new_user["email"],
+            "role": new_user["role"]
+        }
+    }), 201
+
+
 @auth_bp.route("/api/auth/users", methods=["GET"])
 @role_required("manage_users")
 def get_users():
@@ -133,7 +194,8 @@ def create_user():
     allowed_roles = [
         "admin",
         "media",
-        "secretary"
+        "secretary",
+        "member"
     ]
 
     if not name or not email or not password or not role:

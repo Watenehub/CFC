@@ -13,6 +13,7 @@ import Giving from './pages/Giving'
 import Prayer from './pages/Prayer'
 import Contact from './pages/Contact'
 import Login from './pages/Login'
+import Register from './pages/Register'
 import Pastors from './pages/Pastors'
 import Deacons from './pages/Deacons'
 import AdminDashboard from './pages/admin/Dashboard'
@@ -62,6 +63,7 @@ function AppRoutes() {
       <Route path="/prayer" element={<Prayer />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
       <Route path="/pastors" element={<Pastors />} />
       <Route path="/deacons" element={<Deacons />} />
       

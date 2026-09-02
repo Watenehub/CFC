@@ -28,6 +28,13 @@ export const login = async (email, password) => {
   })
 }
 
+export const register = async (userData) => {
+  return apiCall('/api/auth/register', {
+    method: 'POST',
+    body: JSON.stringify(userData),
+  })
+}
+
 export const getCurrentUser = async () => {
   return apiCall('/api/auth/me')
 }

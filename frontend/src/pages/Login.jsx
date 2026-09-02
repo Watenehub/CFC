@@ -91,9 +91,6 @@ function Login() {
                 <input type="checkbox" disabled={loading} />
                 <span>Remember me</span>
               </label>
-              <Link to="/forgot-password" className="forgot-password">
-                Forgot password?
-              </Link>
             </div>
 
             <button 
@@ -105,7 +102,14 @@ function Login() {
             </button>
           </form>
 
-          {/* Demo login buttons removed per request */}
+          <div className="register-footer">
+            <p>
+              Need an account?{' '}
+              <Link to="/register" className="register-link">
+                Create account
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>

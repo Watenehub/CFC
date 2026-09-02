@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import * as authApi from '../api/auth'
 import './Register.css'
 
 function Register() {
@@ -41,25 +42,12 @@ function Register() {
     }
 
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          role: 'member'
-        })
+      const response = await authApi.register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: 'member'
       })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Registration failed')
-      }
 
       await login(formData.email, formData.password)
       navigate('/dashboard')
@@ -76,7 +64,7 @@ function Register() {
         <div className="register-container">
           <div className="register-header">
             <img 
-              src="/Gemini_Generated_Image_f6ifljf6ifljf6if-Photoroom (1).png" 
+              src="/logo.png" 
               alt="Cornerstone Family Chapel"
               className="register-logo"
             />
