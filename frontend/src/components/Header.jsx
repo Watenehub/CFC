@@ -15,6 +15,11 @@ const Header = () => {
     }
   };
 
+  const closeMenu = () => {
+    setMenuOpen(false);
+    setAboutOpen(false);
+  };
+
   return (
     <header className="navbar">
 
@@ -102,32 +107,32 @@ const Header = () => {
               aboutOpen ? "submenu-active" : ""
             }`}
           >
-            <Link to="/about">Our Church</Link>
-            <Link to="/pastors">Pastors</Link>
-            <Link to="/deacons">Deacons</Link>
-            <Link to="/gallery">Gallery</Link>
+            <Link to="/about" onClick={closeMenu}>Our Church</Link>
+            <Link to="/pastors" onClick={closeMenu}>Pastors</Link>
+            <Link to="/deacons" onClick={closeMenu}>Deacons</Link>
+            <Link to="/gallery" onClick={closeMenu}>Gallery</Link>
           </div>
 
         </div>
 
         {/* OTHER LINKS */}
-        <Link to="/sermons" className="mobile-menu-link">
+        <Link to="/sermons" className="mobile-menu-link" onClick={closeMenu}>
           Sermons
         </Link>
 
-        <Link to="/watch-live" className="mobile-menu-link">
+        <Link to="/watch-live" className="mobile-menu-link" onClick={closeMenu}>
           Watch Live
         </Link>
 
-        <Link to="/events" className="mobile-menu-link">
+        <Link to="/events" className="mobile-menu-link" onClick={closeMenu}>
           Events
         </Link>
 
-        <Link to="/ministries" className="mobile-menu-link">
+        <Link to="/ministries" className="mobile-menu-link" onClick={closeMenu}>
           Ministries
         </Link>
 
-        <Link to="/give" className="mobile-menu-link mobile-give">
+        <Link to="/give" className="mobile-menu-link mobile-give" onClick={closeMenu}>
           Give
         </Link>
 
