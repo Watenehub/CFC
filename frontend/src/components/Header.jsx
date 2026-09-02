@@ -1,175 +1,140 @@
-import { useState, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
-import './Header.css'
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import "./Header.css";
 
-function Header() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [aboutOpen, setAboutOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
-  const { user, logout } = useAuth()
-  const location = useLocation()
-  const isHome = location.pathname === '/'
+const Header = () => {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    onScroll()
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
 
-  useEffect(() => {
-    setMobileMenuOpen(false)
-    setAboutOpen(false)
-  }, [location.pathname])
-
-  const navLinks = [
-    { path: '/sermons', label: 'Sermons' },
-    { path: '/watch-live', label: 'Watch Live' },
-    { path: '/events', label: 'Events' },
-    { path: '/ministries', label: 'Ministries' },
-    { path: '/give', label: 'Give' },
-  ]
-
-  const isActive = (path) => location.pathname === path
-
-  const headerClass = [
-    'header',
-    isHome && !scrolled ? 'header--transparent' : 'header--solid',
-    mobileMenuOpen ? 'header--menu-open' : '',
-  ].filter(Boolean).join(' ')
+    // Close About dropdown when closing menu
+    if (menuOpen) {
+      setAboutOpen(false);
+    }
+  };
 
   return (
-    <header className={headerClass}>
-      <div className="header-inner">
-        <Link to="/" className="logo">
+    <header className="navbar">
+
+      <div className="navbar-container">
+
+        {/* LOGO */}
+        <Link to="/" className="navbar-logo">
           <img
             src="/logo.png"
             alt="Cornerstone Family Chapel"
-            className="logo-image"
           />
-          <span className="logo-text">Cornerstone</span>
+          <span>Cornerstone</span>
         </Link>
 
-        <nav className={`nav ${mobileMenuOpen ? 'nav-open' : ''}`} aria-label="Main navigation">
-          <div className="mobile-nav-header">
-            <Link to="/" className="mobile-nav-brand" onClick={() => setMobileMenuOpen(false)}>
-              <img src="/logo.png" alt="Cornerstone Family Chapel" />
-            </Link>
-            <button type="button" className="mobile-nav-close" onClick={() => setMobileMenuOpen(false)} aria-label="Close navigation menu">&times;</button>
+        {/* DESKTOP NAVIGATION */}
+        <nav className="desktop-nav">
+
+          <div className="nav-dropdown">
+            <button className="nav-link">
+              About <span className="arrow">⌄</span>
+            </button>
+
+            <div className="dropdown-menu">
+              <Link to="/about">Our Church</Link>
+              <Link to="/pastors">Pastors</Link>
+              <Link to="/deacons">Deacons</Link>
+              <Link to="/gallery">Gallery</Link>
+            </div>
           </div>
-          <ul className="nav-list desktop-nav-list">
-            <li className="nav-item nav-about">
-              <button
-                type="button"
-                className={`nav-link about-link ${isActive('/about') || isActive('/pastors') || isActive('/deacons') ? 'nav-link-active' : ''}`}
-                aria-expanded={aboutOpen}
-                onClick={() => setAboutOpen(!aboutOpen)}
-              >
-                About
-                <svg className="caret" width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
-                  <path d="M2.5 4.5L6 8l3.5-3.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
-                </svg>
-              </button>
-              <ul className={`dropdown ${aboutOpen ? 'open' : ''}`}>
-                <li><Link to="/about" className="dropdown-link" onClick={() => setAboutOpen(false)}>Our Church</Link></li>
-                <li><Link to="/pastors" className="dropdown-link" onClick={() => setAboutOpen(false)}>Pastors</Link></li>
-                <li><Link to="/deacons" className="dropdown-link" onClick={() => setAboutOpen(false)}>Deacons</Link></li>
-                <li><Link to="/gallery" className="dropdown-link" onClick={() => setAboutOpen(false)}>Gallery</Link></li>
-              </ul>
-            </li>
 
-            {navLinks.map((link) => (
-              <li key={link.path} className="nav-item">
-                <Link
-                  to={link.path}
-                  className={`nav-link ${isActive(link.path) ? 'nav-link-active' : ''}`}
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
+          <Link to="/sermons" className="nav-link">
+            Sermons
+          </Link>
 
-            <li className="nav-item nav-item-mobile-only">
-              <Link to="/contact" className="nav-link">Contact</Link>
-            </li>
+          <Link to="/watch-live" className="nav-link">
+            Watch Live
+          </Link>
 
-            {!user && (
-              <li className="nav-item nav-item-mobile-only">
-                <Link to="/login" className="nav-link">Login</Link>
-              </li>
-            )}
-          </ul>
-          <ul className="mobile-nav-list">
-            <li><Link to="/" onClick={() => setMobileMenuOpen(false)}>Home</Link></li>
-            <li className="mobile-nav-about-item">
-              <button type="button" onClick={() => setAboutOpen(!aboutOpen)} aria-expanded={aboutOpen}>
-                <span>About Us</span><span className="mobile-nav-plus">{aboutOpen ? '-' : '+'}</span>
-              </button>
-              {aboutOpen && (
-                <ul className="mobile-nav-submenu">
-                  <li><Link to="/about" onClick={() => setMobileMenuOpen(false)}>Our Church</Link></li>
-                  <li><Link to="/pastors" onClick={() => setMobileMenuOpen(false)}>Pastors</Link></li>
-                  <li><Link to="/deacons" onClick={() => setMobileMenuOpen(false)}>Deacons</Link></li>
-                  <li><Link to="/gallery" onClick={() => setMobileMenuOpen(false)}>Gallery</Link></li>
-                </ul>
-              )}
-            </li>
-            <li><Link to="/sermons" onClick={() => setMobileMenuOpen(false)}>Sermons</Link></li>
-            <li><Link to="/give" onClick={() => setMobileMenuOpen(false)}>Giving</Link></li>
-            <li><Link to="/events" onClick={() => setMobileMenuOpen(false)}>Events</Link></li>
-            <li><Link to="/gallery" onClick={() => setMobileMenuOpen(false)}>Downloads</Link></li>
-            <li><Link to="/contact" onClick={() => setMobileMenuOpen(false)}>Contact Us</Link></li>
-          </ul>
-          <form className="mobile-nav-search" onSubmit={(event) => event.preventDefault()}>
-            <input type="search" placeholder="Search.." aria-label="Search website" />
-            <button type="submit" aria-label="Search">&#8594;</button>
-          </form>
+          <Link to="/events" className="nav-link">
+            Events
+          </Link>
+
+          <Link to="/ministries" className="nav-link">
+            Ministries
+          </Link>
+
+          <Link to="/give" className="nav-link">
+            Give
+          </Link>
+
         </nav>
 
-        {mobileMenuOpen && (
-          <button
-            type="button"
-            className="mobile-menu-backdrop"
-            aria-label="Close navigation menu"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-        )}
+        {/* HAMBURGER BUTTON */}
+        <button
+          className={`hamburger ${menuOpen ? "active" : ""}`}
+          onClick={toggleMenu}
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
 
-        <div className="header-actions">
-          <Link to="/contact" className="header-cta header-cta--ghost">Contact</Link>
-          <Link to="/watch-live" className="header-cta header-cta--primary">Watch Live</Link>
-
-          {user ? (
-            <div className="user-menu">
-              <Link to="/dashboard" className="header-cta header-cta--ghost">Dashboard</Link>
-              <button type="button" onClick={logout} className="header-cta header-cta--ghost">Logout</button>
-            </div>
-          ) : (
-            <Link to="/login" className="header-cta header-cta--ghost header-login-desktop">Login</Link>
-          )}
-
-          <button
-            type="button"
-            className="mobile-menu-btn"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={mobileMenuOpen}
-          >
-            {mobileMenuOpen ? (
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 6L6 18M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M3 12h18M3 6h18M3 18h18" />
-              </svg>
-            )}
-          </button>
-        </div>
       </div>
-    </header>
-  )
-}
 
-export default Header
+      {/* MOBILE MENU */}
+      <nav className={`mobile-menu ${menuOpen ? "active" : ""}`}>
+
+        {/* ABOUT */}
+        <div className="mobile-dropdown">
+
+          <button
+            className="mobile-menu-link mobile-about-button"
+            onClick={() => setAboutOpen(!aboutOpen)}
+          >
+            <span>About</span>
+            <span className={`mobile-arrow ${aboutOpen ? "rotate" : ""}`}>
+              ⌄
+            </span>
+          </button>
+
+          <div
+            className={`mobile-submenu ${
+              aboutOpen ? "submenu-active" : ""
+            }`}
+          >
+            <Link to="/about">Our Church</Link>
+            <Link to="/pastors">Pastors</Link>
+            <Link to="/deacons">Deacons</Link>
+            <Link to="/gallery">Gallery</Link>
+          </div>
+
+        </div>
+
+        {/* OTHER LINKS */}
+        <Link to="/sermons" className="mobile-menu-link">
+          Sermons
+        </Link>
+
+        <Link to="/watch-live" className="mobile-menu-link">
+          Watch Live
+        </Link>
+
+        <Link to="/events" className="mobile-menu-link">
+          Events
+        </Link>
+
+        <Link to="/ministries" className="mobile-menu-link">
+          Ministries
+        </Link>
+
+        <Link to="/give" className="mobile-menu-link mobile-give">
+          Give
+        </Link>
+
+      </nav>
+
+    </header>
+  );
+};
+
+export default Header;
