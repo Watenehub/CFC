@@ -52,6 +52,13 @@ function Header() {
         </Link>
 
         <nav className={`nav ${mobileMenuOpen ? 'nav-open' : ''}`} aria-label="Main navigation">
+          <div className="mobile-nav-header">
+            <Link to="/" className="mobile-nav-brand" onClick={() => setMobileMenuOpen(false)}>
+              <img src="/logo.png" alt="Cornerstone Family Chapel" />
+              <span>Cornerstone</span>
+            </Link>
+            <button type="button" className="mobile-nav-close" onClick={() => setMobileMenuOpen(false)} aria-label="Close navigation menu">&times;</button>
+          </div>
           <ul className="nav-list">
             <li className="nav-item nav-about">
               <button
