@@ -12,8 +12,8 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # Enable CORS for frontend dev server so auth requests with credentials work
-    CORS(app, resources={r"/api/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001"]}}, supports_credentials=True)
+    # Enable CORS for frontend dev server and Vercel deployment
+    CORS(app, resources={r"/api/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001", "https://*.vercel.app", "https://*.vercel.app"]}}, supports_credentials=True)
 
     # Development secret key.
     # Move this to an environment variable before deployment.
@@ -55,10 +55,16 @@ def create_app():
             'http://localhost:3001',
             'http://127.0.0.1:3001',
         }
-        response.headers.setdefault('Access-Control-Allow-Origin', request_origin if request_origin in allowed_origins else 'http://localhost:3000')
-        response.headers.setdefault('Access-Control-Allow-Credentials', 'true')
-        response.headers.setdefault('Access-Control-Allow-Headers', 'Content-Type')
-        response.headers.setdefault('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+        
+        # Allow any Vercel domain or localhost
+        if request_origin and ('vercel.app' in request_origin or request_origin in allowed_origins):
+            response.headers['Access-Control-Allow-Origin'] = request_origin
+        else:
+            response.headers['Access-Control-Allow-Origin'] = 'http://localhost:3000'
+        
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        response.headers['Access-Control-Allow-Methods'] = 'GET,POST,PUT,DELETE,OPTIONS'
         return response
 
     return app
