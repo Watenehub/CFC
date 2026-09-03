@@ -12,12 +12,24 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # Enable CORS for frontend dev server and Vercel deployment
-    CORS(app, resources={r"/api/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001", "https://*.vercel.app", "https://*.vercel.app"]}}, supports_credentials=True)
+    # Enable CORS for frontend development and Vercel deployment
+    CORS(
+        app,
+        resources={
+            r"/api/*": {
+                "origins": [
+                    "http://localhost:3000",
+                    "http://127.0.0.1:3000",
+                    "http://localhost:3001",
+                    "http://127.0.0.1:3001",
+                ]
+            }
+        },
+        supports_credentials=True
+    )
 
-    # Development secret key.
-    # Move this to an environment variable before deployment.
-    app.secret_key = "development-secret-key-change-later"
+    # Use the secret key from the environment configuration
+    app.secret_key = Config.SECRET_KEY
 
     # Automatically discover and register route blueprints
     for _, module_name, _ in pkgutil.iter_modules(routes.__path__):
@@ -45,26 +57,35 @@ def create_app():
             "message": "Cornerstone Family Chapel API is healthy"
         }
 
-    # Ensure CORS headers are present for local frontend development.
+    # Ensure CORS headers are present
     @app.after_request
     def add_cors_headers(response):
-        request_origin = request.headers.get('Origin')
+        request_origin = request.headers.get("Origin")
+
         allowed_origins = {
-            'http://localhost:3000',
-            'http://127.0.0.1:3000',
-            'http://localhost:3001',
-            'http://127.0.0.1:3001',
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:3001",
+            "http://127.0.0.1:3001",
         }
-        
-        # Allow any Vercel domain or localhost
-        if request_origin and ('vercel.app' in request_origin or request_origin in allowed_origins):
-            response.headers['Access-Control-Allow-Origin'] = request_origin
+
+        # Allow localhost and Vercel deployments
+        if request_origin and (
+            "vercel.app" in request_origin
+            or request_origin in allowed_origins
+        ):
+            response.headers["Access-Control-Allow-Origin"] = request_origin
         else:
-            response.headers['Access-Control-Allow-Origin'] = 'http://localhost:3000'
-        
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-        response.headers['Access-Control-Allow-Methods'] = 'GET,POST,PUT,DELETE,OPTIONS'
+            response.headers["Access-Control-Allow-Origin"] = (
+                "http://localhost:3000"
+            )
+
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+        response.headers["Access-Control-Allow-Methods"] = (
+            "GET,POST,PUT,DELETE,OPTIONS"
+        )
+
         return response
 
     return app
