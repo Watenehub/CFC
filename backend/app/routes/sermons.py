@@ -1,36 +1,79 @@
 from flask import Blueprint, jsonify, request
 from ..auth.permissions import role_required
+from ..database.mongodb import get_db
+from pymongo import DESCENDING
+
 
 sermons_bp = Blueprint("sermons", __name__)
 
-sermons = []
+
+def serialize_sermon(sermon):
+    """Convert MongoDB document into a JSON-safe API response."""
+    if sermon is None:
+        return None
+
+    sermon = sermon.copy()
+    sermon.pop("_id", None)
+
+    return sermon
 
 
 @sermons_bp.route("/api/sermons", methods=["GET"])
 def get_sermons():
-    return jsonify(sermons)
+    """Get all sermons."""
+    db = get_db()
+
+    sermons = list(
+        db.sermons.find().sort("_id", DESCENDING)
+    )
+
+    return jsonify([
+        serialize_sermon(sermon)
+        for sermon in sermons
+    ])
 
 
 @sermons_bp.route("/api/sermons/<int:sermon_id>", methods=["GET"])
 def get_sermon(sermon_id):
-    sermon = next(
-        (item for item in sermons if item["id"] == sermon_id),
-        None
-    )
+    """Get a single sermon by ID."""
+    db = get_db()
+
+    sermon = db.sermons.find_one({
+        "id": sermon_id
+    })
 
     if not sermon:
-        return jsonify({"error": "Sermon not found"}), 404
+        return jsonify({
+            "error": "Sermon not found"
+        }), 404
 
-    return jsonify(sermon)
+    return jsonify(
+        serialize_sermon(sermon)
+    )
 
 
 @sermons_bp.route("/api/sermons", methods=["POST"])
 @role_required("manage_sermons")
 def create_sermon():
+    """Create a new sermon."""
+    db = get_db()
+
     data = request.get_json() or {}
 
+    # Generate the next integer ID
+    last_sermon = db.sermons.find_one(
+        {},
+        sort=[("id", DESCENDING)]
+    )
+
+    next_id = (
+        last_sermon["id"] + 1
+        if last_sermon
+        else 1
+    )
+
     sermon = {
-        "id": len(sermons) + 1,
+        "id": next_id,
         "title": data.get("title", ""),
         "description": data.get("description", ""),
         "speaker": data.get("speaker", ""),
@@ -43,28 +86,23 @@ def create_sermon():
         "tags": data.get("tags", [])
     }
 
-    sermons.append(sermon)
+    db.sermons.insert_one(sermon)
 
     return jsonify({
         "message": "Sermon created successfully",
-        "sermon": sermon
+        "sermon": serialize_sermon(sermon)
     }), 201
 
 
 @sermons_bp.route("/api/sermons/<int:sermon_id>", methods=["PUT"])
 @role_required("manage_sermons")
 def update_sermon(sermon_id):
-    sermon = next(
-        (item for item in sermons if item["id"] == sermon_id),
-        None
-    )
-
-    if not sermon:
-        return jsonify({"error": "Sermon not found"}), 404
+    """Update an existing sermon."""
+    db = get_db()
 
     data = request.get_json() or {}
 
-    for field in [
+    allowed_fields = [
         "title",
         "description",
         "speaker",
@@ -75,28 +113,57 @@ def update_sermon(sermon_id):
         "scripture",
         "category",
         "tags"
-    ]:
-        if field in data:
-            sermon[field] = data[field]
+    ]
+
+    update_data = {
+        field: data[field]
+        for field in allowed_fields
+        if field in data
+    }
+
+    if not update_data:
+        return jsonify({
+            "error": "No valid fields provided for update"
+        }), 400
+
+    result = db.sermons.update_one(
+        {
+            "id": sermon_id
+        },
+        {
+            "$set": update_data
+        }
+    )
+
+    if result.matched_count == 0:
+        return jsonify({
+            "error": "Sermon not found"
+        }), 404
+
+    sermon = db.sermons.find_one({
+        "id": sermon_id
+    })
 
     return jsonify({
         "message": "Sermon updated successfully",
-        "sermon": sermon
+        "sermon": serialize_sermon(sermon)
     })
 
 
 @sermons_bp.route("/api/sermons/<int:sermon_id>", methods=["DELETE"])
 @role_required("manage_sermons")
 def delete_sermon(sermon_id):
-    sermon = next(
-        (item for item in sermons if item["id"] == sermon_id),
-        None
-    )
+    """Delete a sermon."""
+    db = get_db()
 
-    if not sermon:
-        return jsonify({"error": "Sermon not found"}), 404
+    result = db.sermons.delete_one({
+        "id": sermon_id
+    })
 
-    sermons.remove(sermon)
+    if result.deleted_count == 0:
+        return jsonify({
+            "error": "Sermon not found"
+        }), 404
 
     return jsonify({
         "message": "Sermon deleted successfully"

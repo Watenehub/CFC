@@ -5,4 +5,8 @@ load_dotenv()
 
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY")
-    DATABASE_URL = os.getenv("DATABASE_URL")
+    MONGO_URI = os.getenv("MONGO_URI")
+    MONGO_DB_NAME = os.getenv(
+        "MONGO_DB_NAME",
+        "cornerstone_family_chapel"
+    )

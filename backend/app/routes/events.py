@@ -1,36 +1,79 @@
 from flask import Blueprint, jsonify, request
 from ..auth.permissions import role_required
+from ..database.mongodb import get_db
+from pymongo import DESCENDING
+
 
 events_bp = Blueprint("events", __name__)
 
-events = []
+
+def serialize_event(event):
+    """Convert MongoDB document into a JSON-safe API response."""
+    if event is None:
+        return None
+
+    event = event.copy()
+    event.pop("_id", None)
+
+    return event
 
 
 @events_bp.route("/api/events", methods=["GET"])
 def get_events():
-    return jsonify(events)
+    """Get all events."""
+    db = get_db()
+
+    events = list(
+        db.events.find().sort("_id", DESCENDING)
+    )
+
+    return jsonify([
+        serialize_event(event)
+        for event in events
+    ])
 
 
 @events_bp.route("/api/events/<int:event_id>", methods=["GET"])
 def get_event(event_id):
-    event = next(
-        (event for event in events if event["id"] == event_id),
-        None
-    )
+    """Get a single event by ID."""
+    db = get_db()
+
+    event = db.events.find_one({
+        "id": event_id
+    })
 
     if not event:
-        return jsonify({"error": "Event not found"}), 404
+        return jsonify({
+            "error": "Event not found"
+        }), 404
 
-    return jsonify(event)
+    return jsonify(
+        serialize_event(event)
+    )
 
 
 @events_bp.route("/api/events", methods=["POST"])
 @role_required("manage_events")
 def create_event():
+    """Create a new event."""
+    db = get_db()
+
     data = request.get_json() or {}
 
+    # Generate the next integer ID
+    last_event = db.events.find_one(
+        {},
+        sort=[("id", DESCENDING)]
+    )
+
+    next_id = (
+        last_event["id"] + 1
+        if last_event
+        else 1
+    )
+
     event = {
-        "id": len(events) + 1,
+        "id": next_id,
         "title": data.get("title", ""),
         "description": data.get("description", ""),
         "date": data.get("date", ""),
@@ -39,33 +82,35 @@ def create_event():
         "location": data.get("location", ""),
         "image": data.get("image", ""),
         "organizer": data.get("organizer", ""),
-        "registration_status": data.get("registration_status", "open"),
-        "max_participants": data.get("max_participants"),
-        "registration_deadline": data.get("registration_deadline")
+        "registration_status": data.get(
+            "registration_status",
+            "open"
+        ),
+        "max_participants": data.get(
+            "max_participants"
+        ),
+        "registration_deadline": data.get(
+            "registration_deadline"
+        )
     }
 
-    events.append(event)
+    db.events.insert_one(event)
 
     return jsonify({
         "message": "Event created successfully",
-        "event": event
+        "event": serialize_event(event)
     }), 201
 
 
 @events_bp.route("/api/events/<int:event_id>", methods=["PUT"])
 @role_required("manage_events")
 def update_event(event_id):
-    event = next(
-        (event for event in events if event["id"] == event_id),
-        None
-    )
-
-    if not event:
-        return jsonify({"error": "Event not found"}), 404
+    """Update an existing event."""
+    db = get_db()
 
     data = request.get_json() or {}
 
-    for field in [
+    allowed_fields = [
         "title",
         "description",
         "date",
@@ -77,28 +122,57 @@ def update_event(event_id):
         "registration_status",
         "max_participants",
         "registration_deadline"
-    ]:
-        if field in data:
-            event[field] = data[field]
+    ]
+
+    update_data = {
+        field: data[field]
+        for field in allowed_fields
+        if field in data
+    }
+
+    if not update_data:
+        return jsonify({
+            "error": "No valid fields provided for update"
+        }), 400
+
+    result = db.events.update_one(
+        {
+            "id": event_id
+        },
+        {
+            "$set": update_data
+        }
+    )
+
+    if result.matched_count == 0:
+        return jsonify({
+            "error": "Event not found"
+        }), 404
+
+    event = db.events.find_one({
+        "id": event_id
+    })
 
     return jsonify({
         "message": "Event updated successfully",
-        "event": event
+        "event": serialize_event(event)
     })
 
 
 @events_bp.route("/api/events/<int:event_id>", methods=["DELETE"])
 @role_required("manage_events")
 def delete_event(event_id):
-    event = next(
-        (event for event in events if event["id"] == event_id),
-        None
-    )
+    """Delete an event."""
+    db = get_db()
 
-    if not event:
-        return jsonify({"error": "Event not found"}), 404
+    result = db.events.delete_one({
+        "id": event_id
+    })
 
-    events.remove(event)
+    if result.deleted_count == 0:
+        return jsonify({
+            "error": "Event not found"
+        }), 404
 
     return jsonify({
         "message": "Event deleted successfully"

@@ -1,41 +1,22 @@
 from flask import Blueprint, jsonify, request, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from .permissions import role_required
+from ..database.mongodb import get_db
+from pymongo import DESCENDING
+
 
 auth_bp = Blueprint("auth", __name__)
 
-# Temporary development users.
-# These will later be stored in MongoDB.
-users = [
-    {
-        "id": 1,
-        "name": "System Admin",
-        "email": "admin@cornerstonechapel.org",
-        "password": generate_password_hash("admin123"),
-        "role": "admin",
-        "permissions": [
-            "manage_users", "manage_events", "manage_sermons", "manage_giving",
-            "manage_enquiries", "manage_pastors", "manage_deacons", "manage_ministries",
-            "manage_services", "manage_notifications", "manage_gallery"
-        ]
-    },
-    {
-        "id": 2,
-        "name": "Media Account",
-        "email": "media@cornerstonechapel.org",
-        "password": generate_password_hash("admin123"),
-        "role": "media",
-        "permissions": ["manage_events", "manage_sermons", "manage_gallery"]
-    },
-    {
-        "id": 3,
-        "name": "Secretary Account",
-        "email": "secretary@cornerstonechapel.org",
-        "password": generate_password_hash("admin123"),
-        "role": "secretary",
-        "permissions": ["manage_giving", "manage_enquiries"]
-    },
-]
+
+def serialize_user(user):
+    """Return a user without the password or MongoDB internal ID."""
+    return {
+        "id": user["id"],
+        "name": user["name"],
+        "email": user["email"],
+        "role": user["role"],
+        "permissions": user.get("permissions", [])
+    }
 
 
 @auth_bp.route("/api/auth/login", methods=["POST"])
@@ -50,12 +31,16 @@ def login():
             "error": "Email and password are required"
         }), 400
 
-    user = next(
-        (user for user in users if user["email"] == email),
-        None
-    )
+    db = get_db()
 
-    if not user or not check_password_hash(user["password"], password):
+    user = db.users.find_one({
+        "email": email
+    })
+
+    if not user or not check_password_hash(
+        user["password"],
+        password
+    ):
         return jsonify({
             "error": "Invalid email or password"
         }), 401
@@ -66,13 +51,7 @@ def login():
 
     return jsonify({
         "message": "Login successful",
-        "user": {
-            "id": user["id"],
-            "name": user["name"],
-            "email": user["email"],
-            "role": user["role"],
-            "permissions": user.get("permissions", [])
-        }
+        "user": serialize_user(user)
     })
 
 
@@ -85,10 +64,11 @@ def current_user():
             "error": "Not authenticated"
         }), 401
 
-    user = next(
-        (user for user in users if user["id"] == user_id),
-        None
-    )
+    db = get_db()
+
+    user = db.users.find_one({
+        "id": user_id
+    })
 
     if not user:
         session.clear()
@@ -97,13 +77,7 @@ def current_user():
             "error": "User not found"
         }), 404
 
-    return jsonify({
-        "id": user["id"],
-        "name": user["name"],
-        "email": user["email"],
-        "role": user["role"],
-        "permissions": user.get("permissions", [])
-    })
+    return jsonify(serialize_user(user))
 
 
 @auth_bp.route("/api/auth/logout", methods=["POST"])
@@ -125,13 +99,12 @@ def register():
 @auth_bp.route("/api/auth/users", methods=["GET"])
 @role_required("manage_users")
 def get_users():
+    db = get_db()
+
+    users = db.users.find().sort("id", 1)
+
     return jsonify([
-        {
-            "id": user["id"],
-            "name": user["name"],
-            "email": user["email"],
-            "role": user["role"]
-        }
+        serialize_user(user)
         for user in users
     ])
 
@@ -164,13 +137,30 @@ def create_user():
             "allowed_roles": allowed_roles
         }), 400
 
-    if any(user["email"] == email for user in users):
+    db = get_db()
+
+    existing_user = db.users.find_one({
+        "email": email
+    })
+
+    if existing_user:
         return jsonify({
             "error": "Email already exists"
         }), 409
 
+    last_user = db.users.find_one(
+        {},
+        sort=[("id", DESCENDING)]
+    )
+
+    next_id = (
+        last_user["id"] + 1
+        if last_user
+        else 1
+    )
+
     new_user = {
-        "id": len(users) + 1,
+        "id": next_id,
         "name": name,
         "email": email,
         "password": generate_password_hash(password),
@@ -178,46 +168,95 @@ def create_user():
         "permissions": permissions
     }
 
-    users.append(new_user)
+    db.users.insert_one(new_user)
 
     return jsonify({
         "message": "User created successfully",
-        "user": {
-            "id": new_user["id"],
-            "name": new_user["name"],
-            "email": new_user["email"],
-            "role": new_user["role"]
-            ,"permissions": new_user["permissions"]
-        }
+        "user": serialize_user(new_user)
     }), 201
 
 
 @auth_bp.route("/api/auth/users/<int:user_id>", methods=["PUT"])
 @role_required("manage_users")
 def update_user(user_id):
-    user = next((item for item in users if item["id"] == user_id), None)
+    db = get_db()
+
+    user = db.users.find_one({
+        "id": user_id
+    })
+
     if not user:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify({
+            "error": "User not found"
+        }), 404
 
     data = request.get_json() or {}
-    user["name"] = data.get("name", user["name"]).strip()
-    user["email"] = data.get("email", user["email"]).strip().lower()
-    user["role"] = data.get("role", user["role"]).strip().lower()
-    user["permissions"] = data.get("permissions", user.get("permissions", []))
-    if data.get("password"):
-        user["password"] = generate_password_hash(data["password"])
 
-    return jsonify({"message": "User updated successfully", "user": {key: user[key] for key in ("id", "name", "email", "role", "permissions")}})
+    update_data = {}
+
+    if "name" in data:
+        update_data["name"] = data["name"].strip()
+
+    if "email" in data:
+        update_data["email"] = data["email"].strip().lower()
+
+    if "role" in data:
+        role = data["role"].strip().lower()
+
+        if role not in [
+            "admin",
+            "media",
+            "secretary"
+        ]:
+            return jsonify({
+                "error": "Invalid role"
+            }), 400
+
+        update_data["role"] = role
+
+    if "permissions" in data:
+        update_data["permissions"] = data["permissions"]
+
+    if data.get("password"):
+        update_data["password"] = generate_password_hash(
+            data["password"]
+        )
+
+    if update_data:
+        db.users.update_one(
+            {"id": user_id},
+            {"$set": update_data}
+        )
+
+    updated_user = db.users.find_one({
+        "id": user_id
+    })
+
+    return jsonify({
+        "message": "User updated successfully",
+        "user": serialize_user(updated_user)
+    })
 
 
 @auth_bp.route("/api/auth/users/<int:user_id>", methods=["DELETE"])
 @role_required("manage_users")
 def delete_user(user_id):
-    global users
-    user = next((item for item in users if item["id"] == user_id), None)
-    if not user:
-        return jsonify({"error": "User not found"}), 404
+    db = get_db()
+
     if user_id == session.get("user_id"):
-        return jsonify({"error": "You cannot remove your own account"}), 400
-    users = [item for item in users if item["id"] != user_id]
-    return jsonify({"message": "User removed successfully"})
+        return jsonify({
+            "error": "You cannot remove your own account"
+        }), 400
+
+    result = db.users.delete_one({
+        "id": user_id
+    })
+
+    if result.deleted_count == 0:
+        return jsonify({
+            "error": "User not found"
+        }), 404
+
+    return jsonify({
+        "message": "User removed successfully"
+    })

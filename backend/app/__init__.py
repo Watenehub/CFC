@@ -1,5 +1,6 @@
 from flask import Flask, Blueprint, request
 from .config import Config
+from .database.mongodb import init_mongo
 from flask_cors import CORS
 import importlib
 import pkgutil
@@ -11,6 +12,8 @@ from .auth.routes import auth_bp
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+        # Initialize MongoDB connection
+    init_mongo(app)
 
     # Enable CORS for frontend development and Vercel deployment
     CORS(

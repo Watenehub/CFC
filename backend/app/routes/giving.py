@@ -1,36 +1,77 @@
 from flask import Blueprint, jsonify, request
 from ..auth.permissions import role_required
+from ..database.mongodb import get_db
+from pymongo import DESCENDING
+
 
 giving_bp = Blueprint("giving", __name__)
 
-giving_options = []
+
+def serialize_giving(giving):
+    """Convert MongoDB document into a JSON-safe API response."""
+    if giving is None:
+        return None
+
+    giving = giving.copy()
+    giving.pop("_id", None)
+
+    return giving
 
 
 @giving_bp.route("/api/giving", methods=["GET"])
 def get_giving():
-    return jsonify(giving_options)
+    """Get all giving options."""
+    db = get_db()
+
+    giving = list(
+        db.giving.find().sort("_id", DESCENDING)
+    )
+
+    return jsonify([
+        serialize_giving(item)
+        for item in giving
+    ])
 
 
 @giving_bp.route("/api/giving/<int:giving_id>", methods=["GET"])
 def get_giving_option(giving_id):
-    giving = next(
-        (item for item in giving_options if item["id"] == giving_id),
-        None
-    )
+    """Get a single giving option by ID."""
+    db = get_db()
+
+    giving = db.giving.find_one({
+        "id": giving_id
+    })
 
     if not giving:
         return jsonify({"error": "Giving option not found"}), 404
 
-    return jsonify(giving)
+    return jsonify(
+        serialize_giving(giving)
+    )
 
 
 @giving_bp.route("/api/giving", methods=["POST"])
 @role_required("manage_giving")
 def create_giving():
+    """Create a new giving option."""
+    db = get_db()
+
     data = request.get_json() or {}
 
+    # Generate the next integer ID
+    last_giving = db.giving.find_one(
+        {},
+        sort=[("id", DESCENDING)]
+    )
+
+    next_id = (
+        last_giving["id"] + 1
+        if last_giving
+        else 1
+    )
+
     giving = {
-        "id": len(giving_options) + 1,
+        "id": next_id,
         "title": data.get("title", ""),
         "description": data.get("description", ""),
         "category": data.get("category", ""),
@@ -39,56 +80,76 @@ def create_giving():
         "poster": data.get("poster", "")
     }
 
-    giving_options.append(giving)
+    db.giving.insert_one(giving)
 
     return jsonify({
         "message": "Giving option created successfully",
-        "giving": giving
+        "giving": serialize_giving(giving)
     }), 201
 
 
 @giving_bp.route("/api/giving/<int:giving_id>", methods=["PUT"])
 @role_required("manage_giving")
 def update_giving(giving_id):
-    giving = next(
-        (item for item in giving_options if item["id"] == giving_id),
-        None
-    )
-
-    if not giving:
-        return jsonify({"error": "Giving option not found"}), 404
+    """Update an existing giving option."""
+    db = get_db()
 
     data = request.get_json() or {}
 
-    for field in [
+    allowed_fields = [
         "title",
         "description",
         "category",
         "payment_method",
         "payment_details",
         "poster"
-    ]:
-        if field in data:
-            giving[field] = data[field]
+    ]
+
+    update_data = {
+        field: data[field]
+        for field in allowed_fields
+        if field in data
+    }
+
+    if not update_data:
+        return jsonify({
+            "error": "No valid fields provided for update"
+        }), 400
+
+    result = db.giving.update_one(
+        {
+            "id": giving_id
+        },
+        {
+            "$set": update_data
+        }
+    )
+
+    if result.matched_count == 0:
+        return jsonify({"error": "Giving option not found"}), 404
+
+    giving = db.giving.find_one({
+        "id": giving_id
+    })
 
     return jsonify({
         "message": "Giving option updated successfully",
-        "giving": giving
+        "giving": serialize_giving(giving)
     })
 
 
 @giving_bp.route("/api/giving/<int:giving_id>", methods=["DELETE"])
 @role_required("manage_giving")
 def delete_giving(giving_id):
-    giving = next(
-        (item for item in giving_options if item["id"] == giving_id),
-        None
-    )
+    """Delete a giving option."""
+    db = get_db()
 
-    if not giving:
+    result = db.giving.delete_one({
+        "id": giving_id
+    })
+
+    if result.deleted_count == 0:
         return jsonify({"error": "Giving option not found"}), 404
-
-    giving_options.remove(giving)
 
     return jsonify({
         "message": "Giving option deleted successfully"
