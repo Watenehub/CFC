@@ -1,12 +1,20 @@
 import { Link } from 'react-router-dom'
 import DashboardLayout from '../../components/DashboardLayout'
+import { useAuth } from '../../context/AuthContext'
 
 function SecretaryDashboard() {
+  const { hasPermission } = useAuth()
+
   const stats = [
-    { label: 'Open enquiries', value: '23' },
-    { label: 'Awaiting a reply', value: '8' },
-    { label: 'Giving records', value: '89' },
-    { label: 'This month', value: 'KES 245K' },
+    { label: 'Open enquiries', value: '23', permission: 'manage_enquiries' },
+    { label: 'Awaiting a reply', value: '8', permission: 'manage_enquiries' },
+    { label: 'Giving records', value: '89', permission: 'manage_giving' },
+    { label: 'This month', value: 'KES 245K', permission: 'manage_giving' },
+  ]
+
+  const quickActions = [
+    { label: 'View enquiries', path: '/secretary/enquiries', permission: 'manage_enquiries' },
+    { label: 'Manage giving', path: '/secretary/giving', permission: 'manage_giving' },
   ]
 
   const recentActivity = [
@@ -18,7 +26,7 @@ function SecretaryDashboard() {
   return (
     <DashboardLayout role="secretary" title="Church office">
       <section className="stats-grid">
-        {stats.map((stat) => (
+        {stats.filter(stat => hasPermission(stat.permission)).map((stat) => (
           <div key={stat.label} className="stat-card">
             <div className="stat-content">
               <div className="stat-value">{stat.value}</div>
@@ -29,16 +37,18 @@ function SecretaryDashboard() {
       </section>
 
       <section className="dashboard-section">
-        <h2>Office shortcuts</h2>
+        <h2>Shortcuts</h2>
         <div className="quick-actions-grid">
-          <Link to="/contact" className="action-card"><span className="action-label">Contact page</span></Link>
-          <Link to="/give" className="action-card"><span className="action-label">Giving page</span></Link>
-          <Link to="/events" className="action-card"><span className="action-label">Events calendar</span></Link>
+          {quickActions.filter(action => hasPermission(action.permission)).map((action) => (
+            <Link key={action.path} to={action.path} className="action-card">
+              <div className="action-label">{action.label}</div>
+            </Link>
+          ))}
         </div>
       </section>
 
       <section className="dashboard-section">
-        <h2>Recent office activity</h2>
+        <h2>Recent activity</h2>
         <div className="activity-list">
           {recentActivity.map((activity) => (
             <div key={activity.action} className="activity-item">

@@ -44,6 +44,8 @@ export const AuthProvider = ({ children }) => {
     isMedia: user?.role === 'media',
     isSecretary: user?.role === 'secretary',
     isMember: user?.role === 'member',
+    permissions: user?.permissions || [],
+    hasPermission: (permission) => (user?.permissions || []).includes(permission),
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
@@ -63,6 +65,8 @@ export const useAuth = () => {
       isMedia: false,
       isSecretary: false,
       isMember: false,
+      permissions: [],
+      hasPermission: () => false,
     }
   }
 

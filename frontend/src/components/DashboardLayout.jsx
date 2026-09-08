@@ -1,34 +1,38 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { canManage } from '../utils/permissions'
 import '../styles/Dashboard.css'
 
 const NAV = {
   admin: [
-    { path: '/admin', label: 'Overview', exact: true },
-    { path: '/admin/users', label: 'Users' },
-    { path: '/admin/events/manage', label: 'Events Hub' },
-    { path: '/admin/sermons/manage', label: 'Sermon Library' },
-    { path: '/admin/giving', label: 'Giving Center' },
-    { path: '/admin/enquiries', label: 'Enquiries' },
-    { path: '/admin/settings', label: 'Settings' },
+    { path: '/admin', label: 'Overview', exact: true, permission: null },
+    { path: '/admin/users', label: 'Users', permission: 'manage_users' },
+    { path: '/admin/events/manage', label: 'Events Hub', permission: 'manage_events' },
+    { path: '/admin/sermons/manage', label: 'Sermon Library', permission: 'manage_sermons' },
+    { path: '/admin/giving', label: 'Giving Center', permission: 'manage_giving' },
+    { path: '/admin/enquiries', label: 'Enquiries', permission: 'manage_enquiries' },
+    { path: '/admin/ministries', label: 'Ministries', permission: 'manage_ministries' },
+    { path: '/admin/pastors', label: 'Pastors', permission: 'manage_pastors' },
+    { path: '/admin/deacons', label: 'Deacons', permission: 'manage_deacons' },
+    { path: '/admin/gallery', label: 'Gallery Studio', permission: 'manage_gallery' },
+    { path: '/admin/settings', label: 'Settings', permission: 'manage_users' },
   ],
   media: [
-    { path: '/media', label: 'Overview', exact: true },
-    { path: '/admin/gallery', label: 'Gallery Studio' },
+    { path: '/media', label: 'Overview', exact: true, permission: null },
+    { path: '/admin/events/manage', label: 'Events Hub', permission: 'manage_events' },
+    { path: '/admin/sermons/manage', label: 'Sermon Library', permission: 'manage_sermons' },
+    { path: '/admin/gallery', label: 'Gallery Studio', permission: 'manage_gallery' },
   ],
   secretary: [
-    { path: '/secretary', label: 'Overview', exact: true },
-    { path: '/contact', label: 'Contact page' },
-    { path: '/give', label: 'Giving page' },
-    { path: '/events', label: 'Events' },
+    { path: '/secretary', label: 'Overview', exact: true, permission: null },
+    { path: '/admin/giving', label: 'Giving Center', permission: 'manage_giving' },
+    { path: '/admin/enquiries', label: 'Enquiries', permission: 'manage_enquiries' },
   ],
   member: [
-    { path: '/member', label: 'Overview', exact: true },
-    { path: '/sermons', label: 'Sermons' },
-    { path: '/events', label: 'Events' },
-    { path: '/prayer', label: 'Prayer' },
-    { path: '/give', label: 'Give' },
+    { path: '/member', label: 'Overview', exact: true, permission: null },
+    { path: '/sermons', label: 'Sermons', permission: null },
+    { path: '/events', label: 'Events', permission: null },
+    { path: '/prayer', label: 'Prayer', permission: null },
+    { path: '/give', label: 'Give', permission: null },
   ],
 }
 
@@ -40,27 +44,13 @@ const TITLES = {
 }
 
 function DashboardLayout({ role, title, children }) {
-  const { user } = useAuth()
+  const { user, hasPermission } = useAuth()
   const location = useLocation()
   const activeRole = user?.role || role
-  const managementLinks = [
-        { path: '/admin/events/manage', label: 'Events Hub' },
-        { path: '/admin/sermons/manage', label: 'Sermon Library' },
-        { path: '/admin/giving', label: 'Giving Center' },
-        { path: '/admin/ministries', label: 'Ministries' },
-        { path: '/admin/pastors', label: 'Pastors' },
-        { path: '/admin/deacons', label: 'Deacons' },
-        { path: '/admin/gallery', label: 'Gallery Studio' },
-      ].filter((item) => activeRole === 'admin' || canManage(user, {
-        '/admin/events/manage': 'manage_events',
-        '/admin/sermons/manage': 'manage_sermons',
-        '/admin/giving': 'manage_giving',
-        '/admin/ministries': 'manage_ministries',
-        '/admin/pastors': 'manage_pastors',
-        '/admin/deacons': 'manage_deacons',
-        '/admin/gallery': 'manage_gallery',
-      }[item.path]))
-  const links = activeRole === 'admin' ? [...NAV.admin.slice(0, 2), ...managementLinks, ...NAV.admin.slice(5)] : [...(NAV[activeRole] || []), ...managementLinks]
+  
+  const links = NAV[activeRole]?.filter(item => 
+    !item.permission || hasPermission(item.permission)
+  ) || []
 
   const isActive = (item) => {
     if (item.exact) return location.pathname === item.path
