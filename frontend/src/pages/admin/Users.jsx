@@ -125,6 +125,12 @@ function Users() {
     }
   }
 
+  const handleAddUser = () => {
+    setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: [] })
+    setEditingId(null)
+    setIsEditorOpen(true)
+  }
+
   const permissionSummary = useMemo(
     () =>
       users.map((user) => ({
@@ -142,7 +148,7 @@ function Users() {
 
         <div className="page-action-bar">
           <span>Only administrator-created staff accounts can access the workspace.</span>
-          <button type="button" className="btn btn-primary" onClick={() => { setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: [] }); setEditingId(null); setIsEditorOpen(true) }}>Add staff account</button>
+          <button type="button" className="btn btn-primary" onClick={handleAddUser}>Add staff account</button>
         </div>
 
         {loading ? (
