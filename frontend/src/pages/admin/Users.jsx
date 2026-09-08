@@ -1,7 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import DashboardLayout from '../../components/DashboardLayout'
 import * as authApi from '../../api/auth'
-import { readSiteContent, writeSiteContent } from '../../data/siteContent'
 
 const permissionOptions = [
   'manage_users',
@@ -12,13 +11,14 @@ const permissionOptions = [
   'manage_ministries',
   'manage_pastors',
   'manage_deacons',
+  'manage_gallery',
 ]
 
 const roleOptions = ['admin', 'media', 'secretary']
 
 function Users() {
-  const initialUsers = readSiteContent().users
-  const [users, setUsers] = useState(initialUsers)
+  const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -29,15 +29,25 @@ function Users() {
   const [editingId, setEditingId] = useState(null)
   const [isEditorOpen, setIsEditorOpen] = useState(false)
 
-  const saveUsers = (nextUsers) => {
-    setUsers(nextUsers)
-    writeSiteContent({ users: nextUsers })
+  useEffect(() => {
+    fetchUsers()
+  }, [])
+
+  const fetchUsers = async () => {
+    try {
+      const response = await authApi.getUsers()
+      setUsers(response)
+    } catch (error) {
+      console.error('Failed to fetch users:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleRoleChange = (role) => {
     const defaults = {
       admin: permissionOptions,
-      media: ['manage_events', 'manage_sermons'],
+      media: ['manage_events', 'manage_sermons', 'manage_gallery'],
       secretary: ['manage_giving', 'manage_enquiries'],
     }
 
@@ -62,7 +72,6 @@ function Users() {
     event.preventDefault()
 
     const trimmedUser = {
-      id: editingId ?? Date.now(),
       name: formData.name.trim(),
       email: formData.email.trim(),
       password: formData.password,
@@ -70,25 +79,22 @@ function Users() {
       permissions: formData.permissions,
     }
 
-    const nextUsers = editingId
-      ? users.map((user) => (user.id === editingId ? trimmedUser : user))
-      : [...users, trimmedUser]
-
     try {
-      const response = editingId
-        ? await authApi.updateUser(editingId, trimmedUser)
-        : await authApi.createUser(trimmedUser)
-      if (!editingId && response.user?.id) {
-        nextUsers[nextUsers.length - 1].id = response.user.id
+      if (editingId) {
+        await authApi.updateUser(editingId, trimmedUser)
+      } else {
+        await authApi.createUser(trimmedUser)
       }
+      
+      // Refresh users from API
+      await fetchUsers()
+      
+      setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: [] })
+      setEditingId(null)
+      setIsEditorOpen(false)
     } catch (error) {
-      console.error(error)
+      console.error('Failed to save user:', error)
     }
-
-    saveUsers(nextUsers)
-    setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: [] })
-    setEditingId(null)
-    setIsEditorOpen(false)
   }
 
   const handleEdit = (user) => {
@@ -106,14 +112,16 @@ function Users() {
   const handleDelete = async (id) => {
     try {
       await authApi.deleteUser(id)
+      // Refresh users from API
+      await fetchUsers()
+      
+      if (editingId === id) {
+        setEditingId(null)
+        setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: [] })
+        setIsEditorOpen(false)
+      }
     } catch (error) {
-      console.error(error)
-    }
-    saveUsers(users.filter((user) => user.id !== id))
-    if (editingId === id) {
-      setEditingId(null)
-      setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: [] })
-      setIsEditorOpen(false)
+      console.error('Failed to delete user:', error)
     }
   }
 
@@ -137,6 +145,12 @@ function Users() {
           <button type="button" className="btn btn-primary" onClick={() => { setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: [] }); setEditingId(null); setIsEditorOpen(true) }}>Add staff account</button>
         </div>
 
+        {loading ? (
+          <div className="admin-list-wrapper">
+            <p>Loading users...</p>
+          </div>
+        ) : (
+          <>
         {isEditorOpen && <div className="editor-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setIsEditorOpen(false)}>
         <div className="editor-modal" role="dialog" aria-modal="true" aria-labelledby="user-editor-title">
           <div className="editor-modal-header"><h3 id="user-editor-title">{editingId ? 'Edit staff account' : 'Add staff account'}</h3><button type="button" className="modal-close" onClick={() => setIsEditorOpen(false)} aria-label="Close">&times;</button></div>
@@ -235,6 +249,8 @@ function Users() {
             ))}
           </div>
         </div>
+        </>
+        )}
       </div>
     </DashboardLayout>
   )
