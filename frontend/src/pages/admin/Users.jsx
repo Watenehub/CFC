@@ -70,7 +70,6 @@ function Users() {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-    console.log('Form submitted', formData)
 
     const trimmedUser = {
       name: formData.name.trim(),
@@ -80,16 +79,11 @@ function Users() {
       permissions: formData.permissions,
     }
 
-    console.log('User data to send:', trimmedUser)
-
     try {
       if (editingId) {
-        console.log('Updating user:', editingId)
         await authApi.updateUser(editingId, trimmedUser)
       } else {
-        console.log('Creating new user')
-        const response = await authApi.createUser(trimmedUser)
-        console.log('Create user response:', response)
+        await authApi.createUser(trimmedUser)
       }
       
       // Refresh users from API
@@ -98,7 +92,6 @@ function Users() {
       setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: [] })
       setEditingId(null)
       setIsEditorOpen(false)
-      alert('User saved successfully!')
     } catch (error) {
       console.error('Failed to save user:', error)
       alert('Failed to save user: ' + error.message)
@@ -134,8 +127,6 @@ function Users() {
   }
 
   const handleAddUser = () => {
-    console.log('Add user button clicked')
-    alert('Add user button clicked')
     setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: [] })
     setEditingId(null)
     setIsEditorOpen(true)
