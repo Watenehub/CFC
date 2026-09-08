@@ -10,7 +10,8 @@ def init_mongo(app):
 
     client = MongoClient(
         uri,
-        serverSelectionTimeoutMS=5000
+        serverSelectionTimeoutMS=5000,
+        tlsAllowInvalidCertificates=True
     )
 
     db_name = app.config.get(
