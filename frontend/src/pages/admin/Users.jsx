@@ -126,6 +126,8 @@ function Users() {
   }
 
   const handleAddUser = () => {
+    console.log('Add user button clicked')
+    alert('Add user button clicked')
     setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: [] })
     setEditingId(null)
     setIsEditorOpen(true)
