@@ -20,12 +20,7 @@ def create_app():
         app,
         resources={
             r"/api/*": {
-                "origins": [
-                    "http://localhost:3000",
-                    "http://127.0.0.1:3000",
-                    "http://localhost:3001",
-                    "http://127.0.0.1:3001",
-                ]
+                "origins": "*"
             }
         },
         supports_credentials=True
@@ -33,6 +28,10 @@ def create_app():
 
     # Use the secret key from the environment configuration
     app.secret_key = Config.SECRET_KEY
+    
+    # Configure session for cross-domain requests
+    app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+    app.config['SESSION_COOKIE_SECURE'] = True
 
     # Automatically discover and register route blueprints
     for _, module_name, _ in pkgutil.iter_modules(routes.__path__):
