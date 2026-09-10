@@ -24,12 +24,16 @@ import AdminGiving from './pages/admin/Giving'
 import AdminSettings from './pages/admin/Settings'
 import AdminPeople from './pages/admin/PeopleManager'
 import GalleryManager from './pages/admin/GalleryManager'
+import AdminPrayer from './pages/admin/PrayerRequests'
+import AdminAnnouncements from './pages/admin/Announcements'
+import AdminServices from './pages/admin/Services'
 import MediaDashboard from './pages/media/Dashboard'
 import SecretaryDashboard from './pages/secretary/Dashboard'
 import MemberDashboard from './pages/member/Dashboard'
+import NotFound from './pages/NotFound'
 
 function ProtectedRoute({ children, allowedRoles, permission }) {
-  const { user, loading } = useAuth()
+  const { user, loading, hasPermission } = useAuth()
 
   if (loading) {
     return <div className="loading">Loading...</div>
@@ -43,13 +47,14 @@ function ProtectedRoute({ children, allowedRoles, permission }) {
     return <Navigate to="/dashboard" replace />
   }
 
-  if (permission && user.role !== 'admin' && !user.permissions?.includes(permission)) {
-    const storedUser = JSON.parse(window.localStorage.getItem('cornerstone_site_content') || '{}').users?.find((item) => item.email === user.email)
-    if (!storedUser?.permissions?.includes(permission)) return <Navigate to="/dashboard" replace />
+  if (permission && !hasPermission(permission)) {
+    return <Navigate to="/dashboard" replace />
   }
 
   return children
 }
+
+const staffRoles = ['admin', 'media', 'secretary']
 
 function AppRoutes() {
   const { user } = useAuth()
@@ -72,68 +77,52 @@ function AppRoutes() {
       <Route path="/register" element={<Navigate to="/login" replace />} />
       <Route path="/pastors" element={<Pastors />} />
       <Route path="/deacons" element={<Deacons />} />
-      
-      <Route 
-        path="/admin/*" 
-        element={
-          <ProtectedRoute allowedRoles={['admin']}>
-            <AdminDashboard />
-          </ProtectedRoute>
-        } 
-      />
-      <Route path="/admin/users" element={<ProtectedRoute allowedRoles={["admin"]}><AdminUsers /></ProtectedRoute>} />
-      <Route path="/admin/events/create" element={<ProtectedRoute allowedRoles={["admin"]}><AdminEventCreate /></ProtectedRoute>} />
-      <Route path="/admin/events/manage" element={<ProtectedRoute allowedRoles={["admin", "media", "secretary"]} permission="manage_events"><AdminEventCreate /></ProtectedRoute>} />
-      <Route path="/admin/sermons/create" element={<ProtectedRoute allowedRoles={["admin"]}><AdminSermonsCreate /></ProtectedRoute>} />
-      <Route path="/admin/sermons/manage" element={<ProtectedRoute allowedRoles={["admin", "media", "secretary"]} permission="manage_sermons"><AdminSermonsCreate /></ProtectedRoute>} />
-      <Route path="/admin/enquiries" element={<ProtectedRoute allowedRoles={["admin"]}><AdminEnquiries /></ProtectedRoute>} />
-      <Route path="/admin/giving" element={<ProtectedRoute allowedRoles={["admin", "media", "secretary"]} permission="manage_giving"><AdminGiving /></ProtectedRoute>} />
-      <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={["admin"]}><AdminSettings /></ProtectedRoute>} />
-      <Route path="/admin/ministries" element={<ProtectedRoute allowedRoles={["admin", "media", "secretary"]} permission="manage_ministries"><AdminPeople type="ministries" /></ProtectedRoute>} />
-      <Route path="/admin/pastors" element={<ProtectedRoute allowedRoles={["admin", "media", "secretary"]} permission="manage_pastors"><AdminPeople type="pastors" /></ProtectedRoute>} />
-      <Route path="/admin/deacons" element={<ProtectedRoute allowedRoles={["admin", "media", "secretary"]} permission="manage_deacons"><AdminPeople type="deacons" /></ProtectedRoute>} />
-      <Route path="/admin/gallery" element={<ProtectedRoute allowedRoles={["admin", "media", "secretary"]} permission="manage_gallery"><GalleryManager /></ProtectedRoute>} />
-      
-      <Route 
-        path="/media/*" 
-        element={
-          <ProtectedRoute allowedRoles={['admin', 'media']}>
-            <MediaDashboard />
-          </ProtectedRoute>
-        } 
-      />
+
+      <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+      <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsers /></ProtectedRoute>} />
+      <Route path="/admin/events/create" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_events"><AdminEventCreate /></ProtectedRoute>} />
+      <Route path="/admin/events/manage" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_events"><AdminEventCreate /></ProtectedRoute>} />
+      <Route path="/admin/sermons/create" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_sermons"><AdminSermonsCreate /></ProtectedRoute>} />
+      <Route path="/admin/sermons/manage" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_sermons"><AdminSermonsCreate /></ProtectedRoute>} />
+      <Route path="/admin/enquiries" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_enquiries"><AdminEnquiries /></ProtectedRoute>} />
+      <Route path="/admin/prayer" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_enquiries"><AdminPrayer /></ProtectedRoute>} />
+      <Route path="/admin/giving" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_giving"><AdminGiving /></ProtectedRoute>} />
+      <Route path="/admin/announcements" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_notifications"><AdminAnnouncements /></ProtectedRoute>} />
+      <Route path="/admin/services" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_services"><AdminServices /></ProtectedRoute>} />
+      <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><AdminSettings /></ProtectedRoute>} />
+      <Route path="/admin/ministries" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_ministries"><AdminPeople type="ministries" /></ProtectedRoute>} />
+      <Route path="/admin/pastors" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_pastors"><AdminPeople type="pastors" /></ProtectedRoute>} />
+      <Route path="/admin/deacons" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_deacons"><AdminPeople type="deacons" /></ProtectedRoute>} />
+      <Route path="/admin/gallery" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_gallery"><GalleryManager /></ProtectedRoute>} />
+
+      <Route path="/media" element={<ProtectedRoute allowedRoles={['admin', 'media']}><MediaDashboard /></ProtectedRoute>} />
       <Route path="/media/gallery" element={<Navigate to="/admin/gallery" replace />} />
-      
-      <Route 
-        path="/secretary/*" 
-        element={
-          <ProtectedRoute allowedRoles={['admin', 'secretary']}>
-            <SecretaryDashboard />
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route 
-        path="/member/*" 
+      <Route path="/media/*" element={<Navigate to="/media" replace />} />
+
+      <Route path="/secretary" element={<ProtectedRoute allowedRoles={['admin', 'secretary']}><SecretaryDashboard /></ProtectedRoute>} />
+      <Route path="/secretary/*" element={<Navigate to="/secretary" replace />} />
+
+      <Route
+        path="/member/*"
         element={
           <ProtectedRoute allowedRoles={['admin', 'media', 'secretary', 'member']}>
             <MemberDashboard />
           </ProtectedRoute>
-        } 
+        }
       />
-      
-      <Route 
-        path="/dashboard" 
+
+      <Route
+        path="/dashboard"
         element={
           user?.role === 'admin' ? <Navigate to="/admin" replace /> :
           user?.role === 'media' ? <Navigate to="/media" replace /> :
           user?.role === 'secretary' ? <Navigate to="/secretary" replace /> :
           user?.role === 'member' ? <Navigate to="/member" replace /> :
           <Navigate to="/login" replace />
-        } 
+        }
       />
-      
-      <Route path="*" element={<Navigate to="/" replace />} />
+
+      <Route path="*" element={<NotFound />} />
     </Routes>
   )
 }

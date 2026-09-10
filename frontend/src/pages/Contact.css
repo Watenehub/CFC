@@ -82,6 +82,18 @@
   margin-bottom: 1rem;
 }
 
+.contact-map {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+}
+
+.contact-map h3 {
+  color: var(--color-primary);
+  margin-bottom: 0.75rem;
+}
+
 .service-time-item {
   display: flex;
   justify-content: space-between;

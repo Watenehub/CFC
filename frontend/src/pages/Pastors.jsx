@@ -1,36 +1,46 @@
 import './About.css'
-import { readSiteContent } from '../data/siteContent'
 import { useState, useEffect } from 'react'
+import * as pastorsApi from '../api/pastors'
+import PageHero from '../components/PageHero'
 
 function Pastors() {
-  const [pastors, setPastors] = useState(readSiteContent().pastors)
+  const [pastors, setPastors] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    const updatePastors = () => setPastors(readSiteContent().pastors)
-    updatePastors()
-    window.addEventListener('cornerstone-content-updated', updatePastors)
-    return () => window.removeEventListener('cornerstone-content-updated', updatePastors)
+    const loadPastors = async () => {
+      try {
+        const data = await pastorsApi.getPastors()
+        setPastors(data)
+      } catch (err) {
+        setError('Failed to load pastors')
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadPastors()
   }, [])
-
-  const leaders = pastors.length ? pastors : [{
-    name: 'Nahashon Wachira',
-    title: 'Senior Pastor',
-    bio: 'Senior Pastor of Cornerstone Family Chapel. Committed to discipleship, faithful preaching of God’s Word, and shepherding the congregation in love and truth.',
-    image: '/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg',
-  }]
 
   return (
     <div className="about">
-      <div className="container">
-        <section className="about-hero">
-          <h1>Our Pastor</h1>
-          <p className="about-subtitle">Meet the Senior Pastor who shepherds our congregation.</p>
-        </section>
-
-        <section className="about-section">
+      <PageHero
+        eyebrow="Leadership"
+        title="Our Pastors"
+        subtitle="Meet the pastors who shepherd Cornerstone Family Chapel."
+        image="/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg"
+      />
+      <div className="page-body">
+        <div className="container">
+          {loading && <div className="loading-state">Loading...</div>}
+          {error && <div className="error-state">{error}</div>}
+          {!loading && !error && pastors.length === 0 && (
+            <div className="empty-state"><p>No pastors listed yet.</p></div>
+          )}
           <div className="leadership-grid">
-            {leaders.map((pastor) => (
-              <div key={`${pastor.name}-${pastor.title}`} className="leader-card">
+            {pastors.map((pastor) => (
+              <article key={pastor.id || `${pastor.name}-${pastor.title}`} className="leader-card">
                 <div className="leadership-portrait-frame">
                   <div className="leadership-outer-ring"></div>
                   <div className="leadership-inner-ring"></div>
@@ -40,10 +50,10 @@ function Pastors() {
                 <p className="leader-title">{pastor.title}</p>
                 <p className="leader-bio">{pastor.bio}</p>
                 {pastor.encouragement && <p className="leader-encouragement">{pastor.encouragement}</p>}
-              </div>
+              </article>
             ))}
           </div>
-        </section>
+        </div>
       </div>
     </div>
   )

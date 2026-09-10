@@ -77,7 +77,13 @@ def create_giving():
         "category": data.get("category", ""),
         "payment_method": data.get("payment_method", ""),
         "payment_details": data.get("payment_details", ""),
-        "poster": data.get("poster", "")
+        "poster": data.get("poster", ""),
+        "mpesa_business_no": data.get("mpesa_business_no", ""),
+        "mpesa_account_no": data.get("mpesa_account_no", ""),
+        "bank_name": data.get("bank_name", ""),
+        "bank_account_name": data.get("bank_account_name", ""),
+        "bank_account_no": data.get("bank_account_no", ""),
+        "cheque_payee": data.get("cheque_payee", ""),
     }
 
     db.giving.insert_one(giving)
@@ -102,7 +108,13 @@ def update_giving(giving_id):
         "category",
         "payment_method",
         "payment_details",
-        "poster"
+        "poster",
+        "mpesa_business_no",
+        "mpesa_account_no",
+        "bank_name",
+        "bank_account_name",
+        "bank_account_no",
+        "cheque_payee",
     ]
 
     update_data = {

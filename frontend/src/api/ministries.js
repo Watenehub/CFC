@@ -1,30 +1,14 @@
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
+import { apiCall } from './client'
 
-async function apiCall(endpoint, options = {}) {
-  const url = `${API_BASE}${endpoint}`
-  const config = {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-    credentials: 'include',
-  }
+export const getMinistries = async () => apiCall('/api/ministries')
 
-  const response = await fetch(url, config)
-  const data = await response.json()
+export const getMinistry = async (ministryId) => apiCall(`/api/ministries/${ministryId}`)
 
-  if (!response.ok) {
-    throw new Error(data.error || 'An error occurred')
-  }
+export const createMinistry = async (ministryData) =>
+  apiCall('/api/ministries', { method: 'POST', body: JSON.stringify(ministryData) })
 
-  return data
-}
+export const updateMinistry = async (ministryId, ministryData) =>
+  apiCall(`/api/ministries/${ministryId}`, { method: 'PUT', body: JSON.stringify(ministryData) })
 
-export const getMinistries = async () => {
-  return apiCall('/api/ministries')
-}
-
-export const getMinistry = async (ministryId) => {
-  return apiCall(`/api/ministries/${ministryId}`)
-}
+export const deleteMinistry = async (ministryId) =>
+  apiCall(`/api/ministries/${ministryId}`, { method: 'DELETE' })

@@ -1,10 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import DashboardLayout from '../../components/DashboardLayout'
 import ImageUpload from '../../components/ImageUpload'
-import { readSiteContent, writeSiteContent } from '../../data/siteContent'
+import * as sermonsApi from '../../api/sermons'
 
 const emptySermon = {
-  id: '',
   title: '',
   description: '',
   speaker: '',
@@ -17,50 +16,70 @@ const emptySermon = {
 }
 
 function SermonsCreate() {
-  const [sermons, setSermons] = useState(readSiteContent().sermons)
+  const [sermons, setSermons] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [formData, setFormData] = useState(emptySermon)
   const [editingId, setEditingId] = useState(null)
   const [isEditorOpen, setIsEditorOpen] = useState(false)
+  const [saving, setSaving] = useState(false)
 
-  const saveSermons = (nextSermons) => {
-    setSermons(nextSermons)
-    writeSiteContent({ sermons: nextSermons })
+  useEffect(() => {
+    fetchSermons()
+  }, [])
+
+  const fetchSermons = async () => {
+    try {
+      setError('')
+      const data = await sermonsApi.getSermons()
+      setSermons(data)
+    } catch (err) {
+      setError(err.message || 'Failed to load sermons')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
+    setSaving(true)
+    setError('')
 
-    const nextSermon = {
-      ...formData,
-      id: editingId ?? Date.now(),
+    try {
+      if (editingId) {
+        await sermonsApi.updateSermon(editingId, formData)
+      } else {
+        await sermonsApi.createSermon(formData)
+      }
+      await fetchSermons()
+      setFormData(emptySermon)
+      setEditingId(null)
+      setIsEditorOpen(false)
+    } catch (err) {
+      setError(err.message || 'Failed to save sermon')
+    } finally {
+      setSaving(false)
     }
-
-    const nextSermons = editingId
-      ? sermons.map((item) => (item.id === editingId ? nextSermon : item))
-      : [...sermons, nextSermon]
-
-    saveSermons(nextSermons)
-    setFormData(emptySermon)
-    setEditingId(null)
-    setIsEditorOpen(false)
   }
 
   const handleEdit = (sermon) => {
     setEditingId(sermon.id)
-    setFormData({
-      ...sermon,
-      key_takeaways: sermon.key_takeaways || '',
-    })
+    setFormData({ ...emptySermon, ...sermon, key_takeaways: sermon.key_takeaways || '' })
     setIsEditorOpen(true)
   }
 
-  const handleDelete = (id) => {
-    const nextSermons = sermons.filter((item) => item.id !== id)
-    saveSermons(nextSermons)
-    if (editingId === id) {
-      setEditingId(null)
-      setFormData(emptySermon)
-      setIsEditorOpen(false)
+  const handleDelete = async (id) => {
+    try {
+      setError('')
+      await sermonsApi.deleteSermon(id)
+      await fetchSermons()
+      if (editingId === id) {
+        setEditingId(null)
+        setFormData(emptySermon)
+        setIsEditorOpen(false)
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to delete sermon')
     }
   }
 
@@ -69,6 +88,7 @@ function SermonsCreate() {
       <div className="admin-page">
         <h2>Manage sermons</h2>
         <p>Add sermon details, video links, Scripture themes, and teaching summaries for the website.</p>
+        {error && <p className="error-state">{error}</p>}
 
         <div className="page-action-bar">
           <span>Publish a new message to the sermon library.</span>
@@ -82,99 +102,42 @@ function SermonsCreate() {
           <div className="form-grid">
             <div className="form-field">
               <label>Title</label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={(event) => setFormData({ ...formData, title: event.target.value })}
-                required
-              />
+              <input type="text" value={formData.title} onChange={(event) => setFormData({ ...formData, title: event.target.value })} required />
             </div>
-
             <div className="form-field">
               <label>Speaker</label>
-              <input
-                type="text"
-                value={formData.speaker}
-                onChange={(event) => setFormData({ ...formData, speaker: event.target.value })}
-                required
-              />
+              <input type="text" value={formData.speaker} onChange={(event) => setFormData({ ...formData, speaker: event.target.value })} required />
             </div>
-
             <div className="form-field">
               <label>Theme verse</label>
-              <input
-                type="text"
-                value={formData.scripture}
-                onChange={(event) => setFormData({ ...formData, scripture: event.target.value })}
-              />
+              <input type="text" value={formData.scripture} onChange={(event) => setFormData({ ...formData, scripture: event.target.value })} />
             </div>
-
             <div className="form-field">
               <label>Category</label>
-              <input
-                type="text"
-                value={formData.category}
-                onChange={(event) => setFormData({ ...formData, category: event.target.value })}
-                required
-              />
+              <input type="text" value={formData.category} onChange={(event) => setFormData({ ...formData, category: event.target.value })} required />
             </div>
-
             <div className="form-field">
               <label>Date</label>
-              <input
-                type="date"
-                value={formData.date}
-                onChange={(event) => setFormData({ ...formData, date: event.target.value })}
-                required
-              />
+              <input type="date" value={formData.date} onChange={(event) => setFormData({ ...formData, date: event.target.value })} required />
             </div>
-
             <div className="form-field">
               <label>YouTube link</label>
-              <input
-                type="url"
-                value={formData.video_url}
-                onChange={(event) => setFormData({ ...formData, video_url: event.target.value })}
-                required
-              />
+              <input type="url" value={formData.video_url} onChange={(event) => setFormData({ ...formData, video_url: event.target.value })} required />
             </div>
-
             <ImageUpload label="Thumbnail / sermon image" value={formData.thumbnail} onChange={(thumbnail) => setFormData({ ...formData, thumbnail })} />
-
             <div className="form-field full-width">
               <label>Description</label>
-              <textarea
-                rows="4"
-                value={formData.description}
-                onChange={(event) => setFormData({ ...formData, description: event.target.value })}
-                required
-              />
+              <textarea rows="4" value={formData.description} onChange={(event) => setFormData({ ...formData, description: event.target.value })} required />
             </div>
-
             <div className="form-field full-width">
               <label>Key takeaways</label>
-              <textarea
-                rows="3"
-                value={formData.key_takeaways}
-                onChange={(event) => setFormData({ ...formData, key_takeaways: event.target.value })}
-              />
+              <textarea rows="3" value={formData.key_takeaways} onChange={(event) => setFormData({ ...formData, key_takeaways: event.target.value })} />
             </div>
-
           </div>
-
           <div className="form-actions">
-            <button type="submit" className="btn btn-primary">{editingId ? 'Update sermon' : 'Add sermon'}</button>
+            <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving...' : editingId ? 'Update sermon' : 'Add sermon'}</button>
             {editingId && (
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => {
-                  setEditingId(null)
-                  setFormData(emptySermon)
-                }}
-              >
-                Cancel
-              </button>
+              <button type="button" className="btn btn-secondary" onClick={() => { setEditingId(null); setFormData(emptySermon) }}>Cancel</button>
             )}
           </div>
         </form>
@@ -183,21 +146,24 @@ function SermonsCreate() {
 
         <div className="admin-list-wrapper">
           <h3>Saved sermons</h3>
-          <div className="admin-list">
-            {sermons.map((item) => (
-              <div key={item.id} className="admin-item-card">
-                <div>
-                  <strong>{item.title}</strong>
-                  <div>{item.speaker}</div>
-                  <div className="meta-badge">{item.category}</div>
+          {loading ? <p>Loading sermons...</p> : (
+            <div className="admin-list">
+              {sermons.map((item) => (
+                <div key={item.id} className="admin-item-card">
+                  <div>
+                    <strong>{item.title}</strong>
+                    <div>{item.speaker}</div>
+                    <div className="meta-badge">{item.category}</div>
+                  </div>
+                  <div className="item-actions">
+                    <button type="button" className="btn btn-secondary" onClick={() => handleEdit(item)}>Edit</button>
+                    <button type="button" className="btn btn-danger" onClick={() => handleDelete(item.id)}>Remove</button>
+                  </div>
                 </div>
-                <div className="item-actions">
-                  <button type="button" className="btn btn-secondary" onClick={() => handleEdit(item)}>Edit</button>
-                  <button type="button" className="btn btn-danger" onClick={() => handleDelete(item.id)}>Remove</button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+              {!sermons.length && <p className="empty-admin-state">No sermons yet. Add one to get started.</p>}
+            </div>
+          )}
         </div>
       </div>
     </DashboardLayout>

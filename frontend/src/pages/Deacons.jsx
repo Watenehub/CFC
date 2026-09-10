@@ -1,44 +1,56 @@
 import './About.css'
-import { readSiteContent } from '../data/siteContent'
 import { useState, useEffect } from 'react'
+import * as deaconsApi from '../api/deacons'
+import PageHero from '../components/PageHero'
 
 function Deacons() {
-  const [deacons, setDeacons] = useState(readSiteContent().deacons)
+  const [deacons, setDeacons] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    const updateDeacons = () => setDeacons(readSiteContent().deacons)
-    updateDeacons()
-    window.addEventListener('cornerstone-content-updated', updateDeacons)
-    return () => window.removeEventListener('cornerstone-content-updated', updateDeacons)
+    const loadDeacons = async () => {
+      try {
+        const data = await deaconsApi.getDeacons()
+        setDeacons(data)
+      } catch (err) {
+        setError('Failed to load deacons')
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadDeacons()
   }, [])
-
-  const leaders = deacons.length ? deacons : [
-    { name: 'Deacon Samuel Opiyo', role: 'Community outreach and member care', image: '/CFC_CHURCH_PHOTO.jpg' },
-    { name: 'Deaconess Mercy Wanjiru', role: 'Hospitality and small groups', image: '/CFC_CHURCH_PHOTO.jpg' },
-  ]
 
   return (
     <div className="about">
-      <div className="container">
-        <section className="about-hero">
-          <h1>Our Deacons</h1>
-          <p className="about-subtitle">Meet the deacons who serve our church in various ministries.</p>
-        </section>
-
-        <section className="about-section">
+      <PageHero
+        eyebrow="Leadership"
+        title="Our Deacons"
+        subtitle="Meet the deacons who serve our church family in care, hospitality, and outreach."
+        image="/CFC_CHURCH_PHOTO.jpg"
+      />
+      <div className="page-body">
+        <div className="container">
+          {loading && <div className="loading-state">Loading...</div>}
+          {error && <div className="error-state">{error}</div>}
+          {!loading && !error && deacons.length === 0 && (
+            <div className="empty-state"><p>No deacons listed yet.</p></div>
+          )}
           <div className="leadership-grid">
-            {leaders.map((member) => (
-              <div key={`${member.name}-${member.role}`} className="leader-card">
+            {deacons.map((member) => (
+              <article key={member.id || `${member.name}-${member.role}`} className="leader-card">
                 <div className="leader-image">
                   <img src={member.image || '/CFC_CHURCH_PHOTO.jpg'} alt={member.name} />
                 </div>
                 <h3>{member.name}</h3>
-                <p className="leader-bio">{member.role}</p>
+                <p className="leader-bio">{member.role || member.title}</p>
                 {member.encouragement && <p className="leader-encouragement">{member.encouragement}</p>}
-              </div>
+              </article>
             ))}
           </div>
-        </section>
+        </div>
       </div>
     </div>
   )

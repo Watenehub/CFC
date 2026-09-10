@@ -1,19 +1,9 @@
 import { useMemo, useState, useEffect } from 'react'
 import DashboardLayout from '../../components/DashboardLayout'
 import * as authApi from '../../api/auth'
+import { ALL_PERMISSIONS, ROLE_PERMISSIONS } from '../../utils/permissions'
 
-const permissionOptions = [
-  'manage_users',
-  'manage_events',
-  'manage_sermons',
-  'manage_giving',
-  'manage_enquiries',
-  'manage_ministries',
-  'manage_pastors',
-  'manage_deacons',
-  'manage_gallery',
-]
-
+const permissionOptions = ALL_PERMISSIONS
 const roleOptions = ['admin', 'media', 'secretary']
 
 function Users() {
@@ -24,7 +14,7 @@ function Users() {
     email: '',
     password: '',
     role: 'secretary',
-    permissions: [],
+    permissions: ROLE_PERMISSIONS.secretary,
   })
   const [editingId, setEditingId] = useState(null)
   const [isEditorOpen, setIsEditorOpen] = useState(false)
@@ -45,16 +35,10 @@ function Users() {
   }
 
   const handleRoleChange = (role) => {
-    const defaults = {
-      admin: permissionOptions,
-      media: ['manage_events', 'manage_sermons', 'manage_gallery'],
-      secretary: ['manage_giving', 'manage_enquiries'],
-    }
-
     setFormData((previous) => ({
       ...previous,
       role,
-      permissions: defaults[role] || [],
+      permissions: ROLE_PERMISSIONS[role] || [],
     }))
   }
 
@@ -89,7 +73,7 @@ function Users() {
       // Refresh users from API
       await fetchUsers()
       
-      setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: [] })
+      setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: ROLE_PERMISSIONS.secretary })
       setEditingId(null)
       setIsEditorOpen(false)
     } catch (error) {
@@ -118,7 +102,7 @@ function Users() {
       
       if (editingId === id) {
         setEditingId(null)
-        setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: [] })
+        setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: ROLE_PERMISSIONS.secretary })
         setIsEditorOpen(false)
       }
     } catch (error) {
@@ -127,7 +111,7 @@ function Users() {
   }
 
   const handleAddUser = () => {
-    setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: [] })
+    setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: ROLE_PERMISSIONS.secretary })
     setEditingId(null)
     setIsEditorOpen(true)
   }
@@ -224,7 +208,7 @@ function Users() {
                 className="btn btn-secondary"
                 onClick={() => {
                   setEditingId(null)
-                  setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: [] })
+                  setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: ROLE_PERMISSIONS.secretary })
                 }}
               >
                 Cancel

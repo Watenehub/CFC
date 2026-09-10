@@ -1,6 +1,10 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { initScrollAnimations, cleanupScrollAnimations } from '../utils/scrollAnimations'
+import * as sermonsApi from '../api/sermons'
+import * as eventsApi from '../api/events'
+import * as ministriesApi from '../api/ministries'
+import * as notificationsApi from '../api/notifications'
 import './Home.css'
 
 const experiences = [
@@ -35,113 +39,89 @@ const experiences = [
 ]
 
 const connectCards = [
-  {
-    title: 'Prayer',
-    subtitle: 'Share a request with our church family',
-    link: '/prayer',
-    image: '/images/cornerstone/page_03/page03_photo010_pastors_leaders_conference_prayer.jpg',
-  },
-  {
-    title: 'Events',
-    subtitle: 'Conferences, classes, and gatherings',
-    link: '/events',
-    image: '/images/cornerstone/page_02/page02_photo008_good_soil_conference_gathering.jpg',
-  },
-  {
-    title: 'Giving',
-    subtitle: 'Support ministry, missions, and outreach',
-    link: '/give',
-    image: '/images/cornerstone/page_09/page09_photo047_medical_camp_health_outreach.jpg',
-  },
-  {
-    title: 'Gallery',
-    subtitle: 'Photos from life at Cornerstone',
-    link: '/gallery',
-    image: '/images/cornerstone/page_07/page07_photo032_music_extravaganza.jpg',
-  },
-]
-
-const ministries = [
-  {
-    title: 'Children & Teens',
-    tagline: 'Bible stories, fellowship, and room to grow.',
-    description: 'We want young people to feel known, welcomed, and rooted in the Word.',
-    link: '/ministries',
-    image: '/images/cornerstone/page_06/page06_photo026_children_ministry_group.jpg',
-  },
-  {
-    title: 'Praise & Worship',
-    tagline: 'Music that helps the church lift its voice to God.',
-    description: 'Our team prepares each week so we can worship together with heart and unity.',
-    link: '/ministries',
-    image: '/images/cornerstone/page_07/page07_photo030_praise_and_worship_team_group.jpg',
-  },
-  {
-    title: 'Community Outreach',
-    tagline: 'Compassion that goes beyond our walls.',
-    description: 'Medical camps, neighbourhood projects, and simple acts of care for people around us.',
-    link: '/ministries',
-    image: '/images/cornerstone/page_11/page11_photo072_community_outreach_team.jpg',
-  },
-  {
-    title: 'Media Ministry',
-    tagline: 'Helping the congregation stay connected.',
-    description: 'Cameras, sound, and live broadcast so those at home can still share in the service.',
-    link: '/ministries',
-    image: '/images/cornerstone/page_08/page08_photo044_media_technical_team.jpg',
-  },
-]
-
-const events = [
-  {
-    date: 'Sep 5',
-    title: 'Youth Revival Night',
-    time: '6:00 PM – 9:00 PM',
-    location: 'Main Sanctuary',
-    image: '/images/cornerstone/page_07/page07_photo033_worship_night.jpg',
-  },
-  {
-    date: 'Sep 12',
-    title: "Men's Breakfast",
-    time: '8:00 AM – 10:00 AM',
-    location: 'Church Hall',
-    image: '/images/cornerstone/page_02/page02_photo005_conference_fellowship_table.jpg',
-  },
-  {
-    date: 'Sep 15',
-    title: 'Bible Study Launch',
-    time: '7:00 PM – 8:30 PM',
-    location: 'Classroom A',
-    image: '/images/cornerstone/page_05/page05_photo022_membership_class_group.jpg',
-  },
+  { title: 'Prayer', subtitle: 'Share a request with our church family', link: '/prayer', image: '/images/cornerstone/page_03/page03_photo010_pastors_leaders_conference_prayer.jpg' },
+  { title: 'Events', subtitle: 'Conferences, classes, and gatherings', link: '/events', image: '/images/cornerstone/page_02/page02_photo008_good_soil_conference_gathering.jpg' },
+  { title: 'Giving', subtitle: 'Support ministry, missions, and outreach', link: '/give', image: '/images/cornerstone/page_09/page09_photo047_medical_camp_health_outreach.jpg' },
+  { title: 'Gallery', subtitle: 'Photos from life at Cornerstone', link: '/gallery', image: '/images/cornerstone/page_07/page07_photo032_music_extravaganza.jpg' },
 ]
 
 const getInvolved = [
-  {
-    title: 'Serve on a team',
-    description: 'Worship, media, hospitality, children, and outreach all need willing hands.',
-    link: '/ministries',
-  },
-  {
-    title: 'Ask for prayer',
-    description: 'Tell us how we can stand with you. You do not have to carry it alone.',
-    link: '/prayer',
-  },
-  {
-    title: 'Give',
-    description: 'Your gifts help us teach the Word, care for people, and keep the work of the church going.',
-    link: '/give',
-  },
+  { title: 'Serve on a team', description: 'Worship, media, hospitality, children, and outreach all need willing hands.', link: '/ministries' },
+  { title: 'Ask for prayer', description: 'Tell us how we can stand with you. You do not have to carry it alone.', link: '/prayer' },
+  { title: 'Give', description: 'Your gifts help us teach the Word, care for people, and keep the work of the church going.', link: '/give' },
 ]
 
+function formatEventDate(dateString) {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
+function formatTimeRange(start, end) {
+  if (!start) return ''
+  return end ? `${start} – ${end}` : start
+}
+
 function Home() {
+  const [latestSermon, setLatestSermon] = useState(null)
+  const [upcomingEvents, setUpcomingEvents] = useState([])
+  const [ministries, setMinistries] = useState([])
+  const [announcements, setAnnouncements] = useState([])
+
   useEffect(() => {
     const observer = initScrollAnimations()
     return () => cleanupScrollAnimations(observer)
   }, [])
 
+  useEffect(() => {
+    Promise.allSettled([
+      sermonsApi.getSermons(),
+      eventsApi.getEvents(),
+      ministriesApi.getMinistries(),
+      notificationsApi.getNotifications(true),
+    ]).then(([sermonsRes, eventsRes, ministriesRes, notesRes]) => {
+      if (sermonsRes.status === 'fulfilled' && sermonsRes.value?.length) {
+        const sorted = [...sermonsRes.value].sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
+        setLatestSermon(sorted[0])
+      }
+      if (eventsRes.status === 'fulfilled') {
+        const now = new Date()
+        const upcoming = eventsRes.value
+          .filter((event) => !event.date || new Date(event.date) >= now)
+          .sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')))
+          .slice(0, 3)
+        setUpcomingEvents(upcoming)
+      }
+      if (ministriesRes.status === 'fulfilled') {
+        setMinistries(ministriesRes.value.slice(0, 4))
+      }
+      if (notesRes.status === 'fulfilled') {
+        setAnnouncements(notesRes.value.slice(0, 3))
+      }
+    })
+  }, [])
+
   return (
     <div className="home">
+      {announcements.length > 0 && (
+        <div className="home-announcement-bar">
+          <div className="container home-announcement-stack">
+            {announcements.map((note) => (
+              <div key={note.id || note.title} className="home-announcement-inner">
+                <span className="home-announcement-label">Announcement</span>
+                <div className="home-announcement-copy">
+                  <strong>{note.title}</strong>
+                  <span>{note.message}</span>
+                </div>
+                {note.link && (
+                  <Link to={note.link} className="home-announcement-link">Learn more</Link>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <section className="hero">
         <div className="hero-bg">
           <img
@@ -152,6 +132,11 @@ function Home() {
           <div className="hero-overlay" />
         </div>
         <div className="hero-content container">
+          <p className="hero-brand fade-up">Cornerstone Family Chapel</p>
+          <h1 className="hero-title fade-up">A family of faith, rooted in Christ</h1>
+          <p className="hero-subtitle fade-up">
+            Join us for worship, teaching from Scripture, and a community that grows together in love.
+          </p>
           <div className="hero-actions fade-up">
             <Link to="/about" className="btn btn-hero-solid">Plan a Visit</Link>
             <Link to="/watch-live" className="btn btn-outline-white">Watch Live</Link>
@@ -191,30 +176,32 @@ function Home() {
         </div>
       </section>
 
-      <section className="section sermon-feature">
-        <div className="container">
-          <div className="sermon-feature-grid fade-up">
-            <div className="sermon-feature-media">
-              <img
-                src="/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg"
-                alt="Pastor Nahashon Wachira"
-              />
-            </div>
-            <div className="sermon-feature-content">
-              <span className="section-eyebrow">From the pulpit</span>
-              <h2 className="section-heading">Walking in Faith: Trusting God&apos;s Plan</h2>
-              <p className="sermon-meta">Nahashon Wachira · August 25, 2026 · Proverbs 3:5-6</p>
-              <p className="sermon-description">
-                A reminder that we can trust the Lord with all our heart, even when we cannot yet see the next step.
-              </p>
-              <div className="sermon-actions">
-                <Link to="/sermons" className="btn btn-dark">Watch this message</Link>
-                <Link to="/sermons" className="sermon-link-secondary">All sermons →</Link>
+      {latestSermon && (
+        <section className="section sermon-feature">
+          <div className="container">
+            <div className="sermon-feature-grid fade-up">
+              <div className="sermon-feature-media">
+                <img
+                  src={latestSermon.thumbnail || '/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg'}
+                  alt={latestSermon.title}
+                />
+              </div>
+              <div className="sermon-feature-content">
+                <span className="section-eyebrow">From the pulpit</span>
+                <h2 className="section-heading">{latestSermon.title}</h2>
+                <p className="sermon-meta">
+                  {[latestSermon.speaker, latestSermon.date && new Date(latestSermon.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }), latestSermon.scripture].filter(Boolean).join(' · ')}
+                </p>
+                <p className="sermon-description">{latestSermon.description}</p>
+                <div className="sermon-actions">
+                  <Link to={`/sermons/${latestSermon.id}`} className="btn btn-dark">Watch this message</Link>
+                  <Link to="/sermons" className="sermon-link-secondary">All sermons →</Link>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section className="section connect">
         <div className="container">
@@ -236,30 +223,35 @@ function Home() {
         </div>
       </section>
 
-      <section className="section ministries-section">
-        <div className="container">
-          <div className="section-header fade-up">
-            <span className="section-eyebrow">Ministries</span>
-            <h2 className="section-heading">Where our church family serves</h2>
-            <p className="section-subheading">
-              Children, worship, outreach, and media — each ministry helps us grow together and bless others.
-            </p>
+      {ministries.length > 0 && (
+        <section className="section ministries-section">
+          <div className="container">
+            <div className="section-header fade-up">
+              <span className="section-eyebrow">Ministries</span>
+              <h2 className="section-heading">Where our church family serves</h2>
+              <p className="section-subheading">
+                Each ministry helps us grow together and bless others.
+              </p>
+            </div>
+            <div className="ministries-grid">
+              {ministries.map((ministry) => (
+                <Link key={ministry.id} to="/ministries" className="ministry-card fade-up">
+                  <img src={ministry.image || '/chapel.jpg'} alt={ministry.name} loading="lazy" />
+                  <div className="ministry-card-content">
+                    {ministry.leader && <p className="ministry-tagline">Led by {ministry.leader}</p>}
+                    <h3>{ministry.name}</h3>
+                    <p className="ministry-desc">{ministry.description}</p>
+                    <span className="ministry-link">Learn more →</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            <div className="section-footer fade-up">
+              <Link to="/ministries" className="btn btn-dark">All ministries</Link>
+            </div>
           </div>
-          <div className="ministries-grid">
-            {ministries.map((ministry) => (
-              <Link key={ministry.title} to={ministry.link} className="ministry-card fade-up">
-                <img src={ministry.image} alt={ministry.title} loading="lazy" />
-                <div className="ministry-card-content">
-                  <p className="ministry-tagline">{ministry.tagline}</p>
-                  <h3>{ministry.title}</h3>
-                  <p className="ministry-desc">{ministry.description}</p>
-                  <span className="ministry-link">Learn more →</span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section className="section events-section">
         <div className="container">
@@ -270,21 +262,25 @@ function Home() {
               Bible conferences, membership classes, worship nights, and outreach throughout the year.
             </p>
           </div>
-          <div className="events-grid">
-            {events.map((event) => (
-              <Link key={event.title} to="/events" className="event-card fade-up">
-                <div className="event-card-image">
-                  <img src={event.image} alt={event.title} loading="lazy" />
-                  <span className="event-date-badge">{event.date}</span>
-                </div>
-                <div className="event-card-body">
-                  <h3>{event.title}</h3>
-                  <p>{event.time}</p>
-                  <p className="event-location">{event.location}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
+          {upcomingEvents.length === 0 ? (
+            <div className="empty-state fade-up"><p>No upcoming events posted yet. Check back soon.</p></div>
+          ) : (
+            <div className="events-grid">
+              {upcomingEvents.map((event) => (
+                <Link key={event.id} to={`/events/${event.id}`} className="event-card fade-up">
+                  <div className="event-card-image">
+                    <img src={event.image || '/chapel.jpg'} alt={event.title} loading="lazy" />
+                    <span className="event-date-badge">{formatEventDate(event.date)}</span>
+                  </div>
+                  <div className="event-card-body">
+                    <h3>{event.title}</h3>
+                    <p>{formatTimeRange(event.start_time, event.end_time)}</p>
+                    <p className="event-location">{event.location}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
           <div className="section-footer fade-up">
             <Link to="/events" className="btn btn-dark">Full calendar</Link>
           </div>
@@ -296,9 +292,7 @@ function Home() {
           <div className="section-header fade-up">
             <span className="section-eyebrow">Take part</span>
             <h2 className="section-heading">Serve, pray, and give</h2>
-            <p className="section-subheading">
-              Every member has a place in the life of this church.
-            </p>
+            <p className="section-subheading">Every member has a place in the life of this church.</p>
           </div>
           <div className="involved-grid">
             {getInvolved.map((item) => (

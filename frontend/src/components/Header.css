@@ -74,8 +74,24 @@
   padding: 10px 0;
 }
 
-.nav-link:hover {
-  color: #8bd13f;
+.nav-logout,
+.mobile-logout {
+  color: #ffd6d6 !important;
+}
+
+.nav-logout:hover,
+.mobile-logout:hover {
+  color: #ffffff !important;
+}
+
+.mobile-logout {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  font: inherit;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
 }
 
 .arrow {

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import * as prayerApi from '../api/prayer'
 import './Prayer.css'
 import '../styles/ModernDesignSystem.css'
 import '../utils/scrollAnimations'
@@ -10,7 +11,7 @@ function Prayer() {
     phone: '',
     prayerRequest: '',
     category: 'general',
-    privacy: 'public'
+    privacy: 'private'
   })
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -31,21 +32,7 @@ function Prayer() {
     setSuccess(false)
 
     try {
-      const response = await fetch('/api/prayer', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(formData)
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to submit prayer request')
-      }
-
+      await prayerApi.createPrayerRequest(formData)
       setSuccess(true)
       setFormData({
         name: '',
@@ -53,10 +40,10 @@ function Prayer() {
         phone: '',
         prayerRequest: '',
         category: 'general',
-        privacy: 'public'
+        privacy: 'private'
       })
     } catch (err) {
-      setError(err.message)
+      setError(err.message || 'Failed to submit prayer request')
     } finally {
       setLoading(false)
     }

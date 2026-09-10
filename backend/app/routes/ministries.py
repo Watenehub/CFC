@@ -78,7 +78,8 @@ def create_ministry():
         "meeting_time": data.get("meeting_time", ""),
         "location": data.get("location", ""),
         "contact": data.get("contact", ""),
-        "image": data.get("image", "")
+        "image": data.get("image", ""),
+        "encouragement": data.get("encouragement", ""),
     }
 
     db.ministries.insert_one(ministry)
@@ -104,7 +105,8 @@ def update_ministry(ministry_id):
         "meeting_time",
         "location",
         "contact",
-        "image"
+        "image",
+        "encouragement",
     ]
 
     update_data = {

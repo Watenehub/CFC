@@ -1,13 +1,18 @@
-import { useState } from 'react'
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import * as enquiriesApi from '../api/enquiries'
-import { readSiteContent } from '../data/siteContent'
+import * as settingsApi from '../api/settings'
 import './Contact.css'
 import '../styles/ModernDesignSystem.css'
 import '../utils/scrollAnimations'
 
 function Contact() {
-  const [settings, setSettings] = useState(readSiteContent().settings)
+  const [settings, setSettings] = useState({
+    address: '',
+    phone: '',
+    email: '',
+    office_hours: '',
+    service_times: '',
+  })
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -20,9 +25,9 @@ function Contact() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    const updateSettings = () => setSettings(readSiteContent().settings)
-    window.addEventListener('cornerstone-content-updated', updateSettings)
-    return () => window.removeEventListener('cornerstone-content-updated', updateSettings)
+    settingsApi.getSettings()
+      .then(setSettings)
+      .catch((err) => console.error(err))
   }, [])
 
   const handleChange = (e) => {
@@ -40,7 +45,7 @@ function Contact() {
     setSuccess(false)
 
     try {
-      const response = await enquiriesApi.createEnquiry(formData)
+      await enquiriesApi.createEnquiry(formData)
       setSuccess(true)
       setFormData({
         name: '',
@@ -112,6 +117,15 @@ function Contact() {
                 <h3>Service Times</h3>
                 <p>{settings.service_times}</p>
               </div>
+
+              {settings.map_url && (
+                <div className="contact-map">
+                  <h3>Find us</h3>
+                  <a href={settings.map_url} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
+                    Open in Google Maps
+                  </a>
+                </div>
+              )}
             </div>
           </div>
 
@@ -232,10 +246,20 @@ function Contact() {
           <h2>Find Us</h2>
           <div className="map-placeholder">
             <div className="map-content">
-              <div className="map-icon">🗺️</div>
-              <h3>Interactive Map</h3>
-              <p>Map integration coming soon</p>
-              <p className="map-address"><em>Address to be updated</em></p>
+              <h3>{settings.church_name || 'Cornerstone Family Chapel'}</h3>
+              <p className="map-address">{settings.address}</p>
+              {settings.map_url ? (
+                <a
+                  href={settings.map_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-premium btn-premium-primary"
+                >
+                  Open in Google Maps
+                </a>
+              ) : (
+                <p>Map link will appear once it is set in site settings.</p>
+              )}
             </div>
           </div>
         </section>

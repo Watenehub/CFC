@@ -1,108 +1,137 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import DashboardLayout from '../../components/DashboardLayout'
 import { useAuth } from '../../context/AuthContext'
-import './Dashboard.css'
+import * as dashboardApi from '../../api/dashboard'
+import * as settingsApi from '../../api/settings'
 
 function MediaDashboard() {
-  const { user, hasPermission } = useAuth()
+  const { hasPermission } = useAuth()
+  const [stats, setStats] = useState(null)
+  const [error, setError] = useState('')
+  const [settings, setSettings] = useState({ is_live: false, livestream_url: '' })
+  const [liveSaving, setLiveSaving] = useState(false)
+  const [liveMessage, setLiveMessage] = useState('')
 
-  const stats = [
-    { label: 'Sermons', value: '48', icon: '📺', color: 'purple', permission: 'manage_sermons' },
-    { label: 'Livestreams', value: '12', icon: '📡', color: 'blue', permission: 'manage_events' },
-    { label: 'Videos', value: '156', icon: '🎬', color: 'green', permission: 'manage_gallery' },
-    { label: 'Audio Files', value: '89', icon: '🎵', color: 'orange', permission: 'manage_sermons' },
-    { label: 'Photos', value: '234', icon: '📷', color: 'pink', permission: 'manage_gallery' },
-    { label: 'Media Gallery', value: '45', icon: '🖼️', color: 'teal', permission: 'manage_gallery' }
+  useEffect(() => {
+    dashboardApi.getDashboardStats()
+      .then(setStats)
+      .catch((err) => setError(err.message || 'Failed to load stats'))
+
+    if (hasPermission('manage_notifications')) {
+      settingsApi.getSettings()
+        .then((data) => setSettings({
+          is_live: Boolean(data.is_live),
+          livestream_url: data.livestream_url || '',
+        }))
+        .catch(() => {})
+    }
+  }, [])
+
+  const cards = [
+    { label: 'Sermons', value: stats?.sermons, permission: 'manage_sermons', path: '/admin/sermons/manage' },
+    { label: 'Events', value: stats?.events, permission: 'manage_events', path: '/admin/events/manage' },
+    { label: 'Gallery photos', value: stats?.gallery, permission: 'manage_gallery', path: '/admin/gallery' },
+    { label: 'Announcements', value: stats?.notifications, permission: 'manage_notifications', path: '/admin/announcements' },
   ]
 
   const quickActions = [
-    { label: 'Upload Sermon', path: '/media/sermons/upload', icon: '📺', permission: 'manage_sermons' },
-    { label: 'Setup Livestream', path: '/media/livestreams/setup', icon: '📡', permission: 'manage_events' },
-    { label: 'Add Video', path: '/media/videos/add', icon: '🎬', permission: 'manage_gallery' },
-    { label: 'Upload Audio', path: '/media/audio/upload', icon: '🎵', permission: 'manage_sermons' },
-    { label: 'Add Photos', path: '/media/photos/add', icon: '📷', permission: 'manage_gallery' },
-    { label: 'View Gallery', path: '/media/gallery', icon: '🖼️', permission: 'manage_gallery' }
+    { label: 'Add sermon', path: '/admin/sermons/manage', permission: 'manage_sermons' },
+    { label: 'Manage events', path: '/admin/events/manage', permission: 'manage_events' },
+    { label: 'Gallery studio', path: '/admin/gallery', permission: 'manage_gallery' },
+    { label: 'Announcements', path: '/admin/announcements', permission: 'manage_notifications' },
   ]
 
-  const recentActivity = [
-    { action: 'Sermon uploaded: Walking in Faith', time: '2 hours ago', type: 'sermon' },
-    { action: 'Livestream ended', time: '5 hours ago', type: 'livestream' },
-    { action: 'New video added to gallery', time: '1 day ago', type: 'video' },
-    { action: 'Audio file uploaded', time: '2 days ago', type: 'audio' },
-    { action: 'Photos added to album', time: '3 days ago', type: 'photo' }
-  ]
-
-  const managementCards = [
-    { label: 'Sermons', icon: '📺', description: 'Upload and manage sermon videos and audio', path: '/media/sermons', permission: 'manage_sermons' },
-    { label: 'Livestreams', icon: '📡', description: 'Setup and manage live streaming', path: '/media/livestreams', permission: 'manage_events' },
-    { label: 'Videos', icon: '🎬', description: 'Manage video content and library', path: '/media/videos', permission: 'manage_gallery' },
-    { label: 'Audio', icon: '🎵', description: 'Manage audio files and podcasts', path: '/media/audio', permission: 'manage_sermons' },
-    { label: 'Photos', icon: '📷', description: 'Manage photo galleries and albums', path: '/media/photos', permission: 'manage_gallery' },
-    { label: 'Media Gallery', icon: '🖼️', description: 'View and organize all media', path: '/media/gallery', permission: 'manage_gallery' },
-    { label: 'Broadcast Announcements', icon: '📢', description: 'Create and manage broadcast announcements', path: '/media/announcements', permission: 'manage_notifications' },
-    { label: 'Media Statistics', icon: '📊', description: 'View media engagement statistics', path: '/media/statistics', permission: 'manage_events' }
-  ]
+  const saveLivestream = async () => {
+    setLiveSaving(true)
+    setLiveMessage('')
+    try {
+      const response = await settingsApi.updateLivestream({
+        is_live: settings.is_live,
+        livestream_url: settings.livestream_url,
+      })
+      setSettings({
+        is_live: Boolean(response.settings.is_live),
+        livestream_url: response.settings.livestream_url || '',
+      })
+      setLiveMessage(settings.is_live ? 'Watch Live is now showing as live.' : 'Livestream marked as offline.')
+    } catch (err) {
+      setLiveMessage(err.message || 'Failed to update livestream')
+    } finally {
+      setLiveSaving(false)
+    }
+  }
 
   return (
-    <div className="media-dashboard">
-      <div className="container">
-        <div className="dashboard-header">
-          <h1>Media Dashboard</h1>
-          <p className="dashboard-subtitle">Welcome back, {user?.name}</p>
-        </div>
+    <DashboardLayout role="media" title="Media desk">
+      {error && <p className="error-state">{error}</p>}
 
-        <section className="stats-grid">
-          {stats.filter(stat => hasPermission(stat.permission)).map((stat, index) => (
-            <div key={index} className={`stat-card stat-${stat.color}`}>
-              <div className="stat-icon">{stat.icon}</div>
-              <div className="stat-content">
-                <div className="stat-value">{stat.value}</div>
-                <div className="stat-label">{stat.label}</div>
-              </div>
+      <section className="stats-grid">
+        {cards.filter((card) => hasPermission(card.permission)).map((card) => (
+          <Link key={card.label} to={card.path} className="stat-card">
+            <div className="stat-content">
+              <div className="stat-value">{stats ? (card.value ?? 0) : '—'}</div>
+              <div className="stat-label">{card.label}</div>
             </div>
+          </Link>
+        ))}
+      </section>
+
+      {hasPermission('manage_notifications') && (
+        <section className="dashboard-section live-control-panel">
+          <h2>Watch Live control</h2>
+          <p className="dashboard-panel-copy">Toggle the public Watch Live page when a service is streaming.</p>
+          <div className="live-control-grid">
+            <label className="live-toggle">
+              <input
+                type="checkbox"
+                checked={Boolean(settings.is_live)}
+                onChange={(event) => setSettings((prev) => ({ ...prev, is_live: event.target.checked }))}
+              />
+              <span>Currently live</span>
+            </label>
+            <input
+              type="url"
+              className="live-url-input"
+              placeholder="YouTube embed URL"
+              value={settings.livestream_url}
+              onChange={(event) => setSettings((prev) => ({ ...prev, livestream_url: event.target.value }))}
+            />
+            <button type="button" className="btn btn-primary" onClick={saveLivestream} disabled={liveSaving}>
+              {liveSaving ? 'Saving…' : 'Update livestream'}
+            </button>
+          </div>
+          {liveMessage && <p className="success-state">{liveMessage}</p>}
+        </section>
+      )}
+
+      <section className="dashboard-section">
+        <h2>Shortcuts</h2>
+        <div className="quick-actions-grid">
+          {quickActions.filter((action) => hasPermission(action.permission)).map((action) => (
+            <Link key={action.path} to={action.path} className="action-card">
+              <div className="action-label">{action.label}</div>
+            </Link>
           ))}
-        </section>
+        </div>
+      </section>
 
-        <section className="dashboard-section">
-          <h2>Quick Actions</h2>
-          <div className="quick-actions-grid">
-            {quickActions.filter(action => hasPermission(action.permission)).map((action, index) => (
-              <Link key={index} to={action.path} className="action-card">
-                <div className="action-icon">{action.icon}</div>
-                <div className="action-label">{action.label}</div>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        <section className="dashboard-section">
-          <h2>Recent Activity</h2>
-          <div className="activity-list">
-            {recentActivity.map((activity, index) => (
-              <div key={index} className="activity-item">
-                <div className={`activity-indicator activity-${activity.type}`}></div>
-                <div className="activity-content">
-                  <div className="activity-action">{activity.action}</div>
-                  <div className="activity-time">{activity.time}</div>
-                </div>
+      <section className="dashboard-section">
+        <h2>Recent sermons</h2>
+        <div className="activity-list">
+          {(stats?.recent_sermons || []).map((item) => (
+            <Link key={item.id} to="/admin/sermons/manage" className="activity-item">
+              <div className="activity-indicator" />
+              <div className="activity-content">
+                <div className="activity-action">{item.title}</div>
+                <div className="activity-time">{item.speaker} · {item.date}</div>
               </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="dashboard-section">
-          <h2>Media Management</h2>
-          <div className="management-grid">
-            {managementCards.filter(card => hasPermission(card.permission)).map((card, index) => (
-              <Link key={index} to={card.path} className="management-card">
-                <div className="management-icon">{card.icon}</div>
-                <h3>{card.label}</h3>
-                <p>{card.description}</p>
-              </Link>
-            ))}
-          </div>
-        </section>
-      </div>
-    </div>
+            </Link>
+          ))}
+          {stats && !stats.recent_sermons?.length && <p className="empty-admin-state">No sermons yet. Add one from Sermons.</p>}
+        </div>
+      </section>
+    </DashboardLayout>
   )
 }
 

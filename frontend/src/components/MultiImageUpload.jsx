@@ -1,24 +1,38 @@
 import { useRef, useState } from 'react'
+import { uploadImage } from '../api/upload'
 
 function MultiImageUpload({ files, onChange }) {
   const inputRef = useRef(null)
   const [dragging, setDragging] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState('')
 
-  const readFiles = (fileList) => {
+  const readFiles = async (fileList) => {
     const selectedFiles = Array.from(fileList || []).filter((file) => file.type.startsWith('image/'))
-    Promise.all(selectedFiles.map((file) => new Promise((resolve) => {
-      const reader = new FileReader()
-      reader.onload = () => resolve({ id: `${file.name}-${file.lastModified}-${Math.random()}`, image: reader.result, name: file.name })
-      reader.readAsDataURL(file)
-    }))).then((images) => onChange([...files, ...images]))
+    if (!selectedFiles.length) return
+
+    setUploading(true)
+    setError('')
+    try {
+      const uploaded = []
+      for (const file of selectedFiles) {
+        const url = await uploadImage(file)
+        uploaded.push({ id: `${file.name}-${Date.now()}-${Math.random()}`, image: url, name: file.name })
+      }
+      onChange([...files, ...uploaded])
+    } catch (err) {
+      setError(err.message || 'Upload failed')
+    } finally {
+      setUploading(false)
+    }
   }
 
   return (
     <div className="image-upload-field">
       <span className="form-field-label">Gallery images</span>
       <div
-        className={`image-dropzone multi-image-dropzone${dragging ? ' is-dragging' : ''}`}
-        onClick={() => inputRef.current?.click()}
+        className={`image-dropzone multi-image-dropzone${dragging ? ' is-dragging' : ''}${uploading ? ' is-uploading' : ''}`}
+        onClick={() => !uploading && inputRef.current?.click()}
         onDragOver={(event) => {
           event.preventDefault()
           setDragging(true)
@@ -31,9 +45,10 @@ function MultiImageUpload({ files, onChange }) {
         }}
       >
         <span className="upload-icon" aria-hidden="true">&#128444;</span>
-        <strong>{files.length ? 'Add more images' : 'Upload multiple images'}</strong>
-        <small>Choose several files from your PC or drag and drop them here</small>
+        <strong>{uploading ? 'Uploading…' : files.length ? 'Add more images' : 'Upload multiple images'}</strong>
+        <small>Choose several files or drag and drop (max 8MB each)</small>
       </div>
+      {error && <p className="upload-error">{error}</p>}
       <input ref={inputRef} type="file" accept="image/*" multiple className="visually-hidden" onChange={(event) => readFiles(event.target.files)} />
       {files.length > 0 && (
         <div className="multi-image-preview-grid">

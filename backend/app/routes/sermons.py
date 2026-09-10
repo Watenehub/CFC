@@ -83,7 +83,8 @@ def create_sermon():
         "thumbnail": data.get("thumbnail", ""),
         "scripture": data.get("scripture", ""),
         "category": data.get("category", ""),
-        "tags": data.get("tags", [])
+        "tags": data.get("tags", []),
+        "key_takeaways": data.get("key_takeaways", ""),
     }
 
     db.sermons.insert_one(sermon)
@@ -112,7 +113,8 @@ def update_sermon(sermon_id):
         "thumbnail",
         "scripture",
         "category",
-        "tags"
+        "tags",
+        "key_takeaways",
     ]
 
     update_data = {

@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request, session
 from werkzeug.security import generate_password_hash, check_password_hash
-from .permissions import role_required
+from .permissions import role_required, effective_permissions, ROLE_PERMISSIONS
 from ..database.mongodb import get_db
 from pymongo import DESCENDING
 
@@ -10,12 +10,14 @@ auth_bp = Blueprint("auth", __name__)
 
 def serialize_user(user):
     """Return a user without the password or MongoDB internal ID."""
+    role = user["role"]
+    permissions = effective_permissions(role, user.get("permissions"))
     return {
         "id": user["id"],
         "name": user["name"],
         "email": user["email"],
-        "role": user["role"],
-        "permissions": user.get("permissions", [])
+        "role": role,
+        "permissions": permissions,
     }
 
 
@@ -47,7 +49,7 @@ def login():
 
     session["user_id"] = user["id"]
     session["role"] = user["role"]
-    session["permissions"] = user.get("permissions", [])
+    session["permissions"] = effective_permissions(user["role"], user.get("permissions"))
 
     return jsonify({
         "message": "Login successful",
@@ -118,7 +120,7 @@ def create_user():
     email = data.get("email", "").strip().lower()
     password = data.get("password", "")
     role = data.get("role", "").strip().lower()
-    permissions = data.get("permissions", [])
+    permissions = effective_permissions(role, data.get("permissions"))
 
     allowed_roles = [
         "admin",

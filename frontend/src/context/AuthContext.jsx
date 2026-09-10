@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import * as authApi from '../api/auth'
+import { permissionsForRole } from '../utils/permissions'
 
 const AuthContext = createContext(null)
 
@@ -44,8 +45,12 @@ export const AuthProvider = ({ children }) => {
     isMedia: user?.role === 'media',
     isSecretary: user?.role === 'secretary',
     isMember: user?.role === 'member',
-    permissions: user?.permissions || [],
-    hasPermission: (permission) => (user?.permissions || []).includes(permission),
+    permissions: permissionsForRole(user?.role, user?.permissions),
+    hasPermission: (permission) => {
+      if (!user) return false
+      if (user.role === 'admin') return true
+      return permissionsForRole(user.role, user.permissions).includes(permission)
+    },
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

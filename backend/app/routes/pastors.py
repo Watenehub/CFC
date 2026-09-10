@@ -77,7 +77,8 @@ def create_pastor():
         "bio": data.get("bio", ""),
         "email": data.get("email", ""),
         "phone": data.get("phone", ""),
-        "image": data.get("image", "")
+        "image": data.get("image", ""),
+        "encouragement": data.get("encouragement", ""),
     }
 
     db.pastors.insert_one(pastor)
@@ -102,7 +103,8 @@ def update_pastor(pastor_id):
         "bio",
         "email",
         "phone",
-        "image"
+        "image",
+        "encouragement",
     ]
 
     update_data = {

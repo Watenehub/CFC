@@ -40,6 +40,21 @@
   max-width: 320px;
 }
 
+.footer-contact-details {
+  margin-top: 1.25rem;
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+}
+
+.footer-contact-details a {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.footer-contact-details a:hover {
+  color: var(--color-white);
+}
+
 .footer-links-group {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

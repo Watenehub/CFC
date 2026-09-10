@@ -80,6 +80,7 @@ def create_event():
         "start_time": data.get("start_time", ""),
         "end_time": data.get("end_time", ""),
         "location": data.get("location", ""),
+        "map_url": data.get("map_url", ""),
         "image": data.get("image", ""),
         "organizer": data.get("organizer", ""),
         "registration_status": data.get(
@@ -117,6 +118,7 @@ def update_event(event_id):
         "start_time",
         "end_time",
         "location",
+        "map_url",
         "image",
         "organizer",
         "registration_status",

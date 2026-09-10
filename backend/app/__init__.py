@@ -4,6 +4,7 @@ from .database.mongodb import init_mongo
 from flask_cors import CORS
 import importlib
 import pkgutil
+import os
 
 from . import routes
 from .auth.routes import auth_bp
@@ -29,9 +30,11 @@ def create_app():
     # Use the secret key from the environment configuration
     app.secret_key = Config.SECRET_KEY
     
-    # Configure session for cross-domain requests
-    app.config['SESSION_COOKIE_SAMESITE'] = 'None'
-    app.config['SESSION_COOKIE_SECURE'] = True
+    # Secure cookies in production; allow local HTTP for development
+    flask_env = os.getenv("FLASK_ENV", "development")
+    is_production = flask_env == "production"
+    app.config["SESSION_COOKIE_SAMESITE"] = "None" if is_production else "Lax"
+    app.config["SESSION_COOKIE_SECURE"] = is_production
 
     # Automatically discover and register route blueprints
     for _, module_name, _ in pkgutil.iter_modules(routes.__path__):

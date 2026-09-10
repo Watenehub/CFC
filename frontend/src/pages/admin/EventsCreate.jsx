@@ -1,10 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import DashboardLayout from '../../components/DashboardLayout'
 import ImageUpload from '../../components/ImageUpload'
-import { readSiteContent, writeSiteContent } from '../../data/siteContent'
+import * as eventsApi from '../../api/events'
 
 const emptyEvent = {
-  id: '',
   title: '',
   description: '',
   date: '',
@@ -20,48 +19,79 @@ const emptyEvent = {
 }
 
 function EventsCreate() {
-  const [events, setEvents] = useState(readSiteContent().events)
+  const [events, setEvents] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [formData, setFormData] = useState(emptyEvent)
   const [editingId, setEditingId] = useState(null)
   const [isEditorOpen, setIsEditorOpen] = useState(false)
+  const [saving, setSaving] = useState(false)
 
-  const saveEvents = (nextEvents) => {
-    setEvents(nextEvents)
-    writeSiteContent({ events: nextEvents })
+  useEffect(() => {
+    fetchEvents()
+  }, [])
+
+  const fetchEvents = async () => {
+    try {
+      setError('')
+      const data = await eventsApi.getEvents()
+      setEvents(data)
+    } catch (err) {
+      setError(err.message || 'Failed to load events')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
+    setSaving(true)
+    setError('')
 
-    const nextEvent = {
+    const payload = {
       ...formData,
-      id: editingId ?? Date.now(),
       max_participants: formData.max_participants ? Number(formData.max_participants) : null,
     }
 
-    const nextEvents = editingId
-      ? events.map((item) => (item.id === editingId ? nextEvent : item))
-      : [...events, nextEvent]
-
-    saveEvents(nextEvents)
-    setFormData(emptyEvent)
-    setEditingId(null)
-    setIsEditorOpen(false)
+    try {
+      if (editingId) {
+        await eventsApi.updateEvent(editingId, payload)
+      } else {
+        await eventsApi.createEvent(payload)
+      }
+      await fetchEvents()
+      setFormData(emptyEvent)
+      setEditingId(null)
+      setIsEditorOpen(false)
+    } catch (err) {
+      setError(err.message || 'Failed to save event')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleEdit = (eventItem) => {
     setEditingId(eventItem.id)
-    setFormData({ ...eventItem, max_participants: eventItem.max_participants ?? '' })
+    setFormData({
+      ...emptyEvent,
+      ...eventItem,
+      max_participants: eventItem.max_participants ?? '',
+    })
     setIsEditorOpen(true)
   }
 
-  const handleDelete = (id) => {
-    const nextEvents = events.filter((item) => item.id !== id)
-    saveEvents(nextEvents)
-    if (editingId === id) {
-      setEditingId(null)
-      setFormData(emptyEvent)
-      setIsEditorOpen(false)
+  const handleDelete = async (id) => {
+    try {
+      setError('')
+      await eventsApi.deleteEvent(id)
+      await fetchEvents()
+      if (editingId === id) {
+        setEditingId(null)
+        setFormData(emptyEvent)
+        setIsEditorOpen(false)
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to delete event')
     }
   }
 
@@ -70,6 +100,7 @@ function EventsCreate() {
       <div className="admin-page">
         <h2>Manage church events</h2>
         <p>Add, edit, and remove scheduled church activities, outreach programs, and worship events.</p>
+        {error && <p className="error-state">{error}</p>}
 
         <div className="page-action-bar">
           <span>Keep the church calendar fresh and easy to follow.</span>
@@ -83,133 +114,60 @@ function EventsCreate() {
           <div className="form-grid">
             <div className="form-field">
               <label>Event name</label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={(event) => setFormData({ ...formData, title: event.target.value })}
-                required
-              />
+              <input type="text" value={formData.title} onChange={(event) => setFormData({ ...formData, title: event.target.value })} required />
             </div>
-
             <div className="form-field">
               <label>Organizer</label>
-              <input
-                type="text"
-                value={formData.organizer}
-                onChange={(event) => setFormData({ ...formData, organizer: event.target.value })}
-              />
+              <input type="text" value={formData.organizer} onChange={(event) => setFormData({ ...formData, organizer: event.target.value })} />
             </div>
-
             <div className="form-field full-width">
               <label>Description</label>
-              <textarea
-                rows="4"
-                value={formData.description}
-                onChange={(event) => setFormData({ ...formData, description: event.target.value })}
-                required
-              />
+              <textarea rows="4" value={formData.description} onChange={(event) => setFormData({ ...formData, description: event.target.value })} required />
             </div>
-
             <div className="form-field">
               <label>Date</label>
-              <input
-                type="date"
-                value={formData.date}
-                onChange={(event) => setFormData({ ...formData, date: event.target.value })}
-                required
-              />
+              <input type="date" value={formData.date} onChange={(event) => setFormData({ ...formData, date: event.target.value })} required />
             </div>
-
             <div className="form-field">
               <label>Start time</label>
-              <input
-                type="time"
-                value={formData.start_time}
-                onChange={(event) => setFormData({ ...formData, start_time: event.target.value })}
-                required
-              />
+              <input type="time" value={formData.start_time} onChange={(event) => setFormData({ ...formData, start_time: event.target.value })} required />
             </div>
-
             <div className="form-field">
               <label>End time</label>
-              <input
-                type="time"
-                value={formData.end_time}
-                onChange={(event) => setFormData({ ...formData, end_time: event.target.value })}
-                required
-              />
+              <input type="time" value={formData.end_time} onChange={(event) => setFormData({ ...formData, end_time: event.target.value })} required />
             </div>
-
             <div className="form-field">
               <label htmlFor="event-location">Location</label>
               <div className="input-with-action">
-                <input
-                  id="event-location"
-                  type="text"
-                  value={formData.location}
-                  onChange={(event) => setFormData({ ...formData, location: event.target.value })}
-                  required
-                />
+                <input id="event-location" type="text" value={formData.location} onChange={(event) => setFormData({ ...formData, location: event.target.value })} required />
                 <button type="button" className="field-icon-button" title="Choose location on map" onClick={() => window.open('https://www.google.com/maps', '_blank', 'noopener,noreferrer')}>&#128205;</button>
               </div>
             </div>
-
             <div className="form-field">
               <label>Map link</label>
-              <input
-                type="url"
-                value={formData.map_url}
-                onChange={(event) => setFormData({ ...formData, map_url: event.target.value })}
-                placeholder="https://maps.google.com/..."
-              />
+              <input type="url" value={formData.map_url} onChange={(event) => setFormData({ ...formData, map_url: event.target.value })} placeholder="https://maps.google.com/..." />
             </div>
-
             <ImageUpload label="Poster / event image" value={formData.image} onChange={(image) => setFormData({ ...formData, image })} />
-
             <div className="form-field">
               <label>Registration status</label>
-              <select
-                value={formData.registration_status}
-                onChange={(event) => setFormData({ ...formData, registration_status: event.target.value })}
-              >
+              <select value={formData.registration_status} onChange={(event) => setFormData({ ...formData, registration_status: event.target.value })}>
                 <option value="open">Open</option>
                 <option value="closed">Closed</option>
               </select>
             </div>
-
             <div className="form-field">
               <label>Max participants</label>
-              <input
-                type="number"
-                min="0"
-                value={formData.max_participants}
-                onChange={(event) => setFormData({ ...formData, max_participants: event.target.value })}
-              />
+              <input type="number" min="0" value={formData.max_participants} onChange={(event) => setFormData({ ...formData, max_participants: event.target.value })} />
             </div>
-
             <div className="form-field">
               <label>Registration deadline</label>
-              <input
-                type="date"
-                value={formData.registration_deadline}
-                onChange={(event) => setFormData({ ...formData, registration_deadline: event.target.value })}
-              />
+              <input type="date" value={formData.registration_deadline} onChange={(event) => setFormData({ ...formData, registration_deadline: event.target.value })} />
             </div>
           </div>
-
           <div className="form-actions">
-            <button type="submit" className="btn btn-primary">{editingId ? 'Update event' : 'Add event'}</button>
+            <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving...' : editingId ? 'Update event' : 'Add event'}</button>
             {editingId && (
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => {
-                  setEditingId(null)
-                  setFormData(emptyEvent)
-                }}
-              >
-                Cancel
-              </button>
+              <button type="button" className="btn btn-secondary" onClick={() => { setEditingId(null); setFormData(emptyEvent) }}>Cancel</button>
             )}
           </div>
         </form>
@@ -218,21 +176,24 @@ function EventsCreate() {
 
         <div className="admin-list-wrapper">
           <h3>Existing events</h3>
-          <div className="admin-list">
-            {events.map((item) => (
-              <div key={item.id} className="admin-item-card">
-                <div>
-                  <strong>{item.title}</strong>
-                  <div>{item.date} · {item.location}</div>
-                  <div className="meta-badge">{item.registration_status}</div>
+          {loading ? <p>Loading events...</p> : (
+            <div className="admin-list">
+              {events.map((item) => (
+                <div key={item.id} className="admin-item-card">
+                  <div>
+                    <strong>{item.title}</strong>
+                    <div>{item.date} · {item.location}</div>
+                    <div className="meta-badge">{item.registration_status}</div>
+                  </div>
+                  <div className="item-actions">
+                    <button type="button" className="btn btn-secondary" onClick={() => handleEdit(item)}>Edit</button>
+                    <button type="button" className="btn btn-danger" onClick={() => handleDelete(item.id)}>Remove</button>
+                  </div>
                 </div>
-                <div className="item-actions">
-                  <button type="button" className="btn btn-secondary" onClick={() => handleEdit(item)}>Edit</button>
-                  <button type="button" className="btn btn-danger" onClick={() => handleDelete(item.id)}>Remove</button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+              {!events.length && <p className="empty-admin-state">No events yet. Add one to get started.</p>}
+            </div>
+          )}
         </div>
       </div>
     </DashboardLayout>

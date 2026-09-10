@@ -15,6 +15,12 @@ def serialize_gallery_item(item):
     item = item.copy()
     item.pop("_id", None)
 
+    # Frontend uses `image`; older docs may only have `image_url`
+    if not item.get("image") and item.get("image_url"):
+        item["image"] = item["image_url"]
+    if not item.get("image_url") and item.get("image"):
+        item["image_url"] = item["image"]
+
     return item
 
 
@@ -70,11 +76,14 @@ def create_gallery_item():
         else 1
     )
 
+    image = data.get("image") or data.get("image_url", "")
+
     item = {
         "id": next_id,
         "title": data.get("title", ""),
         "description": data.get("description", ""),
-        "image_url": data.get("image_url", ""),
+        "image": image,
+        "image_url": image,
         "category": data.get("category", ""),
         "date": data.get("date", ""),
         "featured": data.get("featured", False)
@@ -99,6 +108,7 @@ def update_gallery_item(item_id):
     allowed_fields = [
         "title",
         "description",
+        "image",
         "image_url",
         "category",
         "date",
@@ -110,6 +120,11 @@ def update_gallery_item(item_id):
         for field in allowed_fields
         if field in data
     }
+
+    if "image" in update_data and "image_url" not in update_data:
+        update_data["image_url"] = update_data["image"]
+    if "image_url" in update_data and "image" not in update_data:
+        update_data["image"] = update_data["image_url"]
 
     if not update_data:
         return jsonify({

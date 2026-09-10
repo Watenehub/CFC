@@ -74,10 +74,12 @@ def create_deacon():
         "id": next_id,
         "name": data.get("name", ""),
         "title": data.get("title", ""),
+        "role": data.get("role", data.get("title", "")),
         "bio": data.get("bio", ""),
         "email": data.get("email", ""),
         "phone": data.get("phone", ""),
-        "image": data.get("image", "")
+        "image": data.get("image", ""),
+        "encouragement": data.get("encouragement", ""),
     }
 
     db.deacons.insert_one(deacon)
@@ -99,10 +101,12 @@ def update_deacon(deacon_id):
     allowed_fields = [
         "name",
         "title",
+        "role",
         "bio",
         "email",
         "phone",
-        "image"
+        "image",
+        "encouragement",
     ]
 
     update_data = {

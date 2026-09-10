@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import * as givingApi from '../api/giving'
-import { readSiteContent } from '../data/siteContent'
 import './Giving.css'
 import '../styles/ModernDesignSystem.css'
 import '../utils/scrollAnimations'
@@ -13,21 +13,10 @@ function Giving() {
 
   useEffect(() => {
     loadGivingOptions()
-
-    const handleContentUpdate = () => loadGivingOptions()
-    window.addEventListener('cornerstone-content-updated', handleContentUpdate)
-
-    return () => window.removeEventListener('cornerstone-content-updated', handleContentUpdate)
   }, [])
 
   const loadGivingOptions = async () => {
     try {
-      const localContent = readSiteContent()
-      if (localContent.giving?.length) {
-        setGivingOptions(localContent.giving)
-        return
-      }
-
       const data = await givingApi.getGiving()
       setGivingOptions(data)
     } catch (err) {
@@ -63,67 +52,6 @@ function Giving() {
       </div>
     )
   }
-
-  const givingList = givingOptions.length > 0 ? givingOptions : [
-    {
-      id: 1,
-      title: 'Missions Support',
-      description: 'Support our global missions partners as they spread the gospel around the world. Your contribution helps fund missionaries, church planting, and humanitarian efforts in underserved communities.',
-      category: 'Missions',
-      payment_method: '<em>To be updated</em>',
-      payment_details: '<em>To be updated</em>',
-      poster: '/chapel.jpg'
-    },
-    {
-      id: 2,
-      title: 'General Offering',
-      description: 'Your general offering supports the day-to-day operations of the church, including facility maintenance, staff support, and ministry programs.',
-      category: 'Offering',
-      payment_method: '<em>To be updated</em>',
-      payment_details: '<em>To be updated</em>',
-      poster: '/chapel.jpg'
-    },
-    {
-      id: 3,
-      title: 'Tithe',
-      description: 'Bring your tithes to the storehouse. The tithe is 10% of your income and supports the work of the ministry.',
-      category: 'Tithe',
-      payment_method: '<em>To be updated</em>',
-      payment_details: '<em>To be updated</em>',
-      poster: '/chapel.jpg'
-    },
-    {
-      id: 4,
-      title: 'Building Fund',
-      description: 'Help us expand our facilities to better serve our growing congregation. Contributions go toward building renovations, new construction, and facility improvements.',
-      category: 'Building Fund',
-      payment_method: '<em>To be updated</em>',
-      payment_details: '<em>To be updated</em>',
-      poster: '/chapel.jpg'
-    },
-    {
-      id: 5,
-      title: 'Benevolent Fund',
-      description: 'Support families in need within our church and community. This fund provides emergency assistance for food, rent, medical bills, and other critical needs.',
-      category: 'Donations',
-      payment_method: '<em>To be updated</em>',
-      payment_details: '<em>To be updated</em>',
-      poster: '/chapel.jpg'
-    },
-    {
-      id: 6,
-      title: 'Youth Camp Scholarship',
-      description: 'Sponsor a young person to attend youth camp. Your donation helps cover camp fees for youth who cannot afford to attend.',
-      category: 'Missions',
-      payment_method: '<em>To be updated</em>',
-      payment_details: '<em>To be updated</em>',
-      poster: '/chapel.jpg'
-    }
-  ]
-
-  const displayOptions = givingOptions.length > 0 ? filteredOptions : givingList.filter(option => 
-    selectedCategory === '' || option.category === selectedCategory
-  )
 
   return (
     <div className="giving-page">
@@ -167,13 +95,13 @@ function Giving() {
         </section>
 
         <section className="giving-options">
-          {displayOptions.length === 0 ? (
+          {filteredOptions.length === 0 ? (
             <div className="empty-state">
               <p>No giving options found for this category.</p>
             </div>
           ) : (
             <div className="giving-grid">
-              {displayOptions.map((option) => (
+              {filteredOptions.map((option) => (
                 <div key={option.id} className="ministry-feature-frame fade-up">
                   <img src={option.poster || '/chapel.jpg'} alt={option.title} className="ministry-feature-image" />
                   <div className="giving-category-badge">{option.category}</div>
@@ -193,9 +121,17 @@ function Giving() {
                       </div>
                     </div>
 
-                    <button className="ministry-feature-button">
-                      Give Now
+                    <button
+                      type="button"
+                      className="ministry-feature-button"
+                      onClick={() => {
+                        const details = document.getElementById(`giving-details-${option.id}`)
+                        details?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                      }}
+                    >
+                      How to give
                     </button>
+                    <div id={`giving-details-${option.id}`} />
                   </div>
                 </div>
               ))}
@@ -207,17 +143,17 @@ function Giving() {
           <h2 className="fade-up">Secure & Trusted Giving</h2>
           <div className="security-features">
             <div className="glass-card fade-up">
-              <div className="security-icon">🔒</div>
+              <div className="security-icon" aria-hidden="true">S</div>
               <h3>Secure Transactions</h3>
               <p>All payments are processed through secure, encrypted channels</p>
             </div>
             <div className="glass-card fade-up">
-              <div className="security-icon">📋</div>
+              <div className="security-icon" aria-hidden="true">R</div>
               <h3>Transparent Records</h3>
               <p>Regular financial reports are available to church members</p>
             </div>
             <div className="glass-card fade-up">
-              <div className="security-icon">✅</div>
+              <div className="security-icon" aria-hidden="true">A</div>
               <h3>Accountability</h3>
               <p>Financial oversight by the church leadership and board</p>
             </div>
@@ -228,11 +164,11 @@ function Giving() {
           <div className="giving-contact-content">
             <h2>Questions About Giving?</h2>
             <p>
-              If you have questions about giving, payment methods, or how your contributions are used, 
+              If you have questions about giving, payment methods, or how your contributions are used,
               please contact our church office.
             </p>
             <div className="contact-info">
-              <p><em>Contact information to be updated</em></p>
+              <p><Link to="/contact">Contact the church office</Link></p>
             </div>
           </div>
         </section>

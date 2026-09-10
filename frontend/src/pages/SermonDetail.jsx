@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import * as sermonsApi from '../api/sermons'
-import { readSiteContent } from '../data/siteContent'
 import './SermonDetail.css'
 
 function SermonDetail() {
@@ -16,11 +15,6 @@ function SermonDetail() {
 
   const loadSermon = async () => {
     try {
-      const localSermon = readSiteContent().sermons.find((item) => String(item.id) === String(id))
-      if (localSermon) {
-        setSermon(localSermon)
-        return
-      }
       const data = await sermonsApi.getSermon(id)
       setSermon(data)
     } catch (err) {
@@ -47,30 +41,17 @@ function SermonDetail() {
     )
   }
 
-  if (error) {
+  if (error || !sermon) {
     return (
       <div className="sermon-detail-page">
         <div className="container">
-          <div className="error-state">{error}</div>
+          <div className="error-state">{error || 'Sermon not found'}</div>
         </div>
       </div>
     )
   }
 
-  const sermonData = sermon || {
-    id: 1,
-    title: 'Walking in Faith: Trusting God\'s Plan',
-    description: 'Discover how to trust God completely and walk in faith, even when the path is unclear. In this message, we explore the wisdom of Proverbs 3:5-6 and learn practical ways to lean not on our own understanding but to acknowledge God in all our ways.',
-    speaker: 'Nahashon Wachira',
-    date: '2026-08-25',
-    video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    audio_url: '',
-    thumbnail: '/CFC_CHURCH_PHOTO.jpg',
-    scripture: 'Proverbs 3:5-6',
-    category: 'Faith',
-    tags: ['faith', 'trust', 'proverbs']
-  }
-
+  const sermonData = sermon
   const embedUrl = getYouTubeEmbedUrl(sermonData.video_url)
 
   return (

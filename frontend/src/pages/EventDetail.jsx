@@ -1,26 +1,27 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import * as eventsApi from '../api/events'
-import { readSiteContent } from '../data/siteContent'
+import * as settingsApi from '../api/settings'
 import './EventDetail.css'
 
 function EventDetail() {
   const { id } = useParams()
   const [event, setEvent] = useState(null)
+  const [contactEmail, setContactEmail] = useState('hello@cornerstonechapel.org')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
     loadEvent()
+    settingsApi.getSettings()
+      .then((data) => {
+        if (data.email) setContactEmail(data.email)
+      })
+      .catch(() => {})
   }, [id])
 
   const loadEvent = async () => {
     try {
-      const localEvent = readSiteContent().events.find((item) => String(item.id) === String(id))
-      if (localEvent) {
-        setEvent(localEvent)
-        return
-      }
       const data = await eventsApi.getEvent(id)
       setEvent(data)
     } catch (err) {
@@ -32,6 +33,7 @@ function EventDetail() {
   }
 
   const formatDate = (dateString) => {
+    if (!dateString) return ''
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', { 
       weekday: 'long',
@@ -42,8 +44,9 @@ function EventDetail() {
   }
 
   const formatTime = (timeString) => {
+    if (!timeString) return ''
     const [hours, minutes] = timeString.split(':')
-    const hour = parseInt(hours)
+    const hour = parseInt(hours, 10)
     const ampm = hour >= 12 ? 'PM' : 'AM'
     const formattedHour = hour % 12 || 12
     return `${formattedHour}:${minutes} ${ampm}`
@@ -59,31 +62,17 @@ function EventDetail() {
     )
   }
 
-  if (error) {
+  if (error || !event) {
     return (
       <div className="event-detail-page">
         <div className="container">
-          <div className="error-state">{error}</div>
+          <div className="error-state">{error || 'Event not found'}</div>
         </div>
       </div>
     )
   }
 
-  const eventData = event || {
-    id: 1,
-    title: 'Youth Revival Night',
-    description: 'An evening of worship, teaching, and fellowship for the youth. Join us for an inspiring night of music and message as we seek God together. This event is designed for young people to connect with each other and deepen their faith.',
-    date: '2026-09-05',
-    start_time: '18:00',
-    end_time: '21:00',
-    location: 'Main Sanctuary',
-    image: '/CFC_CHURCH_PHOTO.jpg',
-    organizer: 'Youth Ministry',
-    registration_status: 'open',
-    max_participants: 100,
-    registration_deadline: '2026-09-04'
-  }
-
+  const eventData = event
   const isPastEvent = new Date(eventData.date) < new Date()
 
   const addToCalendar = () => {
@@ -182,11 +171,11 @@ function EventDetail() {
                     </div>
                   )}
                 </div>
-                <button className="btn btn-primary btn-large" disabled>
-                  Registration Coming Soon
-                </button>
+                <Link to="/contact" className="btn btn-primary btn-large">
+                  Contact to register
+                </Link>
                 <p className="registration-note">
-                  Online registration will be available soon. Please contact us for more information.
+                  Reach out to the church office to reserve your place for this event.
                 </p>
               </div>
             )}
@@ -202,8 +191,8 @@ function EventDetail() {
               <h2>Need More Information?</h2>
               <p>
                 For questions about this event, please contact us at{' '}
-                <a href="mailto:info@cornerstonechapel.org" className="contact-link">
-                  info@cornerstonechapel.org
+                <a href={`mailto:${contactEmail}`} className="contact-link">
+                  {contactEmail}
                 </a>
               </p>
             </div>

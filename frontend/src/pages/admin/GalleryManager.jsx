@@ -1,22 +1,36 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import DashboardLayout from '../../components/DashboardLayout'
 import ImageUpload from '../../components/ImageUpload'
 import MultiImageUpload from '../../components/MultiImageUpload'
-import { readSiteContent, writeSiteContent } from '../../data/siteContent'
+import * as galleryApi from '../../api/gallery'
 
 const categories = ['Worship', 'Conferences', 'Membership', 'ChildrenAndTeens', 'Media', 'MedicalOutreach', 'CommunityOutreach', 'CurrentNeeds']
-const emptyPhoto = { id: '', image: '', description: '', category: 'Worship' }
+const emptyPhoto = { image: '', description: '', category: 'Worship' }
 
 function GalleryManager() {
-  const [photos, setPhotos] = useState(readSiteContent().gallery || [])
+  const [photos, setPhotos] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [formData, setFormData] = useState(emptyPhoto)
   const [editingId, setEditingId] = useState(null)
   const [isEditorOpen, setIsEditorOpen] = useState(false)
   const [pendingImages, setPendingImages] = useState([])
+  const [saving, setSaving] = useState(false)
 
-  const save = (nextPhotos) => {
-    setPhotos(nextPhotos)
-    writeSiteContent({ gallery: nextPhotos })
+  useEffect(() => {
+    fetchPhotos()
+  }, [])
+
+  const fetchPhotos = async () => {
+    try {
+      setError('')
+      const data = await galleryApi.getGallery()
+      setPhotos(data)
+    } catch (err) {
+      setError(err.message || 'Failed to load gallery')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const reset = () => {
@@ -26,30 +40,56 @@ function GalleryManager() {
     setPendingImages([])
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
     if (!editingId && pendingImages.length === 0) return
-    if (editingId) {
-      save(photos.map((item) => item.id === editingId ? { ...formData, id: editingId } : item))
-    } else {
-      const newPhotos = pendingImages.map((file) => ({
-        id: file.id,
-        image: file.image,
-        description: formData.description,
-        category: formData.category,
-      }))
-      save([...photos, ...newPhotos])
+    setSaving(true)
+    setError('')
+
+    try {
+      if (editingId) {
+        await galleryApi.updateGalleryItem(editingId, {
+          image: formData.image,
+          description: formData.description,
+          category: formData.category,
+        })
+      } else {
+        for (const file of pendingImages) {
+          await galleryApi.createGalleryItem({
+            image: file.image,
+            description: formData.description,
+            category: formData.category,
+          })
+        }
+      }
+      await fetchPhotos()
+      reset()
+    } catch (err) {
+      setError(err.message || 'Failed to save gallery image')
+    } finally {
+      setSaving(false)
     }
-    reset()
   }
 
   const edit = (photo) => {
     setEditingId(photo.id)
-    setFormData({ ...emptyPhoto, ...photo })
+    setFormData({
+      image: photo.image || photo.image_url || '',
+      description: photo.description || '',
+      category: photo.category || 'Worship',
+    })
     setIsEditorOpen(true)
   }
 
-  const remove = (id) => save(photos.filter((photo) => photo.id !== id))
+  const remove = async (id) => {
+    try {
+      setError('')
+      await galleryApi.deleteGalleryItem(id)
+      await fetchPhotos()
+    } catch (err) {
+      setError(err.message || 'Failed to delete image')
+    }
+  }
 
   const allCategories = [...new Set([...categories, ...photos.map((photo) => photo.category).filter(Boolean)])]
   const groupedPhotos = allCategories.map((category) => ({
@@ -62,6 +102,7 @@ function GalleryManager() {
       <div className="admin-page">
         <h2>Gallery Studio</h2>
         <p>Upload, describe, categorize, edit, and remove the images shown on the public gallery.</p>
+        {error && <p className="error-state">{error}</p>}
         <div className="page-action-bar">
           <span>{photos.length} uploaded image{photos.length === 1 ? '' : 's'}</span>
           <button type="button" className="btn btn-primary" onClick={() => { setFormData(emptyPhoto); setPendingImages([]); setEditingId(null); setIsEditorOpen(true) }}>Add gallery image</button>
@@ -92,30 +133,34 @@ function GalleryManager() {
                 {editingId ? <ImageUpload label="Gallery image" value={formData.image} onChange={(image) => setFormData({ ...formData, image })} /> : <MultiImageUpload files={pendingImages} onChange={setPendingImages} />}
               </div>
               <div className="form-actions">
-                <button type="submit" className="btn btn-primary" disabled={!editingId && pendingImages.length === 0}>{editingId ? 'Update image' : `Add ${pendingImages.length || ''} image${pendingImages.length === 1 ? '' : 's'}`}</button>
+                <button type="submit" className="btn btn-primary" disabled={saving || (!editingId && pendingImages.length === 0)}>
+                  {saving ? 'Saving...' : editingId ? 'Update image' : `Add ${pendingImages.length || ''} image${pendingImages.length === 1 ? '' : 's'}`}
+                </button>
                 <button type="button" className="btn btn-secondary" onClick={reset}>Cancel</button>
               </div>
             </form>
           </div>
         </div>}
 
-        <div className="gallery-admin-groups">
-          {groupedPhotos.map(({ category, items }) => (
-            <section key={category} className="admin-form-block">
-              <h3>{category.replace(/([A-Z])/g, ' $1')}</h3>
-              {items.length === 0 ? <p className="empty-admin-state">No uploaded images in this category.</p> : (
-                <div className="admin-gallery-grid">
-                  {items.map((photo) => (
-                    <article key={photo.id} className="admin-gallery-card">
-                      <img src={photo.image} alt={photo.description || category} />
-                      <div className="admin-gallery-card-body"><p>{photo.description}</p><div className="item-actions"><button type="button" className="btn btn-secondary" onClick={() => edit(photo)}>Edit</button><button type="button" className="btn btn-danger" onClick={() => remove(photo.id)}>Remove</button></div></div>
-                    </article>
-                  ))}
-                </div>
-              )}
-            </section>
-          ))}
-        </div>
+        {loading ? <p>Loading gallery...</p> : (
+          <div className="gallery-admin-groups">
+            {groupedPhotos.map(({ category, items }) => (
+              <section key={category} className="admin-form-block">
+                <h3>{category.replace(/([A-Z])/g, ' $1')}</h3>
+                {items.length === 0 ? <p className="empty-admin-state">No uploaded images in this category.</p> : (
+                  <div className="admin-gallery-grid">
+                    {items.map((photo) => (
+                      <article key={photo.id} className="admin-gallery-card">
+                        <img src={photo.image || photo.image_url} alt={photo.description || category} />
+                        <div className="admin-gallery-card-body"><p>{photo.description}</p><div className="item-actions"><button type="button" className="btn btn-secondary" onClick={() => edit(photo)}>Edit</button><button type="button" className="btn btn-danger" onClick={() => remove(photo.id)}>Remove</button></div></div>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </section>
+            ))}
+          </div>
+        )}
       </div>
     </DashboardLayout>
   )
