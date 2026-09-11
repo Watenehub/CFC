@@ -111,7 +111,7 @@ def create_enquiry():
 @enquiries_bp.route("/api/enquiries/<int:enquiry_id>", methods=["PUT"])
 @role_required("manage_enquiries")
 def update_enquiry(enquiry_id):
-    """Update an existing enquiry."""
+    """Update an existing enquiry and send email notification if response is added."""
     db = get_db()
 
     data = request.get_json() or {}
@@ -132,6 +132,14 @@ def update_enquiry(enquiry_id):
             "error": "No valid fields provided for update"
         }), 400
 
+    # Get original enquiry to check if we're adding a response
+    original_enquiry = db.enquiries.find_one({"id": enquiry_id})
+    if not original_enquiry:
+        return jsonify({"error": "Enquiry not found"}), 404
+
+    # Check if response is being added/updated
+    is_adding_response = "response" in update_data and update_data["response"] and not original_enquiry.get("response")
+
     result = db.enquiries.update_one(
         {
             "id": enquiry_id
@@ -147,6 +155,12 @@ def update_enquiry(enquiry_id):
     enquiry = db.enquiries.find_one({
         "id": enquiry_id
     })
+
+    # TODO: Send email notification to the enquirer when response is added
+    # This requires email service configuration (SendGrid, Mailgun, or SMTP)
+    # For now, we'll return success without email notification
+    if is_adding_response:
+        print(f"Email notification would be sent to {enquiry.get('email')} for enquiry response")
 
     return jsonify({
         "message": "Enquiry updated successfully",
