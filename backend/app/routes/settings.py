@@ -33,6 +33,7 @@ def serialize_settings(settings):
 
 @settings_bp.route("/api/settings", methods=["GET"])
 def get_settings():
+    """Get site settings (public endpoint)."""
     db = get_db()
     settings = db.settings.find_one({"id": "site"})
     return jsonify(serialize_settings(settings))
