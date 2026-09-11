@@ -55,6 +55,12 @@ function Users() {
   const handleSubmit = async (event) => {
     event.preventDefault()
 
+    // Validate required fields
+    if (!formData.name.trim() || !formData.email.trim() || !formData.password || !formData.role) {
+      alert('Please fill in all required fields')
+      return
+    }
+
     const trimmedUser = {
       name: formData.name.trim(),
       email: formData.email.trim(),
@@ -66,19 +72,21 @@ function Users() {
     try {
       if (editingId) {
         await authApi.updateUser(editingId, trimmedUser)
+        alert('User updated successfully. The user will need to log out and log back in to see the updated permissions.')
       } else {
         await authApi.createUser(trimmedUser)
+        alert('User created successfully!')
       }
       
       // Refresh users from API
       await fetchUsers()
       
-      setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: ROLE_PERMISSIONS.secretary })
+      setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: [] })
       setEditingId(null)
       setIsEditorOpen(false)
     } catch (error) {
       console.error('Failed to save user:', error)
-      alert('Failed to save user: ' + error.message)
+      alert('Failed to save user: ' + (error.message || 'Unknown error'))
     }
   }
 
