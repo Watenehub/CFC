@@ -10,8 +10,7 @@ function Prayer() {
     email: '',
     phone: '',
     prayerRequest: '',
-    category: 'general',
-    privacy: 'private'
+    category: 'general'
   })
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -39,8 +38,7 @@ function Prayer() {
         email: '',
         phone: '',
         prayerRequest: '',
-        category: 'general',
-        privacy: 'private'
+        category: 'general'
       })
     } catch (err) {
       setError(err.message || 'Failed to submit prayer request')
@@ -201,45 +199,6 @@ function Prayer() {
                   placeholder="Share your prayer request here..."
                   disabled={loading}
                 ></textarea>
-              </div>
-
-              <div className="form-group">
-                <label>Privacy Preference</label>
-                <div className="radio-group">
-                  <label className="radio-label">
-                    <input
-                      type="radio"
-                      name="privacy"
-                      value="public"
-                      checked={formData.privacy === 'public'}
-                      onChange={handleChange}
-                      disabled={loading}
-                    />
-                    <span>Public - Share with the congregation</span>
-                  </label>
-                  <label className="radio-label">
-                    <input
-                      type="radio"
-                      name="privacy"
-                      value="private"
-                      checked={formData.privacy === 'private'}
-                      onChange={handleChange}
-                      disabled={loading}
-                    />
-                    <span>Private - Prayer team only</span>
-                  </label>
-                  <label className="radio-label">
-                    <input
-                      type="radio"
-                      name="privacy"
-                      value="pastor"
-                      checked={formData.privacy === 'pastor'}
-                      onChange={handleChange}
-                      disabled={loading}
-                    />
-                    <span>Pastor Only - Confidential</span>
-                  </label>
-                </div>
               </div>
 
               <button 
