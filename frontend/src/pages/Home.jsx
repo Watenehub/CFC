@@ -262,24 +262,50 @@ function Home() {
               Bible conferences, membership classes, worship nights, and outreach throughout the year.
             </p>
           </div>
-          {upcomingEvents.length === 0 ? (
-            <div className="empty-state fade-up"><p>No upcoming events posted yet. Check back soon.</p></div>
-          ) : (
-            <div className="events-grid">
-              {upcomingEvents.map((event) => (
-                <Link key={event.id} to={`/events/${event.id}`} className="event-card fade-up">
-                  <div className="event-card-image">
-                    <img src={event.image || '/chapel.jpg'} alt={event.title} loading="lazy" />
-                    <span className="event-date-badge">{formatEventDate(event.date)}</span>
+          
+          {/* Display announcements with images */}
+          {announcements.length > 0 && (
+            <div className="announcements-grid fade-up">
+              {announcements.map((note) => (
+                <div key={note.id || note.title} className="announcement-card">
+                  {note.image && (
+                    <img src={note.image} alt={note.title} className="announcement-image" loading="lazy" />
+                  )}
+                  <div className="announcement-content">
+                    <span className="announcement-label">Announcement</span>
+                    <h3>{note.title}</h3>
+                    <p>{note.message}</p>
+                    {note.link && (
+                      <Link to={note.link} className="btn btn-primary">Learn more</Link>
+                    )}
                   </div>
-                  <div className="event-card-body">
-                    <h3>{event.title}</h3>
-                    <p>{formatTimeRange(event.start_time, event.end_time)}</p>
-                    <p className="event-location">{event.location}</p>
-                  </div>
-                </Link>
+                </div>
               ))}
             </div>
+          )}
+
+          {upcomingEvents.length === 0 && announcements.length === 0 ? (
+            <div className="empty-state fade-up"><p>No upcoming events or announcements posted yet. Check back soon.</p></div>
+          ) : (
+            <>
+              {upcomingEvents.length > 0 && (
+                <div className="events-grid">
+                  {upcomingEvents.map((event) => (
+                    <Link key={event.id} to={`/events/${event.id}`} className="event-card fade-up">
+                      <div className="event-card-image">
+                        <img src={event.image || '/chapel.jpg'} alt={event.title} loading="lazy" />
+                        <span className="event-date-badge">{formatEventDate(event.date)}</span>
+                      </div>
+                      <div className="event-card-body">
+                        <h3>{event.title}</h3>
+                        <p>{formatTimeRange(event.start_time, event.end_time)}</p>
+                        <p className="event-location">{event.location}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </>
           )}
           <div className="section-footer fade-up">
             <Link to="/events" className="btn btn-dark">Full calendar</Link>

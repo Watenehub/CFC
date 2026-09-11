@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import DashboardLayout from '../../components/DashboardLayout'
 import * as notificationsApi from '../../api/notifications'
 
-const empty = { title: '', message: '', link: '', active: true, priority: 'normal' }
+const empty = { title: '', message: '', link: '', image: '', active: true, priority: 'normal' }
 
 function Announcements() {
   const [items, setItems] = useState([])
@@ -86,6 +86,11 @@ function Announcements() {
                     <label>Message</label>
                     <textarea rows="3" value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} required />
                   </div>
+                  <div className="form-field full-width">
+                    <label>Image URL (optional)</label>
+                    <input value={formData.image} onChange={(e) => setFormData({ ...formData, image: e.target.value })} placeholder="https://example.com/image.jpg" />
+                    <small>Upload an image and paste the URL here. Images will appear in the Coming Up section.</small>
+                  </div>
                   <div className="form-field">
                     <label>Optional link</label>
                     <input value={formData.link} onChange={(e) => setFormData({ ...formData, link: e.target.value })} placeholder="/events" />
@@ -121,7 +126,7 @@ function Announcements() {
                   <div className="meta-badge">{item.active ? 'Active' : 'Hidden'} · {item.priority}</div>
                 </div>
                 <div className="item-actions">
-                  <button type="button" className="btn btn-secondary" onClick={() => { setEditingId(item.id); setFormData({ title: item.title, message: item.message, link: item.link || '', active: !!item.active, priority: item.priority || 'normal' }); setIsEditorOpen(true) }}>Edit</button>
+                  <button type="button" className="btn btn-secondary" onClick={() => { setEditingId(item.id); setFormData({ title: item.title, message: item.message, link: item.link || '', image: item.image || '', active: !!item.active, priority: item.priority || 'normal' }); setIsEditorOpen(true) }}>Edit</button>
                   <button type="button" className="btn btn-danger" onClick={() => handleDelete(item.id)}>Remove</button>
                 </div>
               </div>

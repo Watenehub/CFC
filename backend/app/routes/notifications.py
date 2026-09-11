@@ -50,6 +50,7 @@ def create_notification():
         "title": data.get("title", ""),
         "message": data.get("message", ""),
         "link": data.get("link", ""),
+        "image": data.get("image", ""),
         "active": bool(data.get("active", True)),
         "priority": data.get("priority", "normal"),
     }
@@ -67,7 +68,7 @@ def update_notification(notification_id):
     db = get_db()
     data = request.get_json() or {}
 
-    allowed_fields = ["title", "message", "link", "active", "priority"]
+    allowed_fields = ["title", "message", "link", "image", "active", "priority"]
     update_data = {field: data[field] for field in allowed_fields if field in data}
 
     if not update_data:
