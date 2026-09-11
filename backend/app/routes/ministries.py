@@ -20,7 +20,7 @@ def serialize_ministry(ministry):
 
 @ministries_bp.route("/api/ministries", methods=["GET"])
 def get_ministries():
-    """Get all ministries."""
+    """Get all ministries (public endpoint)."""
     db = get_db()
 
     ministries = list(

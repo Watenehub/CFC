@@ -20,7 +20,7 @@ def serialize_event(event):
 
 @events_bp.route("/api/events", methods=["GET"])
 def get_events():
-    """Get all events."""
+    """Get all events (public endpoint)."""
     db = get_db()
 
     events = list(
