@@ -1,9 +1,10 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import DashboardLayout from '../../components/DashboardLayout'
+import LoadingSpinner from '../../components/LoadingSpinner'
 import * as authApi from '../../api/auth'
-import { ALL_PERMISSIONS, ROLE_PERMISSIONS } from '../../utils/permissions'
+import { ROLE_PERMISSIONS } from '../../utils/permissions'
 
-const permissionOptions = ALL_PERMISSIONS
+const permissionOptions = ROLE_PERMISSIONS
 const roleOptions = ['admin', 'media', 'secretary']
 
 function Users() {
@@ -18,6 +19,7 @@ function Users() {
   })
   const [editingId, setEditingId] = useState(null)
   const [isEditorOpen, setIsEditorOpen] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     fetchUsers()
@@ -69,6 +71,7 @@ function Users() {
       permissions: formData.permissions,
     }
 
+    setSaving(true)
     try {
       if (editingId) {
         await authApi.updateUser(editingId, trimmedUser)
@@ -87,6 +90,8 @@ function Users() {
     } catch (error) {
       console.error('Failed to save user:', error)
       alert('Failed to save user: ' + (error.message || 'Unknown error'))
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -209,7 +214,9 @@ function Users() {
           </div>
 
           <div className="form-actions">
-            <button type="submit" className="btn btn-primary">{editingId ? 'Update user' : 'Add user'}</button>
+            <button type="submit" className="btn btn-primary" disabled={saving}>
+              {saving ? <LoadingSpinner size="small" /> : (editingId ? 'Update user' : 'Add user')}
+            </button>
             {editingId && (
               <button
                 type="button"

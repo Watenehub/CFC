@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import DashboardLayout from '../../components/DashboardLayout'
+import LoadingSpinner from '../../components/LoadingSpinner'
 import * as settingsApi from '../../api/settings'
 import * as authApi from '../../api/auth'
 import { useAuth } from '../../context/AuthContext'
@@ -163,7 +164,7 @@ function Settings() {
 
             <div className="form-actions">
               <button type="button" className="btn btn-primary" onClick={saveSettings} disabled={saving}>
-                {saving ? 'Saving...' : 'Update site settings'}
+                {saving ? <LoadingSpinner size="small" /> : 'Update site settings'}
               </button>
             </div>
 
@@ -195,7 +196,7 @@ function Settings() {
                 </div>
                 <div className="form-actions">
                   <button type="submit" className="btn btn-primary" disabled={changingPassword}>
-                    {changingPassword ? 'Changing...' : 'Change password'}
+                    {changingPassword ? <LoadingSpinner size="small" /> : 'Change password'}
                   </button>
                 </div>
               </form>

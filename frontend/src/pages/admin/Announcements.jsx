@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import DashboardLayout from '../../components/DashboardLayout'
+import LoadingSpinner from '../../components/LoadingSpinner'
 import * as notificationsApi from '../../api/notifications'
 import * as uploadsApi from '../../api/uploads'
 
@@ -134,7 +135,9 @@ function Announcements() {
                   </div>
                 </div>
                 <div className="form-actions">
-                  <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving...' : editingId ? 'Update' : 'Publish'}</button>
+                  <button type="submit" className="btn btn-primary" disabled={saving}>
+                    {saving ? <LoadingSpinner size="small" /> : (editingId ? 'Update' : 'Publish')}
+                  </button>
                 </div>
               </form>
             </div>
