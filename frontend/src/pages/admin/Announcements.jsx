@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import DashboardLayout from '../../components/DashboardLayout'
 import * as notificationsApi from '../../api/notifications'
+import * as uploadsApi from '../../api/uploads'
 
 const empty = { title: '', message: '', link: '', image: '', active: true, priority: 'normal' }
 
@@ -12,6 +13,7 @@ function Announcements() {
   const [editingId, setEditingId] = useState(null)
   const [isEditorOpen, setIsEditorOpen] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     fetchItems()
@@ -57,6 +59,22 @@ function Announcements() {
     }
   }
 
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    setUploading(true)
+    setError('')
+    try {
+      const result = await uploadsApi.uploadFile(file)
+      setFormData({ ...formData, image: result.url })
+    } catch (err) {
+      setError(err.message || 'Failed to upload image')
+    } finally {
+      setUploading(false)
+    }
+  }
+
   return (
     <DashboardLayout role="admin" title="Announcements">
       <div className="admin-page">
@@ -87,9 +105,16 @@ function Announcements() {
                     <textarea rows="3" value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} required />
                   </div>
                   <div className="form-field full-width">
-                    <label>Image URL (optional)</label>
-                    <input value={formData.image} onChange={(e) => setFormData({ ...formData, image: e.target.value })} placeholder="https://example.com/image.jpg" />
-                    <small>Upload an image and paste the URL here. Images will appear in the Coming Up section.</small>
+                    <label>Image (optional)</label>
+                    <input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
+                    {uploading && <small>Uploading...</small>}
+                    {formData.image && (
+                      <div>
+                        <img src={formData.image} alt="Preview" style={{ maxWidth: '200px', marginTop: '10px' }} />
+                        <button type="button" className="btn btn-secondary" onClick={() => setFormData({ ...formData, image: '' })} style={{ marginLeft: '10px' }}>Remove</button>
+                      </div>
+                    )}
+                    <small>Upload an image for the announcement. Images will appear in the Coming Up section.</small>
                   </div>
                   <div className="form-field">
                     <label>Optional link</label>

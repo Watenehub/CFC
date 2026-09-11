@@ -81,7 +81,7 @@ function Users() {
       // Refresh users from API
       await fetchUsers()
       
-      setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: [] })
+      setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: ROLE_PERMISSIONS.secretary })
       setEditingId(null)
       setIsEditorOpen(false)
     } catch (error) {

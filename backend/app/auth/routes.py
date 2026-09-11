@@ -147,7 +147,7 @@ def create_user():
 
     if existing_user:
         return jsonify({
-            "error": "Email already exists"
+            "error": "Email already exists in the system. Please use a different email address."
         }), 409
 
     last_user = db.users.find_one(
