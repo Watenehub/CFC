@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import DashboardLayout from '../../components/DashboardLayout'
 import * as settingsApi from '../../api/settings'
+import * as authApi from '../../api/auth'
+import { useAuth } from '../../context/AuthContext'
 
 const emptySettings = {
   church_name: '',
@@ -18,11 +20,16 @@ const emptySettings = {
 }
 
 function Settings() {
+  const { user } = useAuth()
   const [settings, setSettings] = useState(emptySettings)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [saving, setSaving] = useState(false)
+  const [passwordData, setPasswordData] = useState({ oldPassword: '', newPassword: '' })
+  const [passwordError, setPasswordError] = useState('')
+  const [passwordSuccess, setPasswordSuccess] = useState('')
+  const [changingPassword, setChangingPassword] = useState(false)
 
   useEffect(() => {
     fetchSettings()
@@ -52,6 +59,23 @@ function Settings() {
       setError(err.message || 'Failed to save settings')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleChangePassword = async (event) => {
+    event.preventDefault()
+    setPasswordError('')
+    setPasswordSuccess('')
+    setChangingPassword(true)
+
+    try {
+      await authApi.changePassword(passwordData.oldPassword, passwordData.newPassword)
+      setPasswordSuccess('Password changed successfully.')
+      setPasswordData({ oldPassword: '', newPassword: '' })
+    } catch (err) {
+      setPasswordError(err.message || 'Failed to change password')
+    } finally {
+      setChangingPassword(false)
     }
   }
 
@@ -141,6 +165,40 @@ function Settings() {
               <button type="button" className="btn btn-primary" onClick={saveSettings} disabled={saving}>
                 {saving ? 'Saving...' : 'Update site settings'}
               </button>
+            </div>
+
+            <div className="admin-form-block">
+              <h3>Change Password</h3>
+              <p>Change your account password. Password must be at least 8 characters with uppercase, lowercase, digits, and special characters.</p>
+              {passwordError && <p className="error-state">{passwordError}</p>}
+              {passwordSuccess && <p className="success-state">{passwordSuccess}</p>}
+              <form className="admin-form" onSubmit={handleChangePassword}>
+                <div className="form-grid">
+                  <div className="form-field">
+                    <label>Old password</label>
+                    <input
+                      type="password"
+                      value={passwordData.oldPassword}
+                      onChange={(event) => setPasswordData({ ...passwordData, oldPassword: event.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-field">
+                    <label>New password</label>
+                    <input
+                      type="password"
+                      value={passwordData.newPassword}
+                      onChange={(event) => setPasswordData({ ...passwordData, newPassword: event.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="form-actions">
+                  <button type="submit" className="btn btn-primary" disabled={changingPassword}>
+                    {changingPassword ? 'Changing...' : 'Change password'}
+                  </button>
+                </div>
+              </form>
             </div>
           </>
         )}

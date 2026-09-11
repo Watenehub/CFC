@@ -61,3 +61,10 @@ export const updateUser = async (userId, userData) => {
 export const deleteUser = async (userId) => {
   return apiCall(`/api/auth/users/${userId}`, { method: 'DELETE' })
 }
+
+export const changePassword = async (oldPassword, newPassword) => {
+  return apiCall('/api/auth/change-password', {
+    method: 'POST',
+    body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
+  })
+}

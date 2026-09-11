@@ -240,6 +240,58 @@ def update_user(user_id):
     })
 
 
+@auth_bp.route("/api/auth/change-password", methods=["POST"])
+def change_password():
+    """Allow users to change their own password with old password verification."""
+    user_id = session.get("user_id")
+    
+    if not user_id:
+        return jsonify({"error": "Authentication required"}), 401
+    
+    db = get_db()
+    data = request.get_json() or {}
+    
+    old_password = data.get("old_password", "")
+    new_password = data.get("new_password", "")
+    
+    if not old_password or not new_password:
+        return jsonify({"error": "Old password and new password are required"}), 400
+    
+    # Get current user
+    user = db.users.find_one({"id": user_id})
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    
+    # Verify old password
+    if not check_password_hash(user["password"], old_password):
+        return jsonify({"error": "Incorrect old password"}), 400
+    
+    # Validate new password strength
+    if len(new_password) < 8:
+        return jsonify({"error": "Password must be at least 8 characters long"}), 400
+    
+    if not any(c.isupper() for c in new_password):
+        return jsonify({"error": "Password must contain at least one uppercase letter"}), 400
+    
+    if not any(c.islower() for c in new_password):
+        return jsonify({"error": "Password must contain at least one lowercase letter"}), 400
+    
+    if not any(c.isdigit() for c in new_password):
+        return jsonify({"error": "Password must contain at least one digit"}), 400
+    
+    special_chars = "!@#$%^&*()_+-=[]{}|;:,.<>?"
+    if not any(c in special_chars for c in new_password):
+        return jsonify({"error": "Password must contain at least one special character"}), 400
+    
+    # Update password
+    db.users.update_one(
+        {"id": user_id},
+        {"$set": {"password": generate_password_hash(new_password)}}
+    )
+    
+    return jsonify({"message": "Password changed successfully"})
+
+
 @auth_bp.route("/api/auth/users/<int:user_id>", methods=["DELETE"])
 @role_required("manage_users")
 def delete_user(user_id):
