@@ -20,7 +20,7 @@ def serialize_giving(giving):
 
 @giving_bp.route("/api/giving", methods=["GET"])
 def get_giving():
-    """Get all giving options."""
+    """Get all giving options (public endpoint)."""
     db = get_db()
 
     giving = list(
