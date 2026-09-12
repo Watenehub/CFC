@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
+import GivingDetail from './pages/GivingDetail'
+import { STAFF_ROLES, dashboardPath } from './utils/permissions'
 import Home from './pages/Home'
 import About from './pages/About'
 import Ministries from './pages/Ministries'
@@ -54,7 +56,7 @@ function ProtectedRoute({ children, allowedRoles, permission }) {
   return children
 }
 
-const staffRoles = ['admin', 'media', 'secretary']
+const staffRoles = STAFF_ROLES
 
 function AppRoutes() {
   const { user } = useAuth()
@@ -71,6 +73,7 @@ function AppRoutes() {
       <Route path="/events" element={<Events />} />
       <Route path="/events/:id" element={<EventDetail />} />
       <Route path="/give" element={<Giving />} />
+      <Route path="/give/:id" element={<GivingDetail />} />
       <Route path="/prayer" element={<Prayer />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/login" element={<Login />} />
@@ -78,7 +81,7 @@ function AppRoutes() {
       <Route path="/pastors" element={<Pastors />} />
       <Route path="/deacons" element={<Deacons />} />
 
-      <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+      <Route path="/admin" element={<ProtectedRoute allowedRoles={staffRoles}><AdminDashboard /></ProtectedRoute>} />
       <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsers /></ProtectedRoute>} />
       <Route path="/admin/events/create" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_events"><AdminEventCreate /></ProtectedRoute>} />
       <Route path="/admin/events/manage" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_events"><AdminEventCreate /></ProtectedRoute>} />
@@ -95,11 +98,11 @@ function AppRoutes() {
       <Route path="/admin/deacons" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_deacons"><AdminPeople type="deacons" /></ProtectedRoute>} />
       <Route path="/admin/gallery" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_gallery"><GalleryManager /></ProtectedRoute>} />
 
-      <Route path="/media" element={<ProtectedRoute allowedRoles={['admin', 'media']}><MediaDashboard /></ProtectedRoute>} />
+      <Route path="/media" element={<ProtectedRoute allowedRoles={staffRoles}><MediaDashboard /></ProtectedRoute>} />
       <Route path="/media/gallery" element={<Navigate to="/admin/gallery" replace />} />
       <Route path="/media/*" element={<Navigate to="/media" replace />} />
 
-      <Route path="/secretary" element={<ProtectedRoute allowedRoles={['admin', 'secretary']}><SecretaryDashboard /></ProtectedRoute>} />
+      <Route path="/secretary" element={<ProtectedRoute allowedRoles={staffRoles}><SecretaryDashboard /></ProtectedRoute>} />
       <Route path="/secretary/*" element={<Navigate to="/secretary" replace />} />
 
       <Route
@@ -114,10 +117,7 @@ function AppRoutes() {
       <Route
         path="/dashboard"
         element={
-          user?.role === 'admin' ? <Navigate to="/admin" replace /> :
-          user?.role === 'media' ? <Navigate to="/media" replace /> :
-          user?.role === 'secretary' ? <Navigate to="/secretary" replace /> :
-          user?.role === 'member' ? <Navigate to="/member" replace /> :
+          user ? <Navigate to={dashboardPath(user.role)} replace /> :
           <Navigate to="/login" replace />
         }
       />

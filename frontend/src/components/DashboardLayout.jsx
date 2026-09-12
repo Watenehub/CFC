@@ -1,52 +1,41 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { dashboardPath } from '../utils/permissions'
 import '../styles/Dashboard.css'
 import '../pages/admin/AdminPage.css'
 
-const NAV = {
-  admin: [
-    { path: '/admin', label: 'Overview', exact: true, permission: null },
-    { path: '/admin/users', label: 'Users', permission: 'manage_users' },
-    { path: '/admin/events/manage', label: 'Events', permission: 'manage_events' },
-    { path: '/admin/sermons/manage', label: 'Sermons', permission: 'manage_sermons' },
-    { path: '/admin/giving', label: 'Giving', permission: 'manage_giving' },
-    { path: '/admin/enquiries', label: 'Enquiries', permission: 'manage_enquiries' },
-    { path: '/admin/prayer', label: 'Prayer', permission: 'manage_enquiries' },
-    { path: '/admin/announcements', label: 'Announcements', permission: 'manage_notifications' },
-    { path: '/admin/services', label: 'Services', permission: 'manage_services' },
-    { path: '/admin/ministries', label: 'Ministries', permission: 'manage_ministries' },
-    { path: '/admin/pastors', label: 'Pastors', permission: 'manage_pastors' },
-    { path: '/admin/deacons', label: 'Deacons', permission: 'manage_deacons' },
-    { path: '/admin/gallery', label: 'Gallery', permission: 'manage_gallery' },
-    { path: '/admin/settings', label: 'Settings', permission: 'manage_users' },
-  ],
-  media: [
-    { path: '/media', label: 'Overview', exact: true, permission: null },
-    { path: '/admin/events/manage', label: 'Events', permission: 'manage_events' },
-    { path: '/admin/sermons/manage', label: 'Sermons', permission: 'manage_sermons' },
-    { path: '/admin/gallery', label: 'Gallery', permission: 'manage_gallery' },
-    { path: '/admin/announcements', label: 'Announcements', permission: 'manage_notifications' },
-  ],
-  secretary: [
-    { path: '/secretary', label: 'Overview', exact: true, permission: null },
-    { path: '/admin/giving', label: 'Giving', permission: 'manage_giving' },
-    { path: '/admin/enquiries', label: 'Enquiries', permission: 'manage_enquiries' },
-    { path: '/admin/prayer', label: 'Prayer', permission: 'manage_enquiries' },
-    { path: '/admin/services', label: 'Services', permission: 'manage_services' },
-  ],
-  member: [
-    { path: '/member', label: 'Overview', exact: true, permission: null },
-    { path: '/sermons', label: 'Sermons', permission: null },
-    { path: '/events', label: 'Events', permission: null },
-    { path: '/prayer', label: 'Prayer', permission: null },
-    { path: '/give', label: 'Give', permission: null },
-  ],
-}
+const STAFF_NAV = [
+  { path: '/admin', label: 'Overview', exact: true, roles: ['admin', 'guest'] },
+  { path: '/media', label: 'Overview', exact: true, roles: ['media'] },
+  { path: '/secretary', label: 'Overview', exact: true, roles: ['secretary'] },
+  { path: '/admin/users', label: 'Users', permission: 'manage_users' },
+  { path: '/admin/events/manage', label: 'Events', permission: 'manage_events' },
+  { path: '/admin/sermons/manage', label: 'Sermons', permission: 'manage_sermons' },
+  { path: '/admin/giving', label: 'Giving', permission: 'manage_giving' },
+  { path: '/admin/enquiries', label: 'Enquiries', permission: 'manage_enquiries' },
+  { path: '/admin/prayer', label: 'Prayer', permission: 'manage_enquiries' },
+  { path: '/admin/announcements', label: 'Announcements', permission: 'manage_notifications' },
+  { path: '/admin/services', label: 'Services', permission: 'manage_services' },
+  { path: '/admin/ministries', label: 'Ministries', permission: 'manage_ministries' },
+  { path: '/admin/pastors', label: 'Pastors', permission: 'manage_pastors' },
+  { path: '/admin/deacons', label: 'Deacons', permission: 'manage_deacons' },
+  { path: '/admin/gallery', label: 'Gallery', permission: 'manage_gallery' },
+  { path: '/admin/settings', label: 'Settings', permission: 'manage_users' },
+]
+
+const MEMBER_NAV = [
+  { path: '/member', label: 'Overview', exact: true },
+  { path: '/sermons', label: 'Sermons' },
+  { path: '/events', label: 'Events' },
+  { path: '/prayer', label: 'Prayer' },
+  { path: '/give', label: 'Give' },
+]
 
 const TITLES = {
   admin: 'Admin',
   media: 'Media',
   secretary: 'Secretary',
+  guest: 'Staff',
   member: 'Member',
 }
 
@@ -55,9 +44,12 @@ function DashboardLayout({ role, title, children }) {
   const location = useLocation()
   const activeRole = user?.role || role
 
-  const links = NAV[activeRole]?.filter((item) =>
-    !item.permission || hasPermission(item.permission)
-  ) || []
+  const links = activeRole === 'member'
+    ? MEMBER_NAV
+    : STAFF_NAV.filter((item) => {
+        if (item.roles) return item.roles.includes(activeRole)
+        return !item.permission || hasPermission(item.permission)
+      })
 
   const isActive = (item) => {
     if (item.exact) return location.pathname === item.path
@@ -119,3 +111,4 @@ function DashboardLayout({ role, title, children }) {
 }
 
 export default DashboardLayout
+export { dashboardPath }

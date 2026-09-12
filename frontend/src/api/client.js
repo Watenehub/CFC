@@ -1,8 +1,9 @@
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
+export const API_BASE = import.meta.env.VITE_API_BASE || ''
 
 export async function apiCall(endpoint, options = {}) {
   const url = `${API_BASE}${endpoint}`
   const config = {
+    cache: 'no-store',
     ...options,
     headers: {
       'Content-Type': 'application/json',
@@ -12,10 +13,16 @@ export async function apiCall(endpoint, options = {}) {
   }
 
   const response = await fetch(url, config)
-  const data = await response.json()
+  const contentType = response.headers.get('content-type') || ''
+  const data = contentType.includes('application/json')
+    ? await response.json()
+    : null
 
   if (!response.ok) {
-    throw new Error(data.error || 'An error occurred')
+    const error = new Error(data?.error || 'An error occurred')
+    error.status = response.status
+    error.payload = data
+    throw error
   }
 
   return data

@@ -1,6 +1,7 @@
 import { apiCall } from './client'
+import { asList } from '../utils/content'
 
-export const getGallery = async () => apiCall('/api/gallery')
+export const getGallery = async () => asList(await apiCall('/api/gallery'))
 
 export const getGalleryItem = async (itemId) => apiCall(`/api/gallery/${itemId}`)
 

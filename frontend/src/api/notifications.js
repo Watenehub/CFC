@@ -1,7 +1,8 @@
 import { apiCall } from './client'
+import { asList } from '../utils/content'
 
 export const getNotifications = async (activeOnly = false) =>
-  apiCall(`/api/notifications${activeOnly ? '?active=1' : ''}`)
+  asList(await apiCall(`/api/notifications${activeOnly ? '?active=1' : ''}`))
 export const createNotification = async (data) =>
   apiCall('/api/notifications', { method: 'POST', body: JSON.stringify(data) })
 export const updateNotification = async (id, data) =>

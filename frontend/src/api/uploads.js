@@ -4,7 +4,7 @@ export const uploadFile = async (file) => {
   const formData = new FormData()
   formData.append('file', file)
 
-  const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
+  const API_BASE = import.meta.env.VITE_API_BASE || ''
   const url = `${API_BASE}/api/upload`
 
   const response = await fetch(url, {

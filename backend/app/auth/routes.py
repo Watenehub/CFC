@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request, session
 from werkzeug.security import generate_password_hash, check_password_hash
-from .permissions import role_required, effective_permissions, ROLE_PERMISSIONS
+from .permissions import role_required, effective_permissions, ROLE_PERMISSIONS, ALL_PERMISSIONS
 from ..database.mongodb import get_db
 from pymongo import DESCENDING
 
@@ -125,7 +125,8 @@ def create_user():
     allowed_roles = [
         "admin",
         "media",
-        "secretary"
+        "secretary",
+        "guest",
     ]
 
     if not name or not email or not password or not role:
@@ -147,7 +148,8 @@ def create_user():
 
     if existing_user:
         return jsonify({
-            "error": "Email already exists in the system. Please use a different email address."
+            "error": "An account with this email already exists. Open that user from the list to update their details.",
+            "existing_user": serialize_user(existing_user),
         }), 409
 
     last_user = db.users.find_one(
@@ -200,7 +202,14 @@ def update_user(user_id):
         update_data["name"] = data["name"].strip()
 
     if "email" in data:
-        update_data["email"] = data["email"].strip().lower()
+        email = data["email"].strip().lower()
+        other = db.users.find_one({"email": email, "id": {"$ne": user_id}})
+        if other:
+            return jsonify({
+                "error": "An account with this email already exists. Use a different email address.",
+                "existing_user": serialize_user(other),
+            }), 409
+        update_data["email"] = email
 
     if "role" in data:
         role = data["role"].strip().lower()
@@ -208,7 +217,8 @@ def update_user(user_id):
         if role not in [
             "admin",
             "media",
-            "secretary"
+            "secretary",
+            "guest",
         ]:
             return jsonify({
                 "error": "Invalid role"
@@ -217,7 +227,10 @@ def update_user(user_id):
         update_data["role"] = role
 
     if "permissions" in data:
-        update_data["permissions"] = data["permissions"]
+        update_data["permissions"] = effective_permissions(
+            update_data.get("role", user.get("role")),
+            data.get("permissions"),
+        )
 
     if data.get("password"):
         update_data["password"] = generate_password_hash(
@@ -229,6 +242,12 @@ def update_user(user_id):
             {"id": user_id},
             {"$set": update_data}
         )
+
+        if session.get("user_id") == user_id:
+            if "role" in update_data:
+                session["role"] = update_data["role"]
+            if "permissions" in update_data:
+                session["permissions"] = update_data["permissions"]
 
     updated_user = db.users.find_one({
         "id": user_id

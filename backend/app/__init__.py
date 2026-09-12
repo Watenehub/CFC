@@ -78,7 +78,11 @@ def create_app():
         if request_origin and (
             "vercel.app" in request_origin
             or request_origin in allowed_origins
+            or request_origin.startswith("http://localhost:")
+            or request_origin.startswith("http://127.0.0.1:")
         ):
+            response.headers["Access-Control-Allow-Origin"] = request_origin
+        elif request_origin:
             response.headers["Access-Control-Allow-Origin"] = request_origin
         else:
             response.headers["Access-Control-Allow-Origin"] = (

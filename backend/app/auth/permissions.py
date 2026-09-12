@@ -2,20 +2,22 @@ from functools import wraps
 from flask import jsonify, session
 
 
+ALL_PERMISSIONS = [
+    "manage_users",
+    "manage_events",
+    "manage_sermons",
+    "manage_giving",
+    "manage_enquiries",
+    "manage_pastors",
+    "manage_deacons",
+    "manage_ministries",
+    "manage_services",
+    "manage_notifications",
+    "manage_gallery",
+]
+
 ROLE_PERMISSIONS = {
-    "admin": [
-        "manage_users",
-        "manage_events",
-        "manage_sermons",
-        "manage_giving",
-        "manage_enquiries",
-        "manage_pastors",
-        "manage_deacons",
-        "manage_ministries",
-        "manage_services",
-        "manage_notifications",
-        "manage_gallery",
-    ],
+    "admin": list(ALL_PERMISSIONS),
     "media": [
         "manage_events",
         "manage_sermons",
@@ -27,6 +29,7 @@ ROLE_PERMISSIONS = {
         "manage_enquiries",
         "manage_services",
     ],
+    "guest": [],
 }
 
 
@@ -35,9 +38,10 @@ def has_permission(role, permission):
 
 
 def effective_permissions(role, permissions=None):
-    """Prefer explicit permissions; fall back to role defaults when empty/missing."""
-    if permissions:
-        return list(permissions)
+    """Use the permissions assigned by an admin whenever they are provided."""
+    if isinstance(permissions, list):
+        allowed = set(ALL_PERMISSIONS)
+        return [item for item in permissions if item in allowed]
     return list(ROLE_PERMISSIONS.get(role, []))
 
 
@@ -54,13 +58,13 @@ def role_required(permission):
                 user_role,
                 session.get("permissions"),
             )
-            if permission not in session_permissions and user_role != "admin":
-                return jsonify({
-                    "error": "Access denied",
-                    "message": "You do not have permission to perform this action",
-                }), 403
+            if user_role == "admin" or permission in session_permissions:
+                return function(*args, **kwargs)
 
-            return function(*args, **kwargs)
+            return jsonify({
+                "error": "Access denied",
+                "message": "You do not have permission to perform this action",
+            }), 403
 
         return wrapper
 

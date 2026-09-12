@@ -1,25 +1,26 @@
 import { useState, useEffect, useMemo } from 'react'
 import DashboardLayout from '../../components/DashboardLayout'
-import LoadingSpinner from '../../components/LoadingSpinner'
+import ActionButton from '../../components/ActionButton'
 import * as authApi from '../../api/auth'
-import { ROLE_PERMISSIONS } from '../../utils/permissions'
+import { ALL_PERMISSIONS, ROLE_PERMISSIONS, STAFF_ROLES, permissionLabel } from '../../utils/permissions'
 
-const permissionOptions = ROLE_PERMISSIONS
-const roleOptions = ['admin', 'media', 'secretary']
+const emptyForm = {
+  name: '',
+  email: '',
+  password: '',
+  role: 'guest',
+  permissions: [],
+}
 
 function Users() {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    role: 'secretary',
-    permissions: ROLE_PERMISSIONS.secretary,
-  })
+  const [formData, setFormData] = useState(emptyForm)
   const [editingId, setEditingId] = useState(null)
   const [isEditorOpen, setIsEditorOpen] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [deletingId, setDeletingId] = useState(null)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     fetchUsers()
@@ -29,8 +30,9 @@ function Users() {
     try {
       const response = await authApi.getUsers()
       setUsers(response)
-    } catch (error) {
-      console.error('Failed to fetch users:', error)
+    } catch (err) {
+      console.error('Failed to fetch users:', err)
+      setError(err.message || 'Failed to load users')
     } finally {
       setLoading(false)
     }
@@ -40,7 +42,7 @@ function Users() {
     setFormData((previous) => ({
       ...previous,
       role,
-      permissions: ROLE_PERMISSIONS[role] || [],
+      permissions: ROLE_PERMISSIONS[role] ? [...ROLE_PERMISSIONS[role]] : [],
     }))
   }
 
@@ -54,78 +56,90 @@ function Users() {
     })
   }
 
+  const openExistingUser = (user) => {
+    setEditingId(user.id)
+    setFormData({
+      name: user.name || '',
+      email: user.email || '',
+      password: '',
+      role: user.role || 'guest',
+      permissions: Array.isArray(user.permissions) ? user.permissions : [],
+    })
+    setIsEditorOpen(true)
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault()
+    setError('')
 
-    // Validate required fields
-    if (!formData.name.trim() || !formData.email.trim() || !formData.password || !formData.role) {
-      alert('Please fill in all required fields')
+    if (!formData.name.trim() || !formData.email.trim() || !formData.role) {
+      setError('Please fill in name, email, and role.')
+      return
+    }
+
+    if (!editingId && !formData.password) {
+      setError('Please set an initial password for the new account.')
       return
     }
 
     const trimmedUser = {
       name: formData.name.trim(),
       email: formData.email.trim(),
-      password: formData.password,
       role: formData.role,
       permissions: formData.permissions,
+    }
+
+    if (formData.password) {
+      trimmedUser.password = formData.password
     }
 
     setSaving(true)
     try {
       if (editingId) {
         await authApi.updateUser(editingId, trimmedUser)
-        alert('User updated successfully. The user will need to log out and log back in to see the updated permissions.')
       } else {
         await authApi.createUser(trimmedUser)
-        alert('User created successfully!')
       }
-      
-      // Refresh users from API
+
       await fetchUsers()
-      
-      setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: ROLE_PERMISSIONS.secretary })
+      setFormData(emptyForm)
       setEditingId(null)
       setIsEditorOpen(false)
-    } catch (error) {
-      console.error('Failed to save user:', error)
-      alert('Failed to save user: ' + (error.message || 'Unknown error'))
+    } catch (err) {
+      const existing = err.payload?.existing_user
+      if (err.status === 409 && existing) {
+        setError(err.message)
+        openExistingUser(existing)
+      } else {
+        setError(err.message || 'Failed to save user')
+      }
     } finally {
       setSaving(false)
     }
   }
 
-  const handleEdit = (user) => {
-    setEditingId(user.id)
-    setFormData({
-      name: user.name,
-      email: user.email,
-      password: user.password || '',
-      role: user.role,
-      permissions: user.permissions || [],
-    })
-    setIsEditorOpen(true)
-  }
-
   const handleDelete = async (id) => {
+    setDeletingId(id)
+    setError('')
     try {
       await authApi.deleteUser(id)
-      // Refresh users from API
       await fetchUsers()
-      
       if (editingId === id) {
         setEditingId(null)
-        setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: ROLE_PERMISSIONS.secretary })
+        setFormData(emptyForm)
         setIsEditorOpen(false)
       }
-    } catch (error) {
-      console.error('Failed to delete user:', error)
+    } catch (err) {
+      setError(err.message || 'Failed to remove user')
+    } finally {
+      setDeletingId(null)
     }
   }
 
   const handleAddUser = () => {
-    setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: ROLE_PERMISSIONS.secretary })
+    setFormData(emptyForm)
     setEditingId(null)
+    setError('')
     setIsEditorOpen(true)
   }
 
@@ -142,11 +156,12 @@ function Users() {
     <DashboardLayout role="admin" title="Users">
       <div className="admin-page">
         <h2>Manage users</h2>
-        <p>Add, remove, and assign roles and permissions for staff and church members.</p>
+        <p>Add staff or guest accounts and assign exactly the rights they should have on the site.</p>
+        {error && <p className="error-state">{error}</p>}
 
         <div className="page-action-bar">
-          <span>Only administrator-created staff accounts can access the workspace.</span>
-          <button type="button" className="btn btn-primary" onClick={handleAddUser}>Add staff account</button>
+          <span>Guest accounts start with no access. Tick only the areas this person should manage.</span>
+          <ActionButton className="btn btn-primary" onClick={handleAddUser}>Add guest / staff</ActionButton>
         </div>
 
         {loading ? (
@@ -157,7 +172,7 @@ function Users() {
           <>
         {isEditorOpen && <div className="editor-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setIsEditorOpen(false)}>
         <div className="editor-modal" role="dialog" aria-modal="true" aria-labelledby="user-editor-title">
-          <div className="editor-modal-header"><h3 id="user-editor-title">{editingId ? 'Edit staff account' : 'Add staff account'}</h3><button type="button" className="modal-close" onClick={() => setIsEditorOpen(false)} aria-label="Close">&times;</button></div>
+          <div className="editor-modal-header"><h3 id="user-editor-title">{editingId ? 'Edit account' : 'Add guest or staff account'}</h3><button type="button" className="modal-close" onClick={() => setIsEditorOpen(false)} aria-label="Close">&times;</button></div>
         <form className="admin-form" onSubmit={handleSubmit}>
           <div className="form-grid">
             <div className="form-field">
@@ -181,19 +196,20 @@ function Users() {
             </div>
 
             <div className="form-field">
-              <label>Initial password</label>
+              <label>{editingId ? 'New password (optional)' : 'Initial password'}</label>
               <input
                 type="password"
                 value={formData.password}
                 onChange={(event) => setFormData({ ...formData, password: event.target.value })}
                 required={!editingId}
+                autoComplete="new-password"
               />
             </div>
 
             <div className="form-field">
               <label>Role</label>
               <select value={formData.role} onChange={(event) => handleRoleChange(event.target.value)}>
-                {roleOptions.map((role) => (
+                {STAFF_ROLES.map((role) => (
                   <option key={role} value={role}>{role}</option>
                 ))}
               </select>
@@ -201,33 +217,32 @@ function Users() {
           </div>
 
           <div className="checkbox-grid">
-            {permissionOptions.map((permission) => (
+            {ALL_PERMISSIONS.map((permission) => (
               <label key={permission} className="checkbox-item">
                 <input
                   type="checkbox"
                   checked={formData.permissions.includes(permission)}
                   onChange={() => handlePermissionToggle(permission)}
                 />
-                <span>{permission.replace('manage_', '').replace(/_/g, ' ')}</span>
+                <span>{permissionLabel(permission)}</span>
               </label>
             ))}
           </div>
 
           <div className="form-actions">
-            <button type="submit" className="btn btn-primary" disabled={saving}>
-              {saving ? <LoadingSpinner size="small" /> : (editingId ? 'Update user' : 'Add user')}
-            </button>
+            <ActionButton type="submit" className="btn btn-primary" loading={saving}>
+              {editingId ? 'Update user' : 'Add user'}
+            </ActionButton>
             {editingId && (
-              <button
-                type="button"
+              <ActionButton
                 className="btn btn-secondary"
                 onClick={() => {
                   setEditingId(null)
-                  setFormData({ name: '', email: '', password: '', role: 'secretary', permissions: ROLE_PERMISSIONS.secretary })
+                  setFormData(emptyForm)
                 }}
               >
                 Cancel
-              </button>
+              </ActionButton>
             )}
           </div>
         </form>
@@ -243,13 +258,19 @@ function Users() {
                   <strong>{user.name}</strong>
                   <div>{user.email}</div>
                   <div className="meta-badge">{user.role}</div>
+                  <div className="permission-chips">
+                    {(user.permissions || []).map((permission) => (
+                      <span key={permission} className="permission-chip">{permissionLabel(permission)}</span>
+                    ))}
+                    {!user.permissions?.length && <span className="permission-chip">No extra rights</span>}
+                  </div>
                 </div>
                 <div className="meta-row">
                   <span>{user.permissionCount} permissions</span>
                 </div>
                 <div className="item-actions">
-                  <button type="button" className="btn btn-secondary" onClick={() => handleEdit(user)}>Edit</button>
-                  <button type="button" className="btn btn-danger" onClick={() => handleDelete(user.id)}>Remove</button>
+                  <ActionButton className="btn btn-secondary" onClick={() => openExistingUser(user)}>Edit</ActionButton>
+                  <ActionButton className="btn btn-danger" loading={deletingId === user.id} onClick={() => handleDelete(user.id)}>Remove</ActionButton>
                 </div>
               </div>
             ))}

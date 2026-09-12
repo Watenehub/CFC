@@ -33,6 +33,7 @@ ROLE_PERMISSIONS = {
         "manage_enquiries",
         "manage_services",
     ],
+    "guest": [],
 }
 
 

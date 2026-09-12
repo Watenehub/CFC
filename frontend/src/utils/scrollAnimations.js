@@ -1,45 +1,55 @@
-// Scroll Animations Utility
-// Adds intersection observer for fade-up, fade-in, slide-up, and scale-in animations
+const ANIMATED_SELECTOR = '.fade-up, .fade-in, .slide-up, .scale-in'
+
+let intersectionObserver = null
+let mutationObserver = null
+
+function observeNewElements() {
+  if (!intersectionObserver || typeof document === 'undefined') return
+  document.querySelectorAll(ANIMATED_SELECTOR).forEach((element) => {
+    if (element.classList.contains('visible')) return
+    intersectionObserver.observe(element)
+  })
+}
 
 export const initScrollAnimations = () => {
-  const observerOptions = {
-    root: null,
-    rootMargin: '0px',
-    threshold: 0.1
-  };
+  if (typeof document === 'undefined') return null
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        // Optional: Unobserve after animation
-        // observer.unobserve(entry.target);
-      }
-    });
-  }, observerOptions);
-
-  // Select all elements with animation classes
-  const animatedElements = document.querySelectorAll('.fade-up, .fade-in, .slide-up, .scale-in');
-  
-  animatedElements.forEach(element => {
-    observer.observe(element);
-  });
-
-  return observer;
-};
-
-// Cleanup function
-export const cleanupScrollAnimations = (observer) => {
-  if (observer) {
-    observer.disconnect();
+  if (!intersectionObserver) {
+    intersectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible')
+          intersectionObserver.unobserve(entry.target)
+        }
+      })
+    }, {
+      root: null,
+      rootMargin: '80px 0px',
+      threshold: 0.05,
+    })
   }
-};
 
-// Initialize on page load
+  observeNewElements()
+
+  if (!mutationObserver && document.body) {
+    mutationObserver = new MutationObserver(observeNewElements)
+    mutationObserver.observe(document.body, { childList: true, subtree: true })
+  }
+
+  return intersectionObserver
+}
+
+export const cleanupScrollAnimations = (observer) => {
+  if (observer && observer !== intersectionObserver) {
+    observer.disconnect()
+  }
+}
+
 if (typeof document !== 'undefined') {
+  const start = () => initScrollAnimations()
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initScrollAnimations);
+    document.addEventListener('DOMContentLoaded', start)
   } else {
-    initScrollAnimations();
+    start()
   }
 }

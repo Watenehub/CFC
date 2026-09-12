@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import * as authApi from '../api/auth'
-import { permissionsForRole } from '../utils/permissions'
+import { dashboardPath, permissionsForRole, STAFF_ROLES } from '../utils/permissions'
 
 const AuthContext = createContext(null)
 
@@ -44,7 +44,10 @@ export const AuthProvider = ({ children }) => {
     isAdmin: user?.role === 'admin',
     isMedia: user?.role === 'media',
     isSecretary: user?.role === 'secretary',
+    isGuest: user?.role === 'guest',
     isMember: user?.role === 'member',
+    isStaff: STAFF_ROLES.includes(user?.role),
+    dashboardPath: dashboardPath(user?.role),
     permissions: permissionsForRole(user?.role, user?.permissions),
     hasPermission: (permission) => {
       if (!user) return false
@@ -69,7 +72,10 @@ export const useAuth = () => {
       isAdmin: false,
       isMedia: false,
       isSecretary: false,
+      isGuest: false,
       isMember: false,
+      isStaff: false,
+      dashboardPath: '/login',
       permissions: [],
       hasPermission: () => false,
     }

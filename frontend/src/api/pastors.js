@@ -1,6 +1,7 @@
 import { apiCall } from './client'
+import { asList } from '../utils/content'
 
-export const getPastors = async () => apiCall('/api/pastors')
+export const getPastors = async () => asList(await apiCall('/api/pastors'))
 
 export const getPastor = async (pastorId) => apiCall(`/api/pastors/${pastorId}`)
 

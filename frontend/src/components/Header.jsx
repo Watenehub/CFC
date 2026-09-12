@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { dashboardPath as pathForRole } from '../utils/permissions'
 import './Header.css'
 
 const Header = () => {
@@ -18,12 +19,7 @@ const Header = () => {
     setAboutOpen(false)
   }
 
-  const dashboardPath =
-    user?.role === 'admin' ? '/admin' :
-    user?.role === 'media' ? '/media' :
-    user?.role === 'secretary' ? '/secretary' :
-    user?.role === 'member' ? '/member' :
-    '/login'
+  const dashboardPath = pathForRole(user?.role)
 
   const handleLogout = async () => {
     closeMenu()

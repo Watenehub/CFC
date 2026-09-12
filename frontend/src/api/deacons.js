@@ -1,6 +1,7 @@
 import { apiCall } from './client'
+import { asList } from '../utils/content'
 
-export const getDeacons = async () => apiCall('/api/deacons')
+export const getDeacons = async () => asList(await apiCall('/api/deacons'))
 
 export const getDeacon = async (deaconId) => apiCall(`/api/deacons/${deaconId}`)
 
