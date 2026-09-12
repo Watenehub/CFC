@@ -269,7 +269,15 @@ function Home() {
               {announcements.map((note) => (
                 <div key={note.id || note.title} className="announcement-card">
                   {note.image && (
-                    <img src={note.image} alt={note.title} className="announcement-image" loading="lazy" />
+                    <img 
+                      src={note.image} 
+                      alt={note.title} 
+                      className="announcement-image" 
+                      loading="lazy"
+                      decoding="async"
+                      width="300"
+                      height="200"
+                    />
                   )}
                   <div className="announcement-content">
                     <span className="announcement-label">Announcement</span>
@@ -293,7 +301,14 @@ function Home() {
                   {upcomingEvents.map((event) => (
                     <Link key={event.id} to={`/events/${event.id}`} className="event-card fade-up">
                       <div className="event-card-image">
-                        <img src={event.image || '/chapel.jpg'} alt={event.title} loading="lazy" />
+                        <img 
+                          src={event.image || '/chapel.jpg'} 
+                          alt={event.title} 
+                          loading="lazy"
+                          decoding="async"
+                          width="400"
+                          height="250"
+                        />
                         <span className="event-date-badge">{formatEventDate(event.date)}</span>
                       </div>
                       <div className="event-card-body">
