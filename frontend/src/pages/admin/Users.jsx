@@ -171,7 +171,7 @@ function Users() {
         ) : (
           <>
         {isEditorOpen && <div className="editor-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setIsEditorOpen(false)}>
-        <div className="editor-modal" role="dialog" aria-modal="true" aria-labelledby="user-editor-title">
+        <div className="editor-modal editor-modal-small" role="dialog" aria-modal="true" aria-labelledby="user-editor-title">
           <div className="editor-modal-header"><h3 id="user-editor-title">{editingId ? 'Edit account' : 'Add guest or staff account'}</h3><button type="button" className="modal-close" onClick={() => setIsEditorOpen(false)} aria-label="Close">&times;</button></div>
         <form className="admin-form" onSubmit={handleSubmit}>
           <div className="form-grid">

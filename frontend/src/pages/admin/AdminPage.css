@@ -176,6 +176,10 @@
   padding: 1.25rem 1.5rem 1.5rem;
 }
 
+.editor-modal.editor-modal-small {
+  width: min(500px, 100%);
+}
+
 .editor-modal-header {
   display: flex;
   align-items: center;

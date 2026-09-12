@@ -125,9 +125,11 @@ function Home() {
       <section className="hero">
         <div className="hero-bg">
           <img
-            src="/images/cornerstone/hero-main.jpg"
+            src="/hero-image.jpg"
             alt="Congregation gathered at Cornerstone Family Chapel"
             className="hero-bg-image"
+            loading="eager"
+            decoding="async"
           />
           <div className="hero-overlay" />
         </div>
