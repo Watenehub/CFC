@@ -17,6 +17,7 @@ import Contact from './pages/Contact'
 import Login from './pages/Login'
 import Pastors from './pages/Pastors'
 import Deacons from './pages/Deacons'
+import Staff from './pages/Staff'
 import AdminDashboard from './pages/admin/Dashboard'
 import AdminUsers from './pages/admin/Users'
 import AdminEventCreate from './pages/admin/EventsCreate'
@@ -80,6 +81,7 @@ function AppRoutes() {
       <Route path="/register" element={<Navigate to="/login" replace />} />
       <Route path="/pastors" element={<Pastors />} />
       <Route path="/deacons" element={<Deacons />} />
+      <Route path="/staff" element={<Staff />} />
 
       <Route path="/admin" element={<ProtectedRoute allowedRoles={staffRoles}><AdminDashboard /></ProtectedRoute>} />
       <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsers /></ProtectedRoute>} />
