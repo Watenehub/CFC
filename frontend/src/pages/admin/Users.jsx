@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import DashboardLayout from '../../components/DashboardLayout'
-import ActionButton from '../../components/ActionButton'
+import LoadingSpinner from '../../components/LoadingSpinner'
 import * as authApi from '../../api/auth'
-import { ALL_PERMISSIONS, ROLE_PERMISSIONS, STAFF_ROLES, permissionLabel } from '../../utils/permissions'
+import { ROLE_PERMISSIONS, ALL_PERMISSIONS, STAFF_ROLES, permissionLabel } from '../../utils/permissions'
 
 const emptyForm = {
   name: '',
@@ -161,7 +161,7 @@ function Users() {
 
         <div className="page-action-bar">
           <span>Guest accounts start with no access. Tick only the areas this person should manage.</span>
-          <ActionButton className="btn btn-primary" onClick={handleAddUser}>Add guest / staff</ActionButton>
+          <button type="button" className="btn btn-primary" onClick={handleAddUser}>Add guest / staff</button>
         </div>
 
         {loading ? (
@@ -230,11 +230,12 @@ function Users() {
           </div>
 
           <div className="form-actions">
-            <ActionButton type="submit" className="btn btn-primary" loading={saving}>
-              {editingId ? 'Update user' : 'Add user'}
-            </ActionButton>
+            <button type="submit" className="btn btn-primary" disabled={saving}>
+              {saving ? <LoadingSpinner size="small" /> : (editingId ? 'Update user' : 'Add user')}
+            </button>
             {editingId && (
-              <ActionButton
+              <button
+                type="button"
                 className="btn btn-secondary"
                 onClick={() => {
                   setEditingId(null)
@@ -242,7 +243,7 @@ function Users() {
                 }}
               >
                 Cancel
-              </ActionButton>
+              </button>
             )}
           </div>
         </form>
