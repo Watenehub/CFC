@@ -270,8 +270,10 @@ function Users() {
                   <span>{user.permissionCount} permissions</span>
                 </div>
                 <div className="item-actions">
-                  <ActionButton className="btn btn-secondary" onClick={() => openExistingUser(user)}>Edit</ActionButton>
-                  <ActionButton className="btn btn-danger" loading={deletingId === user.id} onClick={() => handleDelete(user.id)}>Remove</ActionButton>
+                  <button type="button" className="btn btn-secondary" onClick={() => openExistingUser(user)}>Edit</button>
+                  <button type="button" className="btn btn-danger" disabled={deletingId === user.id} onClick={() => handleDelete(user.id)}>
+                    {deletingId === user.id ? <LoadingSpinner size="small" /> : 'Remove'}
+                  </button>
                 </div>
               </div>
             ))}
