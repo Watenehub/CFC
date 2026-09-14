@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from ..auth.permissions import role_required
 from ..database.mongodb import get_db
+from ..security.rate_limit import limiter
 from pymongo import DESCENDING
 
 
@@ -34,6 +35,7 @@ def get_prayer_request(prayer_id):
 
 
 @prayer_bp.route("/api/prayer", methods=["POST"])
+@limiter.limit("5 per minute; 30 per hour")
 def create_prayer_request():
     db = get_db()
     data = request.get_json() or {}

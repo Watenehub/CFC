@@ -15,6 +15,8 @@ import Giving from './pages/Giving'
 import Prayer from './pages/Prayer'
 import Contact from './pages/Contact'
 import Login from './pages/Login'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 import Pastors from './pages/Pastors'
 import Deacons from './pages/Deacons'
 import Staff from './pages/Staff'
@@ -78,6 +80,8 @@ function AppRoutes() {
       <Route path="/prayer" element={<Prayer />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/register" element={<Navigate to="/login" replace />} />
       <Route path="/pastors" element={<Pastors />} />
       <Route path="/deacons" element={<Deacons />} />

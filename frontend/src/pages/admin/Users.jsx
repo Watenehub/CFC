@@ -203,7 +203,9 @@ function Users() {
                 onChange={(event) => setFormData({ ...formData, password: event.target.value })}
                 required={!editingId}
                 autoComplete="new-password"
+                minLength={editingId ? undefined : 8}
               />
+              <small>At least 8 characters with uppercase, lowercase, a number, and a symbol.</small>
             </div>
 
             <div className="form-field">

@@ -28,10 +28,31 @@ def get_dashboard_stats():
     open_enquiries = db.enquiries.count_documents({"status": {"$in": ["New", "In Progress"]}})
     new_prayer = db.prayer_requests.count_documents({"status": "New"})
 
+    event_projection = {
+        "_id": 0,
+        "id": 1,
+        "title": 1,
+        "date": 1,
+        "location": 1,
+    }
+    enquiry_projection = {
+        "_id": 0,
+        "id": 1,
+        "subject": 1,
+        "name": 1,
+        "status": 1,
+    }
+    sermon_projection = {
+        "_id": 0,
+        "id": 1,
+        "title": 1,
+        "speaker": 1,
+        "date": 1,
+    }
     upcoming_events = list(
         db.events.find(
             {"date": {"$gte": today}},
-            {"_id": 0},
+            event_projection,
         ).sort("date", ASCENDING).limit(5)
     )
 
@@ -57,7 +78,7 @@ def get_dashboard_stats():
                 "name": item.get("name", ""),
                 "status": item.get("status", ""),
             }
-            for item in list(db.enquiries.find({}, {"_id": 0}).sort("_id", DESCENDING).limit(5))
+            for item in list(db.enquiries.find({}, enquiry_projection).sort("_id", DESCENDING).limit(5))
         ],
         "recent_sermons": [
             {
@@ -66,7 +87,7 @@ def get_dashboard_stats():
                 "speaker": item.get("speaker", ""),
                 "date": item.get("date", ""),
             }
-            for item in list(db.sermons.find({}, {"_id": 0}).sort("_id", DESCENDING).limit(5))
+            for item in list(db.sermons.find({}, sermon_projection).sort("_id", DESCENDING).limit(5))
         ],
         "upcoming_events": [
             {

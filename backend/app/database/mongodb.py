@@ -1,4 +1,5 @@
-from pymongo import MongoClient
+import os
+from pymongo import MongoClient, ASCENDING
 from flask import current_app
 
 
@@ -8,11 +9,17 @@ def init_mongo(app):
     if not uri:
         raise RuntimeError("MONGO_URI is not configured.")
 
-    client = MongoClient(
-        uri,
-        serverSelectionTimeoutMS=5000,
-        tlsAllowInvalidCertificates=True
-    )
+    client_kwargs = {
+        "serverSelectionTimeoutMS": 5000,
+        "retryWrites": True,
+    }
+
+    allow_invalid = os.getenv("MONGO_TLS_ALLOW_INVALID", "").lower() in {"1", "true", "yes"}
+    flask_env = os.getenv("FLASK_ENV", "development")
+    if allow_invalid and flask_env != "production":
+        client_kwargs["tlsAllowInvalidCertificates"] = True
+
+    client = MongoClient(uri, **client_kwargs)
 
     db_name = app.config.get(
         "MONGO_DB_NAME",
@@ -20,14 +27,22 @@ def init_mongo(app):
     )
 
     db = client[db_name]
-
-    # Verify the connection
     client.admin.command("ping")
+    _ensure_indexes(db)
 
     app.extensions["mongo_client"] = client
     app.extensions["mongo_db"] = db
 
     return db
+
+
+def _ensure_indexes(db):
+    db.users.create_index("email")
+    db.users.create_index("id", unique=True)
+    db.password_resets.create_index("token_hash", unique=True)
+    db.password_resets.create_index("expires_at", expireAfterSeconds=0)
+    db.security_events.create_index("created_at", expireAfterSeconds=90 * 24 * 60 * 60)
+    db.security_events.create_index([("action", ASCENDING), ("created_at", ASCENDING)])
 
 
 def get_db():

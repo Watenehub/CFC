@@ -1,42 +1,67 @@
-from flask import Flask, Blueprint, request
+from flask import Flask, Blueprint, make_response, request
 from .config import Config
 from .database.mongodb import init_mongo
 from flask_cors import CORS
 import importlib
-import pkgutil
+import logging
 import os
+import pkgutil
+import re
 
 from . import routes
 from .auth.routes import auth_bp
+from .security import init_security
+from .security.headers import apply_security_headers
+from .security.origins import get_allowed_origins
+from .security.rate_limit import limiter, rate_limit_exceeded
+from .security.events import log_security_event
+
+
+def _cors_origins():
+    origins = list(get_allowed_origins())
+    pattern = os.getenv("FRONTEND_ORIGIN_REGEX", "").strip()
+    if pattern:
+        origins.append(re.compile(pattern))
+    return origins
 
 
 def create_app():
-    app = Flask(__name__)
-    app.config.from_object(Config)
-        # Initialize MongoDB connection
-    init_mongo(app)
-
-    # Enable CORS for frontend development and Vercel deployment
-    CORS(
-        app,
-        resources={
-            r"/api/*": {
-                "origins": "*"
-            }
-        },
-        supports_credentials=True
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(name)s %(message)s",
     )
 
-    # Use the secret key from the environment configuration
-    app.secret_key = Config.SECRET_KEY
-    
-    # Secure cookies in production; allow local HTTP for development
-    flask_env = os.getenv("FLASK_ENV", "development")
-    is_production = flask_env == "production"
-    app.config["SESSION_COOKIE_SAMESITE"] = "None" if is_production else "Lax"
-    app.config["SESSION_COOKIE_SECURE"] = is_production
+    app = Flask(__name__)
+    app.config.from_object(Config)
+    app.config["SECRET_KEY"] = Config.SECRET_KEY
 
-    # Automatically discover and register route blueprints
+    if not app.config["SECRET_KEY"] or app.config["SECRET_KEY"] in {"changeme", "secret", "dev"}:
+        raise RuntimeError("SECRET_KEY must be set to a long random value.")
+
+    if not Config.MONGO_URI:
+        raise RuntimeError("MONGO_URI is not configured.")
+
+    if os.getenv("TRUST_PROXY", "").lower() in {"1", "true", "yes"}:
+        from werkzeug.middleware.proxy_fix import ProxyFix
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
+    init_mongo(app)
+    limiter.init_app(app)
+    app.register_error_handler(429, rate_limit_exceeded)
+
+    if os.getenv("FLASK_ENV") == "production" and not get_allowed_origins() and not os.getenv("FRONTEND_ORIGIN_REGEX"):
+        raise RuntimeError("Set FRONTEND_ORIGINS to your live site URL(s) before running in production.")
+
+    CORS(
+        app,
+        resources={r"/*": {"origins": _cors_origins()}},
+        supports_credentials=True,
+        allow_headers=["Content-Type", "X-CSRFToken", "X-CSRF-Token"],
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    )
+
+    init_security(app)
+
     for _, module_name, _ in pkgutil.iter_modules(routes.__path__):
         module = importlib.import_module(
             f"{routes.__name__}.{module_name}"
@@ -48,7 +73,6 @@ def create_app():
             if isinstance(obj, Blueprint):
                 app.register_blueprint(obj)
 
-    # Register authentication routes
     app.register_blueprint(auth_bp)
 
     @app.route("/")
@@ -62,43 +86,23 @@ def create_app():
             "message": "Cornerstone Family Chapel API is healthy"
         }
 
-    # Ensure CORS headers are present
+    @app.before_request
+    def handle_preflight():
+        if request.method == "OPTIONS":
+            return apply_security_headers(app, make_response("", 204))
+
     @app.after_request
-    def add_cors_headers(response):
-        request_origin = request.headers.get("Origin")
-
-        allowed_origins = {
-            "http://localhost:3000",
-            "http://127.0.0.1:3000",
-            "http://localhost:3001",
-            "http://127.0.0.1:3001",
-        }
-
-        # Allow localhost and Vercel deployments
-        if request_origin and (
-            "vercel.app" in request_origin
-            or request_origin in allowed_origins
-            or request_origin.startswith("http://localhost:")
-            or request_origin.startswith("http://127.0.0.1:")
+    def audit_auth_failures(response):
+        skip = {"/api/auth/me", "/api/csrf-token", "/api/health"}
+        if (
+            request.path.startswith("/api/")
+            and request.path not in skip
+            and response.status_code in {401, 403}
         ):
-            response.headers["Access-Control-Allow-Origin"] = request_origin
-        elif request_origin:
-            response.headers["Access-Control-Allow-Origin"] = request_origin
-        else:
-            response.headers["Access-Control-Allow-Origin"] = (
-                "http://localhost:3000"
+            log_security_event(
+                "unauthorized_access" if response.status_code == 401 else "access_denied",
+                status=response.status_code,
             )
-
-        response.headers["Access-Control-Allow-Credentials"] = "true"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type"
-        response.headers["Access-Control-Allow-Methods"] = (
-            "GET,POST,PUT,DELETE,OPTIONS"
-        )
-
-        # Add cache control for static assets like images
-        if request.path.startswith("/uploads/"):
-            response.headers["Cache-Control"] = "public, max-age=31536000"
-
         return response
 
     return app

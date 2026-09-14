@@ -1,13 +1,14 @@
 import os
 import uuid
-from flask import Blueprint, current_app, jsonify, request, send_from_directory, url_for
+from flask import Blueprint, current_app, jsonify, request, send_from_directory
 from werkzeug.utils import secure_filename
 from ..auth.permissions import login_required
-
+from ..security.events import log_security_event
+from ..security.images import inspect_image
+from ..security.rate_limit import limiter
 
 uploads_bp = Blueprint("uploads", __name__)
 
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 MAX_UPLOAD_BYTES = 8 * 1024 * 1024
 
 
@@ -18,12 +19,9 @@ def _uploads_dir():
     return path
 
 
-def _allowed(filename):
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
 @uploads_bp.route("/api/upload", methods=["POST"])
 @login_required
+@limiter.limit("20 per minute")
 def upload_file():
     if "file" not in request.files:
         return jsonify({"error": "No file provided"}), 400
@@ -32,27 +30,31 @@ def upload_file():
     if not file or not file.filename:
         return jsonify({"error": "No file selected"}), 400
 
-    if not _allowed(file.filename):
-        return jsonify({"error": "Unsupported file type. Use PNG, JPG, GIF, or WebP."}), 400
-
     file.seek(0, os.SEEK_END)
     size = file.tell()
     file.seek(0)
     if size > MAX_UPLOAD_BYTES:
         return jsonify({"error": "Image must be 8MB or smaller."}), 400
 
-    ext = file.filename.rsplit(".", 1)[1].lower()
-    filename = f"{uuid.uuid4().hex}.{ext}"
+    extension, error = inspect_image(file)
+    if error:
+        log_security_event("upload_rejected", filename=secure_filename(file.filename), reason=error)
+        return jsonify({"error": error}), 400
+
+    filename = f"{uuid.uuid4().hex}.{extension}"
     destination = os.path.join(_uploads_dir(), filename)
+    file.stream.seek(0)
     file.save(destination)
 
-    # Absolute URL so the frontend can load images from the API host
     base = request.host_url.rstrip("/")
     url = f"{base}/uploads/{filename}"
-
+    log_security_event("upload_success", outcome="success", filename=filename)
     return jsonify({"url": url, "filename": filename}), 201
 
 
 @uploads_bp.route("/uploads/<path:filename>", methods=["GET"])
 def serve_upload(filename):
-    return send_from_directory(_uploads_dir(), filename)
+    safe_name = secure_filename(filename)
+    if not safe_name or safe_name != os.path.basename(filename):
+        return jsonify({"error": "Not found"}), 404
+    return send_from_directory(_uploads_dir(), safe_name)

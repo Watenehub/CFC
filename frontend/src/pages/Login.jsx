@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import './Login.css'
 
@@ -70,6 +70,7 @@ function Login() {
                 required
                 placeholder="your.email@example.com"
                 disabled={loading}
+                autoComplete="username"
               />
             </div>
 
@@ -85,6 +86,7 @@ function Login() {
                   required
                   placeholder="••••••••"
                   disabled={loading}
+                  autoComplete="current-password"
                 />
                 <button
                   type="button"
@@ -95,7 +97,7 @@ function Login() {
                   disabled={loading}
                 >
                   {showPassword ? (
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.2A10.7 10.7 0 0 1 12 5c5.2 0 9 7 9 7a17.8 17.8 0 0 1-3.1 3.8M6.2 6.2C3.9 7.9 3 12 3 12s3.8 7 9 7c1.2 0 2.3-.2 3.3-.6" /></svg>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.2A10.7 10.7 0 0 1 12 5c5 0 9 7 9 7a17.8 17.8 0 0 1-3.1 3.8M6.2 6.2C3.9 7.9 3 12 3 12s3.8 7 9 7c1.2 0 2.3-.2 3.3-.6" /></svg>
                   ) : (
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6.3 5 12 5s9.5 7 9.5 7-3.8 7-9.5 7-9.5-7-9.5-7Z" /><circle cx="12" cy="12" r="2.5" /></svg>
                   )}
@@ -104,10 +106,8 @@ function Login() {
             </div>
 
             <div className="form-options">
-              <label className="remember-me">
-                <input type="checkbox" disabled={loading} />
-                <span>Remember me</span>
-              </label>
+              <span />
+              <Link to="/forgot-password" className="forgot-password">Forgot password?</Link>
             </div>
 
             <button 
