@@ -28,7 +28,7 @@ class Config:
     )
     SESSION_COOKIE_SAMESITE = os.getenv(
         "SESSION_COOKIE_SAMESITE",
-        "None" if os.getenv("FLASK_ENV") == "production" else "Lax",
+        "Lax",  # Use Lax for better compatibility with CORS
     )
     PERMANENT_SESSION_LIFETIME = timedelta(
         hours=int(os.getenv("SESSION_HOURS", "8"))
