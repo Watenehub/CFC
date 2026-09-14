@@ -95,6 +95,10 @@ def create_app():
             "GET,POST,PUT,DELETE,OPTIONS"
         )
 
+        # Add cache control for static assets like images
+        if request.path.startswith("/uploads/"):
+            response.headers["Cache-Control"] = "public, max-age=31536000"
+
         return response
 
     return app
