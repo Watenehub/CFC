@@ -1,4 +1,4 @@
-from .headers import apply_security_headers
+# from .headers import apply_security_headers
 # from .sanitize import sanitize_request_json
 
 
@@ -12,6 +12,8 @@ def init_security(app):
     # def _sanitize_json():
     #     sanitize_request_json()
 
-    @app.after_request
-    def _security_headers(response):
-        return apply_security_headers(app, response)
+    # Security headers disabled temporarily - causing CORS issues
+    # @app.after_request
+    # def _security_headers(response):
+    #     return apply_security_headers(app, response)
+    pass

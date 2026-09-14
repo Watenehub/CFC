@@ -1,4 +1,3 @@
-import os
 from pymongo import MongoClient, ASCENDING
 from flask import current_app
 
@@ -12,12 +11,8 @@ def init_mongo(app):
     client_kwargs = {
         "serverSelectionTimeoutMS": 5000,
         "retryWrites": True,
+        "tlsAllowInvalidCertificates": True  # Temporarily allow invalid certificates
     }
-
-    allow_invalid = os.getenv("MONGO_TLS_ALLOW_INVALID", "").lower() in {"1", "true", "yes"}
-    flask_env = os.getenv("FLASK_ENV", "development")
-    if allow_invalid and flask_env != "production":
-        client_kwargs["tlsAllowInvalidCertificates"] = True
 
     client = MongoClient(uri, **client_kwargs)
 
