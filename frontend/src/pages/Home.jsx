@@ -74,31 +74,52 @@ function Home() {
   }, [])
 
   useEffect(() => {
-    Promise.allSettled([
-      sermonsApi.getSermons(),
-      eventsApi.getEvents(),
-      ministriesApi.getMinistries(),
-      notificationsApi.getNotifications(true),
-    ]).then(([sermonsRes, eventsRes, ministriesRes, notesRes]) => {
-      if (sermonsRes.status === 'fulfilled' && sermonsRes.value?.length) {
-        const sorted = [...sermonsRes.value].sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
-        setLatestSermon(sorted[0])
+    let isMounted = true
+
+    const loadData = async () => {
+      try {
+        // Load critical content first
+        const [sermonsData, eventsData, notesData] = await Promise.allSettled([
+          sermonsApi.getSermons(),
+          eventsApi.getEvents(),
+          notificationsApi.getNotifications(true),
+        ])
+
+        if (isMounted) {
+          if (sermonsData.status === 'fulfilled' && sermonsData.value?.length) {
+            const sorted = [...sermonsData.value].sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
+            setLatestSermon(sorted[0])
+          }
+          if (eventsData.status === 'fulfilled') {
+            const now = new Date()
+            const upcoming = eventsData.value
+              .filter((event) => !event.date || new Date(event.date) >= now)
+              .sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')))
+              .slice(0, 3)
+            setUpcomingEvents(upcoming)
+          }
+          if (notesData.status === 'fulfilled') {
+            setAnnouncements(notesData.value.slice(0, 3))
+          }
+        }
+
+        // Load less critical content after
+        if (isMounted) {
+          const ministriesData = await ministriesApi.getMinistries()
+          if (isMounted && ministriesData) {
+            setMinistries(ministriesData.slice(0, 4))
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load home page data:', err)
       }
-      if (eventsRes.status === 'fulfilled') {
-        const now = new Date()
-        const upcoming = eventsRes.value
-          .filter((event) => !event.date || new Date(event.date) >= now)
-          .sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')))
-          .slice(0, 3)
-        setUpcomingEvents(upcoming)
-      }
-      if (ministriesRes.status === 'fulfilled') {
-        setMinistries(ministriesRes.value.slice(0, 4))
-      }
-      if (notesRes.status === 'fulfilled') {
-        setAnnouncements(notesRes.value.slice(0, 3))
-      }
-    })
+    }
+
+    loadData()
+
+    return () => {
+      isMounted = false
+    }
   }, [])
 
   return (
