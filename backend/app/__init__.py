@@ -54,10 +54,10 @@ def create_app():
     # if os.getenv("FLASK_ENV") == "production" and not get_allowed_origins() and not os.getenv("FRONTEND_ORIGIN_REGEX"):
     #     raise RuntimeError("Set FRONTEND_ORIGINS to your live site URL(s) before running in production.")
 
-    # Temporarily allow all origins for debugging
+    # Allow specific frontend origin (cannot use * with credentials)
     CORS(
         app,
-        resources={r"/*": {"origins": "*"}},
+        resources={r"/*": {"origins": ["https://cfckenya.vercel.app", "http://localhost:3000", "http://localhost:5173"]}},
         supports_credentials=True,
         allow_headers=["Content-Type", "X-CSRFToken", "X-CSRF-Token"],
         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -98,7 +98,9 @@ def create_app():
     @app.before_request
     def handle_preflight():
         if request.method == "OPTIONS":
-            return apply_security_headers(app, make_response("", 204))
+            # Security headers disabled temporarily
+            # return apply_security_headers(app, make_response("", 204))
+            return make_response("", 204)
 
     @app.after_request
     def audit_auth_failures(response):
