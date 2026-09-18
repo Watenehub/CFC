@@ -22,10 +22,7 @@ class Config:
     MAX_CONTENT_LENGTH = 10 * 1024 * 1024
     SESSION_COOKIE_NAME = "cfc_session"
     SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SECURE = _bool_env(
-        "SESSION_COOKIE_SECURE",
-        os.getenv("FLASK_ENV", "development") == "production",
-    )
+    SESSION_COOKIE_SECURE = False  # Temporarily disabled for debugging
     SESSION_COOKIE_SAMESITE = os.getenv(
         "SESSION_COOKIE_SAMESITE",
         "Lax",  # Use Lax for better compatibility with CORS
