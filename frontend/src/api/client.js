@@ -59,9 +59,10 @@ export async function apiCall(endpoint, options = {}, retry = true) {
     headers['Content-Type'] = headers['Content-Type'] || 'application/json'
   }
 
-  if (isJsonMethod(method)) {
-    headers['X-CSRFToken'] = await getCsrfToken()
-  }
+  // CSRF disabled temporarily
+  // if (isJsonMethod(method)) {
+  //   headers['X-CSRFToken'] = await getCsrfToken()
+  // }
 
   const config = {
     cache: isGetRequest ? 'default' : 'no-store',
@@ -74,10 +75,11 @@ export async function apiCall(endpoint, options = {}, retry = true) {
   const response = await fetch(url, config)
   const data = await parseBody(response)
 
-  if (retry && isJsonMethod(method) && csrfFailed(data, response.status)) {
-    csrfToken = ''
-    return apiCall(endpoint, options, false)
-  }
+  // CSRF retry disabled temporarily
+  // if (retry && isJsonMethod(method) && csrfFailed(data, response.status)) {
+  //   csrfToken = ''
+  //   return apiCall(endpoint, options, false)
+  // }
 
   if (!response.ok) {
     const error = new Error(data?.error || 'An error occurred')

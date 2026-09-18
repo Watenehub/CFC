@@ -1,11 +1,11 @@
-import { apiCall, resetCsrfToken } from './client'
+import { apiCall } from './client'
 
 export const login = async (email, password) => {
   const result = await apiCall('/api/auth/login', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   })
-  resetCsrfToken()
+  // resetCsrfToken() - CSRF disabled temporarily
   return result
 }
 
@@ -19,7 +19,7 @@ export const getCurrentUser = async () => apiCall('/api/auth/me')
 
 export const logout = async () => {
   const result = await apiCall('/api/auth/logout', { method: 'POST' })
-  resetCsrfToken()
+  // resetCsrfToken() - CSRF disabled temporarily
   return result
 }
 
