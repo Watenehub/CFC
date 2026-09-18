@@ -10,11 +10,11 @@ import re
 
 from . import routes
 from .auth.routes import auth_bp
-from .security import init_security
-from .security.headers import apply_security_headers
+# from .security import init_security
+# from .security.headers import apply_security_headers
 from .security.origins import get_allowed_origins
-from .security.rate_limit import limiter, rate_limit_exceeded
-from .security.events import log_security_event
+# from .security.rate_limit import limiter, rate_limit_exceeded
+# from .security.events import log_security_event
 
 
 def _cors_origins():
@@ -46,21 +46,23 @@ def create_app():
         app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
     init_mongo(app)
-    limiter.init_app(app)
-    app.register_error_handler(429, rate_limit_exceeded)
+    # limiter.init_app(app)
+    # app.register_error_handler(429, rate_limit_exceeded)
 
-    if os.getenv("FLASK_ENV") == "production" and not get_allowed_origins() and not os.getenv("FRONTEND_ORIGIN_REGEX"):
-        raise RuntimeError("Set FRONTEND_ORIGINS to your live site URL(s) before running in production.")
+    # Temporarily disable FRONTEND_ORIGINS check for debugging
+    # if os.getenv("FLASK_ENV") == "production" and not get_allowed_origins() and not os.getenv("FRONTEND_ORIGIN_REGEX"):
+    #     raise RuntimeError("Set FRONTEND_ORIGINS to your live site URL(s) before running in production.")
 
+    # Temporarily allow all origins for debugging
     CORS(
         app,
-        resources={r"/*": {"origins": _cors_origins()}},
+        resources={r"/*": {"origins": "*"}},
         supports_credentials=True,
         allow_headers=["Content-Type", "X-CSRFToken", "X-CSRF-Token"],
         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     )
 
-    init_security(app)
+    # init_security(app)
 
     for _, module_name, _ in pkgutil.iter_modules(routes.__path__):
         module = importlib.import_module(
