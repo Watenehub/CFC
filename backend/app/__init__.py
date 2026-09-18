@@ -13,6 +13,7 @@ from .auth.routes import auth_bp
 # from .security import init_security
 # from .security.headers import apply_security_headers
 from .security.origins import get_allowed_origins
+from flask import jsonify
 # from .security.rate_limit import limiter, rate_limit_exceeded
 # from .security.events import log_security_event
 
@@ -87,6 +88,12 @@ def create_app():
             "status": "success",
             "message": "Cornerstone Family Chapel API is healthy"
         }
+
+    @app.route("/api/csrf-token", methods=["GET"])
+    def csrf_token():
+        # Simple CSRF token endpoint - returns a dummy token
+        # CSRF protection is disabled but frontend expects this endpoint
+        return jsonify({"csrf_token": "dummy-token"})
 
     @app.before_request
     def handle_preflight():
