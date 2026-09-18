@@ -1,10 +1,13 @@
-import { apiCall } from './client'
+import { apiCall, resetCsrfToken } from './client'
 
-export const login = async (email, password) =>
-  apiCall('/api/auth/login', {
+export const login = async (email, password) => {
+  const result = await apiCall('/api/auth/login', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   })
+  resetCsrfToken()
+  return result
+}
 
 export const register = async (userData) =>
   apiCall('/api/auth/register', {
@@ -14,7 +17,11 @@ export const register = async (userData) =>
 
 export const getCurrentUser = async () => apiCall('/api/auth/me')
 
-export const logout = async () => apiCall('/api/auth/logout', { method: 'POST' })
+export const logout = async () => {
+  const result = await apiCall('/api/auth/logout', { method: 'POST' })
+  resetCsrfToken()
+  return result
+}
 
 export const getUsers = async () => apiCall('/api/auth/users')
 

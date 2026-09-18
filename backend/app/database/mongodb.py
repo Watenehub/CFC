@@ -1,5 +1,6 @@
 from pymongo import MongoClient, ASCENDING
 from flask import current_app
+import os
 
 
 def init_mongo(app):
@@ -11,7 +12,6 @@ def init_mongo(app):
     client_kwargs = {
         "serverSelectionTimeoutMS": 5000,
         "retryWrites": True,
-        "tlsAllowInvalidCertificates": True  # Temporarily allow invalid certificates
     }
 
     client = MongoClient(uri, **client_kwargs)

@@ -11,6 +11,11 @@ function csrfFailed(data, status) {
   return status === 400 && (data?.code === 'csrf_failed' || /security token/i.test(data?.error || ''))
 }
 
+export function resetCsrfToken() {
+  csrfToken = ''
+  csrfPromise = null
+}
+
 export async function getCsrfToken(force = false) {
   if (csrfToken && !force) return csrfToken
   if (csrfPromise && !force) return csrfPromise

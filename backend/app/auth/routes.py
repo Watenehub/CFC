@@ -6,15 +6,6 @@ from flask import Blueprint, jsonify, request, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from .permissions import role_required, effective_permissions
 from ..database.mongodb import get_db
-# from ..security.events import log_security_event
-# from ..security.lockout import (
-#     clear_failed_logins,
-#     lockout_status,
-#     register_failed_login,
-# )
-# from ..security.mailer import send_email
-# from ..security.passwords import PASSWORD_HELP, validate_password
-# from ..security.rate_limit import limiter
 from pymongo import DESCENDING
 
 
@@ -40,15 +31,11 @@ def _hash_token(token):
 
 
 def _apply_password(update_data, password):
-    # error = validate_password(password)
-    # if error:
-    #     return error
     update_data["password"] = generate_password_hash(password)
     return None
 
 
 @auth_bp.route("/api/auth/login", methods=["POST"])
-# @limiter.limit("5 per minute; 20 per hour")
 def login():
     data = request.get_json() or {}
 
@@ -62,25 +49,17 @@ def login():
 
     db = get_db()
     user = db.users.find_one({"email": email})
-    # locked = lockout_status(user)
-    # if locked:
-    #     log_security_event("login_blocked", email=email, user_id=user.get("id"))
-    #     return jsonify({"error": locked}), 429
 
     if not user or not check_password_hash(user["password"], password):
-        # register_failed_login(db, user, email)
         return jsonify({
             "error": "Invalid email or password"
         }), 401
 
-    # clear_failed_logins(db, user)
     session.clear()
     session.permanent = True
     session["user_id"] = user["id"]
     session["role"] = user["role"]
     session["permissions"] = effective_permissions(user["role"], user.get("permissions"))
-
-    # log_security_event("login_success", outcome="success", email=email, user_id=user["id"])
 
     return jsonify({
         "message": "Login successful",
@@ -111,7 +90,6 @@ def current_user():
 
 @auth_bp.route("/api/auth/logout", methods=["POST"])
 def logout():
-    # log_security_event("logout", outcome="success", user_id=session.get("user_id"))
     session.clear()
     return jsonify({
         "message": "Logout successful"
@@ -119,16 +97,13 @@ def logout():
 
 
 @auth_bp.route("/api/auth/register", methods=["POST"])
-# @limiter.limit("3 per hour")
 def register():
-    # log_security_event("register_blocked", reason="public_registration_disabled")
     return jsonify({
         "error": "Public registration is disabled. Ask an administrator to create a staff account."
     }), 403
 
 
 @auth_bp.route("/api/auth/forgot-password", methods=["POST"])
-# @limiter.limit("3 per minute; 10 per hour")
 def forgot_password():
     data = request.get_json() or {}
     email = data.get("email", "").strip().lower()
@@ -141,7 +116,6 @@ def forgot_password():
     db = get_db()
     user = db.users.find_one({"email": email})
     if not user:
-        # log_security_event("password_reset_requested", email=email, reason="unknown_user")
         return jsonify(generic)
 
     raw_token = secrets.token_urlsafe(32)
@@ -161,26 +135,19 @@ def forgot_password():
         "If you did not request this, you can ignore this email."
     )
     try:
-        # send_email(user["email"], "Reset your CFC staff password", body)
-        pass
+        send_email(user["email"], "Reset your CFC staff password", body)
     except Exception:
-        # log_security_event("password_reset_email_failed", email=email, user_id=user["id"])
         pass
 
-    # log_security_event("password_reset_requested", outcome="success", email=email, user_id=user["id"])
     return jsonify(generic)
 
 
 @auth_bp.route("/api/auth/reset-password", methods=["POST"])
-# @limiter.limit("5 per minute")
 def reset_password():
     data = request.get_json() or {}
     token = data.get("token", "")
     new_password = data.get("new_password", "")
 
-    # error = validate_password(new_password)
-    # if not token or error:
-    #     return jsonify({"error": error or "A valid reset token is required"}), 400
     if not token:
         return jsonify({"error": "A valid reset token is required"}), 400
 
@@ -191,7 +158,6 @@ def reset_password():
         expires = expires.replace(tzinfo=timezone.utc)
 
     if not record or (expires and expires < datetime.now(timezone.utc)):
-        # log_security_event("password_reset_failed", reason="invalid_or_expired_token")
         return jsonify({"error": "This reset link is invalid or has expired."}), 400
 
     db.users.update_one(
@@ -201,7 +167,6 @@ def reset_password():
     )
     db.password_resets.update_one({"_id": record["_id"]}, {"$set": {"used": True}})
     db.password_resets.delete_many({"user_id": record["user_id"], "used": False})
-    # log_security_event("password_reset_success", outcome="success", user_id=record["user_id"])
     return jsonify({"message": "Password updated. You can sign in with your new password."})
 
 
@@ -210,7 +175,6 @@ def reset_password():
 def get_users():
     db = get_db()
     users = db.users.find().sort("id", 1)
-    # log_security_event("users_listed", outcome="success")
     return jsonify([
         serialize_user(user)
         for user in users
@@ -240,10 +204,6 @@ def create_user():
             "error": "Name, email, password and role are required"
         }), 400
 
-    # password_error = validate_password(password)
-    # if password_error:
-    #     return jsonify({"error": password_error, "hint": PASSWORD_HELP}), 400
-
     if role not in allowed_roles:
         return jsonify({
             "error": "Invalid role",
@@ -272,13 +232,6 @@ def create_user():
     }
 
     db.users.insert_one(new_user)
-    # log_security_event(
-    #     "user_created",
-    #     outcome="success",
-    #     target_user_id=next_id,
-    #     target_email=email,
-    #     target_role=role,
-    # )
 
     return jsonify({
         "message": "User created successfully",
@@ -328,9 +281,7 @@ def update_user(user_id):
         )
 
     if data.get("password"):
-        password_error = _apply_password(update_data, data["password"])
-        if password_error:
-            return jsonify({"error": password_error}), 400
+        _apply_password(update_data, data["password"])
 
     if update_data:
         db.users.update_one({"id": user_id}, {"$set": update_data})
@@ -341,13 +292,6 @@ def update_user(user_id):
             if "permissions" in update_data:
                 session["permissions"] = update_data["permissions"]
 
-    # log_security_event(
-    #     "user_updated",
-    #     outcome="success",
-    #     target_user_id=user_id,
-    #     fields=sorted(update_data.keys()),
-    # )
-
     updated_user = db.users.find_one({"id": user_id})
     return jsonify({
         "message": "User updated successfully",
@@ -356,7 +300,6 @@ def update_user(user_id):
 
 
 @auth_bp.route("/api/auth/change-password", methods=["POST"])
-# @limiter.limit("5 per minute")
 def change_password():
     user_id = session.get("user_id")
 
@@ -376,18 +319,12 @@ def change_password():
         return jsonify({"error": "User not found"}), 404
 
     if not check_password_hash(user["password"], old_password):
-        # log_security_event("change_password_failed", user_id=user_id, reason="wrong_old_password")
         return jsonify({"error": "Incorrect old password"}), 400
-
-    # password_error = validate_password(new_password)
-    # if password_error:
-    #     return jsonify({"error": password_error, "hint": PASSWORD_HELP}), 400
 
     db.users.update_one(
         {"id": user_id},
         {"$set": {"password": generate_password_hash(new_password)}}
     )
-    # log_security_event("change_password_success", outcome="success", user_id=user_id)
     return jsonify({"message": "Password changed successfully"})
 
 
@@ -408,7 +345,6 @@ def delete_user(user_id):
             "error": "User not found"
         }), 404
 
-    # log_security_event("user_deleted", outcome="success", target_user_id=user_id)
     return jsonify({
         "message": "User removed successfully"
     })
