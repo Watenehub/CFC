@@ -11,11 +11,6 @@ function csrfFailed(data, status) {
   return status === 400 && (data?.code === 'csrf_failed' || /security token/i.test(data?.error || ''))
 }
 
-export function resetCsrfToken() {
-  csrfToken = ''
-  csrfPromise = null
-}
-
 export async function getCsrfToken(force = false) {
   if (csrfToken && !force) return csrfToken
   if (csrfPromise && !force) return csrfPromise
@@ -59,10 +54,9 @@ export async function apiCall(endpoint, options = {}, retry = true) {
     headers['Content-Type'] = headers['Content-Type'] || 'application/json'
   }
 
-  // CSRF disabled temporarily
-  // if (isJsonMethod(method)) {
-  //   headers['X-CSRFToken'] = await getCsrfToken()
-  // }
+  if (isJsonMethod(method)) {
+    headers['X-CSRFToken'] = await getCsrfToken()
+  }
 
   const config = {
     cache: isGetRequest ? 'default' : 'no-store',
@@ -75,11 +69,10 @@ export async function apiCall(endpoint, options = {}, retry = true) {
   const response = await fetch(url, config)
   const data = await parseBody(response)
 
-  // CSRF retry disabled temporarily
-  // if (retry && isJsonMethod(method) && csrfFailed(data, response.status)) {
-  //   csrfToken = ''
-  //   return apiCall(endpoint, options, false)
-  // }
+  if (retry && isJsonMethod(method) && csrfFailed(data, response.status)) {
+    csrfToken = ''
+    return apiCall(endpoint, options, false)
+  }
 
   if (!response.ok) {
     const error = new Error(data?.error || 'An error occurred')
