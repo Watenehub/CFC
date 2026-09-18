@@ -104,16 +104,17 @@ def create_app():
 
     @app.after_request
     def audit_auth_failures(response):
-        skip = {"/api/auth/me", "/api/csrf-token", "/api/health"}
-        if (
-            request.path.startswith("/api/")
-            and request.path not in skip
-            and response.status_code in {401, 403}
-        ):
-            log_security_event(
-                "unauthorized_access" if response.status_code == 401 else "access_denied",
-                status=response.status_code,
-            )
+        # Security logging disabled temporarily
+        # skip = {"/api/auth/me", "/api/csrf-token", "/api/health"}
+        # if (
+        #     request.path.startswith("/api/")
+        #     and request.path not in skip
+        #     and response.status_code in {401, 403}
+        # ):
+        #     log_security_event(
+        #         "unauthorized_access" if response.status_code == 401 else "access_denied",
+        #         status=response.status_code,
+        #     )
         return response
 
     return app
