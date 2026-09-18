@@ -1,4 +1,4 @@
-from flask import Flask, Blueprint, make_response, request
+from flask import Flask, Blueprint, make_response, request, jsonify
 from .config import Config
 from .database.mongodb import init_mongo
 from flask_cors import CORS
@@ -64,6 +64,12 @@ def create_app():
             "status": "success",
             "message": "Cornerstone Family Chapel API is healthy"
         }
+
+    @app.route("/api/csrf-token", methods=["GET"])
+    def csrf_token():
+        # Simple CSRF token endpoint for frontend compatibility
+        # Returns a dummy token since CSRF protection is not implemented
+        return jsonify({"csrf_token": "dummy-token"})
 
     @app.before_request
     def handle_preflight():
