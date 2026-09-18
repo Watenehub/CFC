@@ -35,9 +35,9 @@ def create_app():
 
     CORS(
         app,
-        resources={r"/*": {"origins": "*"}},
+        resources={r"/*": {"origins": ["https://cfckenya.vercel.app", "http://localhost:3000", "http://localhost:5173"]}},
         supports_credentials=True,
-        allow_headers=["Content-Type"],
+        allow_headers=["Content-Type", "X-CSRFToken", "X-CSRF-Token"],
         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     )
 
