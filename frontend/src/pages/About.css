@@ -10,14 +10,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--color-deep-navy) 0%, var(--color-royal-blue) 100%);
+  background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
   overflow: hidden;
 }
 
 .about-hero-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(15, 23, 42, 0.4);
+  background: rgba(13, 59, 18, 0.4);
 }
 
 .about-hero-content {
@@ -32,7 +32,7 @@
   font-size: clamp(2.5rem, 6vw, 4.5rem);
   font-weight: 800;
   line-height: 1.1;
-  color: var(--color-pure-white);
+  color: var(--color-white);
   margin-bottom: 1.5rem;
   letter-spacing: -0.02em;
 }
@@ -40,7 +40,7 @@
 .about-hero-subtitle {
   font-size: clamp(1.25rem, 3vw, 2rem);
   font-weight: 600;
-  color: var(--color-warm-gold);
+  color: var(--color-accent);
   margin-bottom: 1.5rem;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -69,36 +69,36 @@
 }
 
 .about-section--white {
-  background: var(--color-pure-white);
+  background: var(--color-white);
 }
 
 .about-section--light {
-  background: var(--color-light-gray);
+  background: var(--color-bg-light);
 }
 
 .about-section--gradient {
-  background: var(--gradient-primary);
-  color: var(--color-pure-white);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  color: var(--color-white);
 }
 
 .about-section--slogan {
-  background: var(--color-deep-navy);
+  background: var(--color-primary-dark);
   padding: 8rem 0;
   text-align: center;
 }
 
 .about-section--faithfulness {
-  background: linear-gradient(135deg, var(--color-warm-gold) 0%, #F59E0B 100%);
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
   padding: 8rem 0;
   text-align: center;
-  color: var(--color-deep-navy);
+  color: var(--color-primary-dark);
 }
 
 .about-section--cta {
-  background: var(--color-deep-navy);
+  background: var(--color-primary-dark);
   padding: 8rem 0;
   text-align: center;
-  color: var(--color-pure-white);
+  color: var(--color-white);
 }
 
 /* SECTION HEADER */
@@ -113,7 +113,7 @@
 .section-header h2 {
   font-size: clamp(2rem, 4vw, 3rem);
   font-weight: 800;
-  color: var(--color-deep-navy);
+  color: var(--color-primary-dark);
   margin-bottom: 1.5rem;
   letter-spacing: -0.02em;
 }
@@ -122,13 +122,13 @@
 .about-section--slogan .section-header h2,
 .about-section--faithfulness .section-header h2,
 .about-section--cta .section-header h2 {
-  color: var(--color-pure-white);
+  color: var(--color-white);
 }
 
 .section-intro {
   font-size: clamp(1rem, 2vw, 1.25rem);
   line-height: 1.8;
-  color: var(--color-charcoal);
+  color: var(--color-gray-800);
   margin-bottom: 0;
 }
 
@@ -146,18 +146,18 @@
 }
 
 .who-we-are-card {
-  background: var(--color-pure-white);
+  background: var(--color-white);
   border-radius: 20px;
   padding: 3rem 2rem;
   text-align: center;
-  box-shadow: var(--shadow-soft);
+  box-shadow: var(--shadow-md);
   border: 1px solid var(--color-gray-200);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .who-we-are-card:hover {
   transform: translateY(-8px);
-  box-shadow: var(--shadow-premium);
+  box-shadow: var(--shadow-xl);
 }
 
 .who-we-are-icon {
@@ -168,7 +168,7 @@
 .who-we-are-card h3 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--color-deep-navy);
+  color: var(--color-primary-dark);
   margin-bottom: 1rem;
   letter-spacing: -0.01em;
 }
@@ -176,7 +176,7 @@
 .who-we-are-card p {
   font-size: 1rem;
   line-height: 1.7;
-  color: var(--color-charcoal);
+  color: var(--color-gray-800);
   margin: 0;
 }
 
@@ -216,7 +216,7 @@
   font-weight: 800;
   line-height: 1.2;
   letter-spacing: -0.02em;
-  color: var(--color-warm-gold);
+  color: var(--color-accent);
   max-width: 900px;
   margin: 0 auto;
 }
@@ -238,7 +238,7 @@
 
 .defines-bullet {
   font-size: 2rem;
-  color: var(--color-royal-blue);
+  color: var(--color-primary);
   line-height: 1;
   flex-shrink: 0;
 }
@@ -246,7 +246,7 @@
 .defines-item p {
   font-size: 1.125rem;
   line-height: 1.7;
-  color: var(--color-charcoal);
+  color: var(--color-gray-800);
   margin: 0;
   font-weight: 500;
 }
@@ -272,7 +272,7 @@
   flex-shrink: 0;
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--color-royal-blue);
+  color: var(--color-primary);
   min-width: 180px;
   padding-top: 0.25rem;
 }
@@ -280,7 +280,7 @@
 .timeline-content p {
   font-size: 1.125rem;
   line-height: 1.8;
-  color: var(--color-charcoal);
+  color: var(--color-gray-800);
   margin: 0;
 }
 
@@ -309,18 +309,18 @@
 }
 
 .value-card {
-  background: var(--color-pure-white);
+  background: var(--color-white);
   border-radius: 20px;
   padding: 2.5rem 2rem;
   text-align: center;
-  box-shadow: var(--shadow-soft);
+  box-shadow: var(--shadow-md);
   border: 1px solid var(--color-gray-200);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .value-card:hover {
   transform: translateY(-8px);
-  box-shadow: var(--shadow-premium);
+  box-shadow: var(--shadow-xl);
 }
 
 .value-icon {
@@ -331,7 +331,7 @@
 .value-card h3 {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--color-deep-navy);
+  color: var(--color-primary-dark);
   margin-bottom: 1rem;
   letter-spacing: -0.01em;
 }
@@ -339,7 +339,7 @@
 .value-card p {
   font-size: 1rem;
   line-height: 1.7;
-  color: var(--color-charcoal);
+  color: var(--color-gray-800);
   margin-bottom: 1rem;
 }
 
@@ -361,15 +361,15 @@
 .life-together-item {
   text-align: center;
   padding: 2rem;
-  background: var(--color-pure-white);
+  background: var(--color-white);
   border-radius: 16px;
-  box-shadow: var(--shadow-soft);
+  box-shadow: var(--shadow-md);
 }
 
 .life-together-number {
   font-size: 3rem;
   font-weight: 800;
-  color: var(--color-royal-blue);
+  color: var(--color-primary);
   margin-bottom: 1rem;
   letter-spacing: -0.02em;
 }
@@ -377,7 +377,7 @@
 .life-together-item h3 {
   font-size: 1.125rem;
   font-weight: 700;
-  color: var(--color-deep-navy);
+  color: var(--color-primary-dark);
   margin: 0;
   letter-spacing: -0.01em;
 }
@@ -386,7 +386,7 @@
   text-align: center;
   font-size: 1.25rem;
   line-height: 1.8;
-  color: var(--color-charcoal);
+  color: var(--color-gray-800);
   max-width: 700px;
   margin: 2rem auto 1rem;
   font-weight: 500;
@@ -443,24 +443,24 @@
 }
 
 .btn-primary {
-  background: var(--color-warm-gold);
-  color: var(--color-deep-navy);
+  background: var(--color-accent);
+  color: var(--color-primary-dark);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(212, 160, 23, 0.4);
+  box-shadow: var(--shadow-lg);
 }
 
 .btn-outline {
   background: transparent;
-  color: var(--color-pure-white);
-  border-color: var(--color-pure-white);
+  color: var(--color-white);
+  border-color: var(--color-white);
 }
 
 .btn-outline:hover {
-  background: var(--color-pure-white);
-  color: var(--color-deep-navy);
+  background: var(--color-white);
+  color: var(--color-primary-dark);
 }
 
 /* FADE UP ANIMATION */
