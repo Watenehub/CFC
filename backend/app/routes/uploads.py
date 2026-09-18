@@ -3,9 +3,6 @@ import uuid
 from flask import Blueprint, current_app, jsonify, request, send_from_directory
 from werkzeug.utils import secure_filename
 from ..auth.permissions import login_required
-from ..security.events import log_security_event
-from ..security.images import inspect_image
-from ..security.rate_limit import limiter
 
 uploads_bp = Blueprint("uploads", __name__)
 
@@ -21,7 +18,6 @@ def _uploads_dir():
 
 @uploads_bp.route("/api/upload", methods=["POST"])
 @login_required
-@limiter.limit("20 per minute")
 def upload_file():
     if "file" not in request.files:
         return jsonify({"error": "No file provided"}), 400
@@ -36,10 +32,11 @@ def upload_file():
     if size > MAX_UPLOAD_BYTES:
         return jsonify({"error": "Image must be 8MB or smaller."}), 400
 
-    extension, error = inspect_image(file)
-    if error:
-        log_security_event("upload_rejected", filename=secure_filename(file.filename), reason=error)
-        return jsonify({"error": error}), 400
+    filename = secure_filename(file.filename)
+    extension = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+    
+    if extension not in ["jpg", "jpeg", "png", "gif", "webp"]:
+        return jsonify({"error": "Invalid file type. Only images are allowed."}), 400
 
     filename = f"{uuid.uuid4().hex}.{extension}"
     destination = os.path.join(_uploads_dir(), filename)
@@ -48,7 +45,6 @@ def upload_file():
 
     base = request.host_url.rstrip("/")
     url = f"{base}/uploads/{filename}"
-    log_security_event("upload_success", outcome="success", filename=filename)
     return jsonify({"url": url, "filename": filename}), 201
 
 

@@ -1,7 +1,6 @@
 from flask import Blueprint, jsonify, request
 from ..auth.permissions import role_required
 from ..database.mongodb import get_db
-from ..security.rate_limit import limiter
 from pymongo import DESCENDING
 
 
@@ -54,7 +53,6 @@ def get_enquiry(enquiry_id):
 
 
 @enquiries_bp.route("/api/enquiries", methods=["POST"])
-@limiter.limit("5 per minute; 30 per hour")
 def create_enquiry():
     """Create a new enquiry (public endpoint)."""
     db = get_db()
