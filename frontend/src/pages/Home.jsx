@@ -82,6 +82,21 @@ function Home() {
   }, [])
 
   useEffect(() => {
+    const elements = document.querySelectorAll('.home-reveal')
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          entry.target.classList.toggle('visible', entry.isIntersecting)
+        })
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -60px 0px' },
+    )
+
+    elements.forEach((element) => observer.observe(element))
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
     let isMounted = true
 
     const loadData = async () => {
@@ -188,7 +203,7 @@ function Home() {
         <span className="floating-dot floating-dot-one" aria-hidden="true" />
         <span className="floating-dot floating-dot-two" aria-hidden="true" />
         <div className="container">
-          <div className="section-header fade-up">
+          <div className="section-header home-reveal ascend-text">
             <span className="section-eyebrow">This week</span>
             <h2 className="section-heading">Ways to be part of Cornerstone</h2>
             <p className="section-subheading">
@@ -197,7 +212,7 @@ function Home() {
           </div>
           <div className="experience-grid">
             {experiences.map((item) => (
-              <Link key={item.title} to={item.link} className="experience-card fade-up">
+              <Link key={item.title} to={item.link} className="experience-card home-reveal skate-text">
                 <div className="experience-card-image">
                   <img src={item.image} alt={item.title} loading="lazy" />
                 </div>
@@ -214,7 +229,7 @@ function Home() {
 
       <section className="section sermon-feature section-tumble">
           <div className="container">
-            <div className="sermon-feature-grid fade-up">
+            <div className="sermon-feature-grid home-reveal merge-text">
               <div className="sermon-feature-media">
                 <img className="motion-image" src={latestSermon?.thumbnail || '/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg'} alt={latestSermon?.title || 'Cornerstone Family Chapel sermon'} />
               </div>
@@ -236,27 +251,29 @@ function Home() {
 
       <section className="section connect section-pan">
         <div className="container">
-          <div className="section-header fade-up">
-            <span className="section-eyebrow"># Stay connected</span>
-            <h2 className="section-heading">Prayer, events, giving, and photos</h2>
-          </div>
-          <div className="connect-scroll">
-            {connectCards.map((card) => (
-              <Link key={card.title} to={card.link} className="connect-card fade-up">
-                <img src={card.image} alt={card.title} loading="lazy" />
-                <div className="connect-card-overlay">
-                  <h3>{card.title}</h3>
-                  <p>{card.subtitle}</p>
-                </div>
-              </Link>
-            ))}
+          <div className="connect-stage">
+            <div className="section-header home-reveal burst-text">
+              <span className="section-eyebrow"># Stay</span>
+              <h2 className="section-heading">Connected</h2>
+            </div>
+            <div className="connect-scroll">
+              {connectCards.map((card) => (
+                <Link key={card.title} to={card.link} className="connect-card home-reveal skate-text">
+                  <img src={card.image} alt={card.title} loading="lazy" />
+                  <div className="connect-card-overlay">
+                    <h3>{card.title}</h3>
+                    <p>{card.subtitle}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
         <section className="section events-section section-tumble">
           <div className="container events-layout">
-            <div className="events-copy fade-up event-copy-motion" key={`event-copy-${currentEvent.id}`}>
+            <div className="events-copy home-reveal ascend-text event-copy-motion" key={`event-copy-${currentEvent.id}`}>
               <span className="section-eyebrow">Calendar</span>
               <h2 className="section-heading">Coming up at the chapel</h2>
               <p className="events-description">{currentEvent.description || 'Bible conferences, membership classes, worship nights, and outreach throughout the year.'}</p>
@@ -266,7 +283,7 @@ function Home() {
               </div>
               <Link to="/events" className="btn btn-primary events-calendar-button">Full calendar</Link>
             </div>
-            <div className="event-showcase fade-up" aria-live="polite">
+            <div className="event-showcase home-reveal merge-text" aria-live="polite">
               <div className="event-showcase-image">
                 {eventSlides.map((event, index) => (
                   <div className={`event-slide ${index === activeEvent ? 'is-active' : ''}`} key={event.id} aria-hidden={index !== activeEvent}>
@@ -283,14 +300,14 @@ function Home() {
 
       <section className="section get-involved section-pan">
         <div className="container">
-          <div className="section-header fade-up">
+          <div className="section-header home-reveal bounce-text">
             <span className="section-eyebrow">Take part</span>
             <h2 className="section-heading">Serve, pray, and give</h2>
             <p className="section-subheading">Every member has a place in the life of this church.</p>
           </div>
           <div className="involved-grid">
             {getInvolved.map((item) => (
-              <Link key={item.title} to={item.link} className="involved-card fade-up">
+              <Link key={item.title} to={item.link} className="involved-card home-reveal burst-text">
                 <h3>{item.title}</h3>
                 <p>{item.description}</p>
                 <span className="involved-link">Learn more →</span>
@@ -302,7 +319,7 @@ function Home() {
 
       <section className="cta-band section-pan">
         <div className="container">
-          <div className="cta-band-content fade-up">
+          <div className="cta-band-content home-reveal bounce-text">
             <h2>We would be glad to welcome you</h2>
             <p>Visit on Sunday, write to us, or watch a recent message from home.</p>
             <div className="cta-band-actions">
