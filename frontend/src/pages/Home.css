@@ -1572,31 +1572,33 @@
 
   .home .experience-stage { height: 530px; }
 
-  .home .experiences.section-tectonic .experience-card { width: 205px; }
-  .home .experience-card-1 { left: 42px; top: 78px; }
-  .home .experience-card-2 { left: 290px; top: 0; }
-  .home .experience-card-3 { left: 538px; top: 88px; }
-  .home .experience-card-4 { left: 786px; top: 0; }
+  .home .experiences.section-tectonic .experience-card { width: 226px; }
+  .home .experience-card-1 { left: 28px; top: 78px; }
+  .home .experience-card-2 { left: 286px; top: 0; }
+  .home .experience-card-3 { left: 544px; top: 88px; }
+  .home .experience-card-4 { left: 802px; top: 0; }
 
-  .home .experiences.section-tectonic .experience-card-image { height: 152px; }
-  .home .experiences.section-tectonic .experience-card-body { min-height: 175px; padding: 16px 16px 18px; }
-  .home .experiences.section-tectonic .experience-card-body h3 { font-size: 0.95rem; }
-  .home .experiences.section-tectonic .experience-card-body p { font-size: 0.72rem; }
-  .home .experiences.section-tectonic .experience-card-link { font-size: 0.66rem; }
+  .home .experiences.section-tectonic .experience-card-1 { border: 0; }
+  .home .experiences.section-tectonic .experience-card-image { height: 167px; }
+  .home .experiences.section-tectonic .experience-card-body { min-height: 193px; padding: 17px 17px 20px; }
+  .home .experiences.section-tectonic .experience-card-body h3 { font-size: 1rem; }
+  .home .experiences.section-tectonic .experience-card-body p { font-size: 0.76rem; }
+  .home .experiences.section-tectonic .experience-card-link { font-size: 0.69rem; }
 }
 
 @media (min-width: 901px) {
   .home .connect-stage {
     max-width: 1300px;
-    min-height: 590px;
+    min-height: 650px;
   }
 
   .home .connect-scroll {
-    width: 70%;
+    width: 78%;
+    transform: translate(-2%, 34px);
   }
 
   .home .connect-card {
-    aspect-ratio: 0.72 / 1;
+    aspect-ratio: 0.66 / 1;
   }
 
   .home .connect-card:nth-child(1) { transform: translateY(8px) rotate(-0.8deg); }

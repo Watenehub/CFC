@@ -477,6 +477,8 @@ function About() {
                 grows in Christ, community, and service.
               </p>
 
+              <p>By the Grace of God we are currently located at Ruiru Kamakis.</p>
+
               <a
                 className="about-story-location"
                 href="https://maps.app.goo.gl/X1ipVVPMVysJwD4L7"
