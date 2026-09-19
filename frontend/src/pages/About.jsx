@@ -64,7 +64,7 @@ function About() {
               <span>CHAPEL</span>
             </div>
 
-            <h1 className="typewriter-text">
+            <h1 className="ascend-text">
               A FAMILY CHURCH
               <br />
               THAT WORSHIPS
