@@ -66,7 +66,7 @@ function About() {
           <div className="about-hero-image-wrap about-reveal">
             <div className="about-hero-image">
               <img
-                src="/images/cornerstone/page_01/page01_photo001_praise_and_worship_team_group.jpg"
+                src="/images/cornerstone/page_01/751563519_871022072748257_3613845665156140829_n.jpg"
                 alt="Cornerstone Family Chapel worship service"
               />
             </div>

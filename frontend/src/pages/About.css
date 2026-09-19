@@ -522,9 +522,9 @@
   position: relative;
 
   width: 88%;
-  height: 175px;
+  height: 200px;
 
-  margin: -35px auto 0;
+  margin: 15px auto 0;
 
   overflow: hidden;
 
@@ -940,7 +940,8 @@
 
   .about-faith-image {
     width: 94%;
-    height: 145px;
+    height: 160px;
+    margin: 10px auto 0;
   }
 
   .about-story {
