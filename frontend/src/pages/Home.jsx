@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { initScrollAnimations, cleanupScrollAnimations } from '../utils/scrollAnimations'
 import * as sermonsApi from '../api/sermons'
 import * as eventsApi from '../api/events'
-import * as ministriesApi from '../api/ministries'
 import * as notificationsApi from '../api/notifications'
 import './Home.css'
 
@@ -51,9 +50,18 @@ const getInvolved = [
   { title: 'Give', description: 'Your gifts help us teach the Word, care for people, and keep the work of the church going.', link: '/give' },
 ]
 
+const fallbackEvent = {
+  id: 'chapel-fallback',
+  title: 'Bible conferences, membership classes, worship nights, and outreach',
+  description: 'There is always something happening at the chapel. Explore the full calendar for what is coming next.',
+  image: '/images/cornerstone/page_02/page02_photo008_good_soil_conference_gathering.jpg',
+  link: '/events',
+}
+
 function formatEventDate(dateString) {
   if (!dateString) return ''
   const date = new Date(dateString)
+  if (Number.isNaN(date.getTime())) return ''
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
@@ -65,8 +73,8 @@ function formatTimeRange(start, end) {
 function Home() {
   const [latestSermon, setLatestSermon] = useState(null)
   const [upcomingEvents, setUpcomingEvents] = useState([])
-  const [ministries, setMinistries] = useState([])
   const [announcements, setAnnouncements] = useState([])
+  const [activeEvent, setActiveEvent] = useState(0)
 
   useEffect(() => {
     const observer = initScrollAnimations()
@@ -95,21 +103,14 @@ function Home() {
             const upcoming = eventsData.value
               .filter((event) => !event.date || new Date(event.date) >= now)
               .sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')))
-              .slice(0, 3)
+              .slice(0, 6)
             setUpcomingEvents(upcoming)
           }
           if (notesData.status === 'fulfilled') {
-            setAnnouncements(notesData.value.slice(0, 3))
+            setAnnouncements(notesData.value.slice(0, 6))
           }
         }
 
-        // Load less critical content after
-        if (isMounted) {
-          const ministriesData = await ministriesApi.getMinistries()
-          if (isMounted && ministriesData) {
-            setMinistries(ministriesData.slice(0, 4))
-          }
-        }
       } catch (err) {
         console.error('Failed to load home page data:', err)
       }
@@ -121,6 +122,42 @@ function Home() {
       isMounted = false
     }
   }, [])
+
+  const eventSlides = useMemo(() => {
+    const apiEvents = upcomingEvents.map((event) => ({
+      ...event,
+      type: 'event',
+      description: event.description || event.location || 'Join us at Cornerstone Family Chapel.',
+      image: event.image || fallbackEvent.image,
+    }))
+
+    const noticeSlides = announcements
+      .filter((note) => note.image)
+      .map((note) => ({
+        ...note,
+        id: `announcement-${note.id || note.title}`,
+        type: 'announcement',
+        description: note.message,
+        image: note.image,
+      }))
+
+    const slides = [...apiEvents, ...noticeSlides]
+    return slides.length ? slides.slice(0, 6) : [fallbackEvent]
+  }, [upcomingEvents, announcements])
+
+  useEffect(() => {
+    setActiveEvent((current) => Math.min(current, Math.max(eventSlides.length - 1, 0)))
+
+    if (eventSlides.length <= 1) return undefined
+
+    const timer = window.setInterval(() => {
+      setActiveEvent((current) => (current + 1) % eventSlides.length)
+    }, 3500)
+
+    return () => window.clearInterval(timer)
+  }, [eventSlides.length])
+
+  const currentEvent = eventSlides[activeEvent] || fallbackEvent
 
   return (
     <div className="home">
@@ -147,7 +184,9 @@ function Home() {
         </div>
       </section>
 
-      <section className="section experiences section-rise">
+      <section className="section experiences section-tectonic">
+        <span className="floating-dot floating-dot-one" aria-hidden="true" />
+        <span className="floating-dot floating-dot-two" aria-hidden="true" />
         <div className="container">
           <div className="section-header fade-up">
             <span className="section-eyebrow">This week</span>
@@ -173,37 +212,32 @@ function Home() {
         </div>
       </section>
 
-      {latestSermon && (
-        <section className="section sermon-feature section-pan">
+      <section className="section sermon-feature section-tumble">
           <div className="container">
             <div className="sermon-feature-grid fade-up">
               <div className="sermon-feature-media">
-                <img
-                  src={latestSermon.thumbnail || '/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg'}
-                  alt={latestSermon.title}
-                />
+                <img className="motion-image" src={latestSermon?.thumbnail || '/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg'} alt={latestSermon?.title || 'Cornerstone Family Chapel sermon'} />
               </div>
               <div className="sermon-feature-content">
                 <span className="section-eyebrow">From the pulpit</span>
-                <h2 className="section-heading">{latestSermon.title}</h2>
+                <h2 className="section-heading">{latestSermon?.title || 'More than a Name'}</h2>
                 <p className="sermon-meta">
-                  {[latestSermon.speaker, latestSermon.date && new Date(latestSermon.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }), latestSermon.scripture].filter(Boolean).join(' · ')}
+                  {[latestSermon?.speaker || 'PIT NASH', latestSermon?.date && new Date(latestSermon.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }), latestSermon?.scripture || 'Genesis 32:27–31'].filter(Boolean).join(' · ')}
                 </p>
-                <p className="sermon-description">{latestSermon.description}</p>
+                <p className="sermon-description">{latestSermon?.description || 'A message from the pulpit to help us know Christ and live as His people.'}</p>
                 <div className="sermon-actions">
-                  <Link to={`/sermons/${latestSermon.id}`} className="btn btn-dark">Watch this message</Link>
+                  <Link to={latestSermon ? `/sermons/${latestSermon.id}` : '/sermons'} className="btn btn-dark">Watch this message</Link>
                   <Link to="/sermons" className="sermon-link-secondary">All sermons →</Link>
                 </div>
               </div>
             </div>
           </div>
         </section>
-      )}
 
-      <section className="section connect section-dissolve">
+      <section className="section connect section-pan">
         <div className="container">
           <div className="section-header fade-up">
-            <span className="section-eyebrow">Stay connected</span>
+            <span className="section-eyebrow"># Stay connected</span>
             <h2 className="section-heading">Prayer, events, giving, and photos</h2>
           </div>
           <div className="connect-scroll">
@@ -220,112 +254,34 @@ function Home() {
         </div>
       </section>
 
-      {ministries.length > 0 && (
-        <section className="section ministries-section section-wipe">
-          <div className="container">
-            <div className="section-header fade-up">
-              <span className="section-eyebrow">Ministries</span>
-              <h2 className="section-heading">Where our church family serves</h2>
-              <p className="section-subheading">
-                Each ministry helps us grow together and bless others.
-              </p>
+        <section className="section events-section section-tumble">
+          <div className="container events-layout">
+            <div className="events-copy fade-up event-copy-motion" key={`event-copy-${currentEvent.id}`}>
+              <span className="section-eyebrow">Calendar</span>
+              <h2 className="section-heading">Coming up at the chapel</h2>
+              <p className="events-description">{currentEvent.description || 'Bible conferences, membership classes, worship nights, and outreach throughout the year.'}</p>
+              <div className="event-current-details">
+                {currentEvent.title && currentEvent.title !== fallbackEvent.title && <strong>{currentEvent.title}</strong>}
+                {currentEvent.type === 'event' && <span>{[formatEventDate(currentEvent.date), formatTimeRange(currentEvent.start_time, currentEvent.end_time)].filter(Boolean).join(' · ')}</span>}
+              </div>
+              <Link to="/events" className="btn btn-primary events-calendar-button">Full calendar</Link>
             </div>
-            <div className="ministries-grid">
-              {ministries.map((ministry) => (
-                <Link key={ministry.id} to="/ministries" className="ministry-card fade-up">
-                  <img src={ministry.image || '/chapel.jpg'} alt={ministry.name} loading="lazy" />
-                  <div className="ministry-card-content">
-                    {ministry.leader && <p className="ministry-tagline">Led by {ministry.leader}</p>}
-                    <h3>{ministry.name}</h3>
-                    <p className="ministry-desc">{ministry.description}</p>
-                    <span className="ministry-link">Learn more →</span>
+            <div className="event-showcase fade-up" aria-live="polite">
+              <div className="event-showcase-image">
+                {eventSlides.map((event, index) => (
+                  <div className={`event-slide ${index === activeEvent ? 'is-active' : ''}`} key={event.id} aria-hidden={index !== activeEvent}>
+                    <img className="motion-image" src={event.image || fallbackEvent.image} alt={event.title || 'Upcoming Cornerstone event'} loading={index === 0 ? 'eager' : 'lazy'} />
                   </div>
-                </Link>
-              ))}
-            </div>
-            <div className="section-footer fade-up">
-              <Link to="/ministries" className="btn btn-dark">All ministries</Link>
+                ))}
+              </div>
+              <div className="event-dots" aria-label="Upcoming events">
+                {eventSlides.map((event, index) => <button key={event.id} type="button" className={index === activeEvent ? 'active' : ''} aria-label={`Show ${event.title || `event ${index + 1}`}`} onClick={() => setActiveEvent(index)} />)}
+              </div>
             </div>
           </div>
         </section>
-      )}
 
-      <section className="section events-section section-slide">
-        <div className="container">
-          <div className="section-header fade-up">
-            <span className="section-eyebrow">Calendar</span>
-            <h2 className="section-heading">Coming up at the chapel</h2>
-            <p className="section-subheading">
-              Bible conferences, membership classes, worship nights, and outreach throughout the year.
-            </p>
-          </div>
-          
-          {/* Display announcements with images */}
-          {announcements.length > 0 && (
-            <div className="announcements-grid fade-up">
-              {announcements.map((note) => (
-                <div key={note.id || note.title} className="announcement-card">
-                  {note.image && (
-                    <img 
-                      src={note.image} 
-                      alt={note.title} 
-                      className="announcement-image" 
-                      loading="lazy"
-                      decoding="async"
-                      width="300"
-                      height="200"
-                    />
-                  )}
-                  <div className="announcement-content">
-                    <span className="announcement-label">Announcement</span>
-                    <h3>{note.title}</h3>
-                    <p>{note.message}</p>
-                    {note.link && (
-                      <Link to={note.link} className="btn btn-primary">Learn more</Link>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {upcomingEvents.length === 0 && announcements.length === 0 ? (
-            <div className="empty-state fade-up"><p>No upcoming events or announcements posted yet. Check back soon.</p></div>
-          ) : (
-            <>
-              {upcomingEvents.length > 0 && (
-                <div className="events-grid">
-                  {upcomingEvents.map((event) => (
-                    <Link key={event.id} to={`/events/${event.id}`} className="event-card fade-up">
-                      <div className="event-card-image">
-                        <img 
-                          src={event.image || '/chapel.jpg'} 
-                          alt={event.title} 
-                          loading="lazy"
-                          decoding="async"
-                          width="400"
-                          height="250"
-                        />
-                        <span className="event-date-badge">{formatEventDate(event.date)}</span>
-                      </div>
-                      <div className="event-card-body">
-                        <h3>{event.title}</h3>
-                        <p>{formatTimeRange(event.start_time, event.end_time)}</p>
-                        <p className="event-location">{event.location}</p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-          <div className="section-footer fade-up">
-            <Link to="/events" className="btn btn-dark">Full calendar</Link>
-          </div>
-        </div>
-      </section>
-
-      <section className="section get-involved section-rise">
+      <section className="section get-involved section-pan">
         <div className="container">
           <div className="section-header fade-up">
             <span className="section-eyebrow">Take part</span>
@@ -344,7 +300,7 @@ function Home() {
         </div>
       </section>
 
-      <section className="cta-band section-breathe">
+      <section className="cta-band section-pan">
         <div className="container">
           <div className="cta-band-content fade-up">
             <h2>We would be glad to welcome you</h2>
