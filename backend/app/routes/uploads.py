@@ -1,8 +1,10 @@
 import os
 import uuid
-from flask import Blueprint, current_app, jsonify, request, send_from_directory
+import gridfs
+from flask import Blueprint, current_app, jsonify, request, send_file, send_from_directory
 from werkzeug.utils import secure_filename
 from ..auth.permissions import login_required
+from ..database.mongodb import get_db
 
 uploads_bp = Blueprint("uploads", __name__)
 
@@ -39,9 +41,13 @@ def upload_file():
         return jsonify({"error": "Invalid file type. Only images are allowed."}), 400
 
     filename = f"{uuid.uuid4().hex}.{extension}"
-    destination = os.path.join(_uploads_dir(), filename)
     file.stream.seek(0)
-    file.save(destination)
+    bucket = gridfs.GridFS(get_db())
+    bucket.put(
+        file.stream,
+        filename=filename,
+        content_type=file.mimetype or "application/octet-stream",
+    )
 
     base = request.host_url.rstrip("/")
     url = f"{base}/uploads/{filename}"
@@ -53,4 +59,15 @@ def serve_upload(filename):
     safe_name = secure_filename(filename)
     if not safe_name or safe_name != os.path.basename(filename):
         return jsonify({"error": "Not found"}), 404
+
+    stored_file = gridfs.GridFS(get_db()).find_one({"filename": safe_name})
+    if stored_file:
+        return send_file(
+            stored_file,
+            mimetype=stored_file.content_type or "application/octet-stream",
+            download_name=safe_name,
+            conditional=True,
+        )
+
+    # Keep locally stored uploads from older deployments available during migration.
     return send_from_directory(_uploads_dir(), safe_name)
