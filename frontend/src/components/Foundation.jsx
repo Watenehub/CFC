@@ -13,12 +13,13 @@ export default function Foundation() {
       setLoading(false);
     }).catch(err => {
       console.error('Failed to fetch settings:', err);
+      setSettings({}); // Set empty object on error to allow default rendering
       setLoading(false);
     });
   }, []);
 
-  // Don't render if no mission/vision data or still loading
-  if (loading || !settings || (!settings.mission && !settings.vision && !settings.motto)) {
+  // Don't render if still loading
+  if (loading) {
     return null;
   }
 
@@ -27,7 +28,7 @@ export default function Foundation() {
       id: "vision",
       number: "01",
       title: "Our Vision",
-      description: settings.vision || "To nurture people to Christlikeness in order for them to reflect Christ in their daily life's.",
+      description: settings?.vision || "To nurture people to Christlikeness in order for them to reflect Christ in their daily life's.",
       image: "/images/cornerstone/page_01/page01_photo001_praise_and_worship_team_group.jpg",
       icon: "◉",
     },
@@ -35,7 +36,7 @@ export default function Foundation() {
       id: "mission",
       number: "02",
       title: "Our Mission",
-      description: settings.mission || "To equip people to live their everyday ordinary life for Christ.",
+      description: settings?.mission || "To equip people to live their everyday ordinary life for Christ.",
       image: "/images/cornerstone/page_02/page02_photo005_conference_fellowship_table.jpg",
       icon: "◎",
     },
@@ -43,20 +44,20 @@ export default function Foundation() {
       id: "motto",
       number: "03",
       title: "Our Motto",
-      description: settings.motto || "A family church that worships in truth and in spirit.",
+      description: settings?.motto || "A family church that worships in truth and in spirit.",
       image: "/images/cornerstone/page_02/page02_photo008_good_soil_conference_gathering.jpg",
       icon: "✦",
     },
   ].filter(item => {
-    // Only include items that have data
-    if (item.id === "vision") return settings.vision;
-    if (item.id === "mission") return settings.mission;
-    if (item.id === "motto") return settings.motto;
+    // Only include items that have data (if settings exists)
+    if (settings && item.id === "vision") return settings.vision;
+    if (settings && item.id === "mission") return settings.mission;
+    if (settings && item.id === "motto") return settings.motto;
     return true;
   });
 
-  // If no data after filtering, don't render
-  if (foundationData.length === 0) {
+  // If no data after filtering and settings exists, don't render
+  if (foundationData.length === 0 && settings) {
     return null;
   }
 
