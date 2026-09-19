@@ -1,10 +1,17 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import Foundation from '../components/Foundation'
+import * as settingsApi from '../api/settings'
 import './About.css'
 
 function About() {
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 })
+  const [mvmProgress, setMvmProgress] = useState(0)
+  const [mvmActiveIndex, setMvmActiveIndex] = useState(0)
+  const [settings, setSettings] = useState(null)
+
+  useEffect(() => {
+    settingsApi.getSettings().then(setSettings).catch(console.error)
+  }, [])
 
   useEffect(() => {
     // Scroll reveal animation that works both ways
@@ -28,6 +35,43 @@ function About() {
 
     elements.forEach((element) => observer.observe(element))
 
+    // Scroll-driven Mission / Vision / Motto story.
+    // The outer section is 320vh tall and its inner stage is sticky.
+    // This converts the user's scroll position into a 0 -> 1 progress value.
+    const handleMvmScroll = () => {
+      const section = document.querySelector('.mvm-scroll-section')
+      if (!section) return
+
+      const rect = section.getBoundingClientRect()
+      const scrollableDistance = section.offsetHeight - window.innerHeight
+
+      if (scrollableDistance <= 0) return
+
+      const progress = Math.min(
+        1,
+        Math.max(0, -rect.top / scrollableDistance)
+      )
+
+      setMvmProgress(progress)
+
+      const mvmItems = [
+        settings?.vision,
+        settings?.mission,
+        settings?.motto
+      ].filter(Boolean)
+
+      const activeIndex = Math.min(
+        mvmItems.length - 1,
+        Math.round(progress * (mvmItems.length - 1))
+      )
+
+      setMvmActiveIndex(activeIndex)
+    }
+
+    handleMvmScroll()
+    window.addEventListener('scroll', handleMvmScroll, { passive: true })
+    window.addEventListener('resize', handleMvmScroll)
+
     // Cursor tracking for parallax effects
     const handleMouseMove = (e) => {
       setCursorPosition({
@@ -40,9 +84,36 @@ function About() {
 
     return () => {
       observer.disconnect()
+      window.removeEventListener('scroll', handleMvmScroll)
+      window.removeEventListener('resize', handleMvmScroll)
       window.removeEventListener('mousemove', handleMouseMove)
     }
-  }, [])
+  }, [settings])
+
+  // Build MVM items from settings API
+  const mvmItems = [
+    {
+      key: 'vision',
+      title: 'Our Vision',
+      text: settings?.vision || 'To nurture people to Christlikeness in order for them to reflect Christ in their daily lives.',
+      image: '/images/cornerstone/page_01/751563519_871022072748257_3613845665156140829_n.jpg',
+      imageAlt: 'Cornerstone Family Chapel worship service',
+    },
+    {
+      key: 'mission',
+      title: 'Our Mission',
+      text: settings?.mission || 'We exist to nurture people toward Christlikeness and equip them to live their everyday lives for Christ.',
+      image: '/images/cornerstone/page_02/page02_photo005_conference_fellowship_table.jpg',
+      imageAlt: 'Cornerstone Family Chapel fellowship',
+    },
+    {
+      key: 'motto',
+      title: 'Our Motto',
+      text: settings?.motto || 'Bible plus nothing. Bible minus nothing.',
+      image: '/images/cornerstone/page_02/page02_photo008_good_soil_conference_gathering.jpg',
+      imageAlt: 'Cornerstone Family Chapel gathering',
+    },
+  ].filter(item => item.text) // Only include items with content
 
   return (
     <main className="about-page">
@@ -96,9 +167,71 @@ function About() {
 
 
       {/* =====================================================
-          FOUNDATION (Mission, Vision, Motto)
+          MISSION / VISION / MOTTO — SCROLL STORY
+          The section stays pinned while the user's scroll
+          moves through Vision -> Mission -> Motto.
       ====================================================== */}
-      <Foundation />
+      {mvmItems.length > 0 && (
+        <section className="mvm-scroll-section" aria-label="Mission, Vision and Motto">
+          <div className="mvm-sticky">
+            <div className="mvm-container">
+              <div className="mvm-heading">
+                <h2>
+                  Mission, Vision <span>&amp; Motto</span>
+                </h2>
+                <p>The principles that guide us in shaping lives for Christ.</p>
+              </div>
+
+              <div className="mvm-stage">
+                <div className="mvm-progress" aria-hidden="true">
+                  <span
+                    className="mvm-progress-fill"
+                    style={{ height: `${mvmProgress * 100}%` }}
+                  />
+                </div>
+
+                <div className="mvm-slides">
+                  {mvmItems.map((item, index) => {
+                    const offset = index - mvmProgress * (mvmItems.length - 1)
+                    const distance = Math.abs(offset)
+
+                    return (
+                      <article
+                        className={`mvm-slide ${index === mvmActiveIndex ? 'is-active' : ''}`}
+                        key={item.key}
+                        aria-hidden={index !== mvmActiveIndex}
+                        style={{
+                          '--mvm-offset': offset,
+                          '--mvm-distance': Math.min(distance, 1),
+                        }}
+                      >
+                        <div className="mvm-image-wrap">
+                          <img src={item.image} alt={item.imageAlt} />
+                        </div>
+
+                        <div className="mvm-copy">
+                          <span className="mvm-number">0{index + 1}</span>
+                          <h3>{item.title}</h3>
+                          <p>{item.text}</p>
+                        </div>
+                      </article>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className="mvm-dots" aria-label="Section progress">
+                {mvmItems.map((item, index) => (
+                  <span
+                    key={item.key}
+                    className={index === mvmActiveIndex ? 'is-active' : ''}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
 
       {/* =====================================================
