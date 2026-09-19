@@ -1,10 +1,13 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Foundation from '../components/Foundation'
 import './About.css'
 
 function About() {
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 })
+
   useEffect(() => {
+    // Scroll reveal animation that works both ways
     const elements = document.querySelectorAll('.about-reveal')
 
     const observer = new IntersectionObserver(
@@ -12,7 +15,8 @@ function About() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('visible')
-            observer.unobserve(entry.target)
+          } else {
+            entry.target.classList.remove('visible')
           }
         })
       },
@@ -24,7 +28,20 @@ function About() {
 
     elements.forEach((element) => observer.observe(element))
 
-    return () => observer.disconnect()
+    // Cursor tracking for parallax effects
+    const handleMouseMove = (e) => {
+      setCursorPosition({
+        x: (e.clientX / window.innerWidth - 0.5) * 20,
+        y: (e.clientY / window.innerHeight - 0.5) * 20
+      })
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('mousemove', handleMouseMove)
+    }
   }, [])
 
   return (
@@ -41,13 +58,13 @@ function About() {
 
           <div className="about-hero-content about-reveal">
 
-            <div className="about-church-mark about-ascend">
+            <div className="about-church-mark">
               <span>CORNERSTONE</span>
               <span>FAMILY</span>
               <span>CHAPEL</span>
             </div>
 
-            <h1 className="about-typewriter">
+            <h1 className="typewriter-text">
               A FAMILY CHURCH
               <br />
               THAT WORSHIPS IN
@@ -57,7 +74,7 @@ function About() {
               SPIRIT
             </h1>
 
-            <p className="about-ascend">
+            <p className="typewriter-text">
               We exist to nurture people toward Christlikeness and equip them
               to live their everyday lives for Christ.
             </p>
@@ -91,8 +108,8 @@ function About() {
 
         <div className="about-container">
 
-          <div className="about-section-title about-reveal">
-            <h2 className="about-ascend">
+          <div className="about-section-title about-reveal ascend-text">
+            <h2>
               Who We
               <br />
               Are
@@ -101,7 +118,7 @@ function About() {
 
           <div className="about-who-grid">
 
-            <div className="about-who-image about-reveal">
+            <div className="about-who-image about-reveal ascend-text">
 
               <div className="about-photo-angle">
                 <img
@@ -114,9 +131,9 @@ function About() {
 
             </div>
 
-            <div className="about-who-content about-reveal">
+            <div className="about-who-content about-reveal ascend-text">
 
-              <div className="about-mint-card about-ascend">
+              <div className="about-mint-card">
 
                 <p>
                   Cornerstone Family Chapel is a Christ-centered church
@@ -127,7 +144,7 @@ function About() {
 
               </div>
 
-              <div className="about-family-block about-ascend">
+              <div className="about-family-block">
                 <h3>FAMILY</h3>
 
                 <p>
@@ -136,7 +153,7 @@ function About() {
                 </p>
               </div>
 
-              <div className="about-chapel-block about-ascend">
+              <div className="about-chapel-block">
 
                 <h3>CHAPEL</h3>
 
@@ -163,9 +180,9 @@ function About() {
 
         <div className="about-container about-defines-grid">
 
-          <div className="about-defines-content about-reveal">
+          <div className="about-defines-content about-reveal skate-text">
 
-            <h2 className="about-skate">
+            <h2>
               What Defines
               <br />
               Us
@@ -173,25 +190,25 @@ function About() {
 
             <div className="about-defines-list">
 
-              <p className="about-skate">We are centered on Jesus Christ.</p>
+              <p>We are centered on Jesus Christ.</p>
 
-              <p className="about-skate">We are committed to biblical truth.</p>
+              <p>We are committed to biblical truth.</p>
 
-              <p className="about-skate">We pursue unity and discipleship.</p>
+              <p>We pursue unity and discipleship.</p>
 
-              <p className="about-skate">
+              <p>
                 We live out the Great Commandment and
                 Great Commission.
               </p>
 
-              <p className="about-skate">We seek to serve God and others.</p>
+              <p>We seek to serve God and others.</p>
 
             </div>
 
           </div>
 
 
-          <div className="about-defines-image about-reveal">
+          <div className="about-defines-image about-reveal skate-text">
 
             <div className="about-defines-photo">
 
@@ -218,9 +235,9 @@ function About() {
 
         <div className="about-container about-faith-grid">
 
-          <div className="about-slogan about-reveal">
+          <div className="about-slogan about-reveal merge-text">
 
-            <h2 className="about-merge">
+            <h2>
               BIBLE PLUS
               <br />
               NOTHING.
@@ -233,9 +250,9 @@ function About() {
           </div>
 
 
-          <div className="about-faith-content about-reveal">
+          <div className="about-faith-content about-reveal merge-text">
 
-            <div className="about-faith-card about-merge">
+            <div className="about-faith-card">
 
               <h3>God's Faithfulness</h3>
 
@@ -247,7 +264,7 @@ function About() {
 
             </div>
 
-            <div className="about-faith-image about-merge">
+            <div className="about-faith-image">
 
               <img
                 src="/images/cornerstone/page_07/page07_photo030_praise_and_worship_team_group.jpg"
@@ -270,15 +287,15 @@ function About() {
 
         <div className="about-container">
 
-          <h2 className="about-story-title about-reveal">
+          <h2 className="about-story-title about-reveal burst-text">
             Our Story
           </h2>
 
           <div className="about-story-grid">
 
-            <div className="about-story-text about-reveal">
+            <div className="about-story-text about-reveal burst-text">
 
-              <p className="about-burst">
+              <p>
                 Cornerstone's vision aligned with Rabbit Creek Church,
                 with its leadership supporting the ministry. The church
                 began through an online church model as the RCC Kenya
@@ -288,7 +305,7 @@ function About() {
             </div>
 
 
-            <div className="about-story-photo about-reveal">
+            <div className="about-story-photo about-reveal burst-text">
 
               <img
                 src="/images/cornerstone/page_02/page02_photo008_good_soil_conference_gathering.jpg"
@@ -298,7 +315,7 @@ function About() {
             </div>
 
 
-            <div className="about-story-photo about-reveal">
+            <div className="about-story-photo about-reveal burst-text">
 
               <img
                 src="/images/cornerstone/page_02/page02_photo006_conference_participants.jpg"
@@ -308,21 +325,21 @@ function About() {
             </div>
 
 
-            <div className="about-story-text about-reveal">
+            <div className="about-story-text about-reveal burst-text">
 
-              <div className="about-story-date about-burst">
+              <div className="about-story-date">
                 October 2, 2022
               </div>
 
-              <p className="about-burst">
+              <p>
                 Cornerstone Family Chapel was officially launched
                 at Kihunguro Secondary School with 135 people in
                 attendance.
               </p>
 
-              <strong className="about-burst">TODAY</strong>
+              <strong>TODAY</strong>
 
-              <p className="about-burst">
+              <p>
                 A continuing story of God's faithfulness as Cornerstone
                 grows in Christ, community, and service.
               </p>
@@ -343,7 +360,7 @@ function About() {
 
         <div className="about-container about-final-grid">
 
-          <div className="about-final-photo about-reveal">
+          <div className="about-final-photo about-reveal bounce-text">
 
             <img
               src="/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg"
@@ -353,9 +370,9 @@ function About() {
           </div>
 
 
-          <div className="about-final-content about-reveal">
+          <div className="about-final-content about-reveal bounce-text">
 
-            <div className="about-final-message about-bounce">
+            <div className="about-final-message">
 
               <h2>
                 Come Be Part of
@@ -372,7 +389,7 @@ function About() {
 
             <Link
               to="/contact"
-              className="about-final-button about-bounce"
+              className="about-final-button"
             >
               Get in touch
               <span>→</span>

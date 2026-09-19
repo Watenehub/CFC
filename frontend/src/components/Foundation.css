@@ -6,7 +6,6 @@
   position: relative;
 
   background: var(--about-mint, #b8efd2);
-
   padding: 120px 6% 160px;
 
   overflow: hidden;
@@ -48,15 +47,11 @@
   letter-spacing: 1px;
 
   margin-bottom: 30px;
-
-  color: var(--about-dark-green, #073c2c);
 }
 
 
 .foundation-label span {
   font-size: 20px;
-
-  color: var(--about-green, #22c879);
 }
 
 
@@ -134,7 +129,7 @@
 
   overflow: hidden;
 
-  background: #ddd;
+  background: var(--about-green, #22c879);
 
   box-shadow:
     0 25px 70px rgba(0, 0, 0, 0.12);
@@ -311,7 +306,7 @@
 
   font-weight: 700;
 
-  color: var(--about-green, #22c879);
+  color: var(--about-dark-green, #073c2c);
 }
 
 
@@ -332,7 +327,7 @@
 
   border-radius: 50%;
 
-  background: var(--about-white, #ffffff);
+  background: var(--about-mint, #b8efd2);
 
   color: var(--about-green, #22c879);
 
@@ -346,15 +341,17 @@
 
 .foundation-story:nth-child(2)
 .story-icon {
-  background: var(--about-white, #ffffff);
-  color: var(--about-dark-green, #073c2c);
+  background: var(--about-green, #22c879);
+
+  color: white;
 }
 
 
 .foundation-story:nth-child(3)
 .story-icon {
-  background: var(--about-white, #ffffff);
-  color: var(--about-green, #22c879);
+  background: var(--about-dark-green, #073c2c);
+
+  color: var(--about-mint, #b8efd2);
 }
 
 
@@ -389,6 +386,16 @@
   line-height: 1.55;
 
   color: var(--about-dark-green, #073c2c);
+}
+
+.foundation-story p.leader-role {
+  font-size: 18px;
+
+  font-weight: 600;
+
+  color: var(--about-green, #22c879);
+
+  margin-bottom: 15px;
 }
 
 

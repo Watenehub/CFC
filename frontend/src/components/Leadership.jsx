@@ -1,17 +1,11 @@
 import { useEffect, useState } from "react"
-import * as settingsApi from '../api/settings'
 import "./Foundation.css"
 
-export default function Foundation() {
-  const [settings, setSettings] = useState(null)
+export default function Leadership({ title, subtitle, members }) {
   const [activeSection, setActiveSection] = useState(0)
 
   useEffect(() => {
-    settingsApi.getSettings().then(setSettings).catch(console.error)
-  }, [])
-
-  useEffect(() => {
-    if (!settings) return
+    if (!members || members.length === 0) return
 
     const sections = document.querySelectorAll(".foundation-story")
 
@@ -33,42 +27,10 @@ export default function Foundation() {
     sections.forEach((section) => observer.observe(section))
 
     return () => observer.disconnect()
-  }, [settings])
+  }, [members])
 
-  // Don't render if no foundation data exists
-  if (!settings || (!settings.vision && !settings.mission && !settings.motto)) {
-    return null
-  }
-
-  const foundationData = [
-    {
-      id: "vision",
-      number: "01",
-      title: "Our Vision",
-      description: settings.vision || "",
-      image: "/images/cornerstone/page_01/751563519_871022072748257_3613845665156140829_n.jpg",
-      icon: "◉",
-    },
-    {
-      id: "mission",
-      number: "02",
-      title: "Our Mission",
-      description: settings.mission || "",
-      image: "/images/cornerstone/page_02/page02_photo005_conference_fellowship_table.jpg",
-      icon: "◎",
-    },
-    {
-      id: "motto",
-      number: "03",
-      title: "Our Motto",
-      description: settings.motto || "",
-      image: "/images/cornerstone/page_02/page02_photo008_good_soil_conference_gathering.jpg",
-      icon: "✦",
-    },
-  ].filter(item => item.description) // Only include items with content
-
-  // Don't render if no items have content
-  if (foundationData.length === 0) {
+  // Don't render if no members
+  if (!members || members.length === 0) {
     return null
   }
 
@@ -80,15 +42,15 @@ export default function Foundation() {
 
         <div className="foundation-label">
           <span>◎</span>
-          OUR FOUNDATION
+          LEADERSHIP
         </div>
 
         <h1>
-          Mission, Vision <span>&amp; Motto</span>
+          {title} <span>&amp; Team</span>
         </h1>
 
         <p>
-          The principles that guide us in shaping lives for Christ.
+          {subtitle}
         </p>
 
       </div>
@@ -102,11 +64,11 @@ export default function Foundation() {
 
           <div className="foundation-image-sticky">
 
-            {foundationData.map((item, index) => (
+            {members.map((member, index) => (
               <img
-                key={item.id}
-                src={item.image}
-                alt={item.title}
+                key={member.id || `${member.name}-${index}`}
+                src={member.image || '/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg'}
+                alt={member.name}
                 className={
                   activeSection === index
                     ? "foundation-image active"
@@ -123,7 +85,7 @@ export default function Foundation() {
 
               <div className="counter-line"></div>
 
-              <span>{String(foundationData.length).padStart(2, "0")}</span>
+              <span>{String(members.length).padStart(2, "0")}</span>
             </div>
 
           </div>
@@ -134,9 +96,9 @@ export default function Foundation() {
         {/* RIGHT CONTENT */}
         <div className="foundation-content">
 
-          {foundationData.map((item, index) => (
+          {members.map((member, index) => (
             <article
-              key={item.id}
+              key={member.id || `${member.name}-${index}`}
               data-index={index}
               className={`foundation-story ${
                 activeSection === index ? "active" : ""
@@ -144,16 +106,18 @@ export default function Foundation() {
             >
 
               <div className="story-number">
-                {item.number}
+                {String(index + 1).padStart(2, "0")}
               </div>
 
               <div className="story-icon">
-                {item.icon}
+                {index === 0 ? "◉" : index === 1 ? "◎" : "✦"}
               </div>
 
-              <h2>{item.title}</h2>
+              <h2>{member.name}</h2>
 
-              <p>{item.description}</p>
+              <p className="leader-role">{member.title || member.role}</p>
+
+              <p>{member.bio || member.encouragement || ""}</p>
 
               <div className="story-bottom">
 
