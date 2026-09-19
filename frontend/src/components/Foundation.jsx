@@ -61,6 +61,8 @@ export default function Foundation() {
   }
 
   useEffect(() => {
+    if (typeof document === 'undefined') return;
+    
     const sections = document.querySelectorAll(".foundation-story");
 
     const observer = new IntersectionObserver(

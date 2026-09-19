@@ -26,6 +26,7 @@ function Deacons() {
 
   useEffect(() => {
     if (deacons.length === 0) return;
+    if (typeof document === 'undefined') return;
     
     const sections = document.querySelectorAll(".foundation-story");
 
