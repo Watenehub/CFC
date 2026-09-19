@@ -316,18 +316,6 @@ function Home() {
         </div>
       </section>
 
-      <section className="cta-band section-pan">
-        <div className="container">
-          <div className="cta-band-content home-reveal bounce-text">
-            <h2>We would be glad to welcome you</h2>
-            <p>Visit on Sunday, write to us, or watch a recent message from home.</p>
-            <div className="cta-band-actions">
-              <Link to="/about" className="btn btn-hero-solid">Plan a Visit</Link>
-              <Link to="/contact" className="btn btn-outline-white">Contact the church</Link>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   )
 }

@@ -477,6 +477,19 @@ function About() {
                 grows in Christ, community, and service.
               </p>
 
+              <a
+                className="about-story-location"
+                href="https://maps.app.goo.gl/X1ipVVPMVysJwD4L7"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 21s7-6.1 7-12A7 7 0 1 0 5 9c0 5.9 7 12 7 12Z" />
+                  <circle cx="12" cy="9" r="2.25" />
+                </svg>
+                <span>Ruiru Kamakis, behind Gatongora Police Station</span>
+              </a>
+
             </div>
 
           </div>

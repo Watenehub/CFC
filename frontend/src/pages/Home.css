@@ -1562,3 +1562,50 @@
   .home .experiences.section-tectonic .experience-card { opacity: 1 !important; transform: none !important; transition: none !important; }
   .home .experiences.section-tectonic .experience-card-image img { transition: none; }
 }
+
+/* Larger desktop proportions while preserving the supplied card placement. */
+@media (min-width: 901px) {
+  .home .experiences-container {
+    max-width: 1040px;
+    min-height: 720px;
+  }
+
+  .home .experience-stage { height: 530px; }
+
+  .home .experiences.section-tectonic .experience-card { width: 205px; }
+  .home .experience-card-1 { left: 42px; top: 78px; }
+  .home .experience-card-2 { left: 290px; top: 0; }
+  .home .experience-card-3 { left: 538px; top: 88px; }
+  .home .experience-card-4 { left: 786px; top: 0; }
+
+  .home .experiences.section-tectonic .experience-card-image { height: 152px; }
+  .home .experiences.section-tectonic .experience-card-body { min-height: 175px; padding: 16px 16px 18px; }
+  .home .experiences.section-tectonic .experience-card-body h3 { font-size: 0.95rem; }
+  .home .experiences.section-tectonic .experience-card-body p { font-size: 0.72rem; }
+  .home .experiences.section-tectonic .experience-card-link { font-size: 0.66rem; }
+}
+
+@media (min-width: 901px) {
+  .home .connect-stage {
+    max-width: 1300px;
+    min-height: 590px;
+  }
+
+  .home .connect-scroll {
+    width: 70%;
+  }
+
+  .home .connect-card {
+    aspect-ratio: 0.72 / 1;
+  }
+
+  .home .connect-card:nth-child(1) { transform: translateY(8px) rotate(-0.8deg); }
+  .home .connect-card:nth-child(2) { transform: translateY(118px) rotate(0.8deg); }
+  .home .connect-card:nth-child(3) { transform: translateY(228px) rotate(-0.7deg); }
+  .home .connect-card:nth-child(4) { transform: translateY(338px) rotate(0.7deg); }
+
+  .home .connect-card.home-reveal.skate-text.visible:nth-child(1) { transform: translateY(8px) rotate(-0.8deg); }
+  .home .connect-card.home-reveal.skate-text.visible:nth-child(2) { transform: translateY(118px) rotate(0.8deg); }
+  .home .connect-card.home-reveal.skate-text.visible:nth-child(3) { transform: translateY(228px) rotate(-0.7deg); }
+  .home .connect-card.home-reveal.skate-text.visible:nth-child(4) { transform: translateY(338px) rotate(0.7deg); }
+}

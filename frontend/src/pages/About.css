@@ -17,6 +17,35 @@
   color: var(--about-dark-green);
 }
 
+.about-story-location {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin-top: 1rem;
+  color: var(--about-dark-green);
+  font-weight: 700;
+  line-height: 1.45;
+  text-decoration: none;
+}
+
+.about-story-location svg {
+  flex: 0 0 1.15rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-top: 0.1rem;
+  fill: none;
+  stroke: var(--about-green);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.about-story-location:hover {
+  color: var(--about-green);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
 .about-page *,
 .about-page *::before,
 .about-page *::after {
