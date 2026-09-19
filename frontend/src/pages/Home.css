@@ -909,7 +909,9 @@
 .home .hero-bg-image {
   object-position: center 37%;
   transform-origin: center;
-  animation: home-hero-photo-pan 18s ease-in-out infinite alternate;
+  animation:
+    home-hero-photo-pan 18s ease-in-out infinite alternate,
+    home-hero-breathe 8s ease-in-out infinite;
 }
 
 .home .hero-overlay {
@@ -933,6 +935,7 @@
 .home .hero-title {
   max-width: 1000px;
   margin: 0 auto;
+  font-family: 'Sprite Graffiti', 'Permanent Marker', 'Brush Script MT', cursive;
   font-size: clamp(2.5rem, 5.7vw, 5.25rem);
   line-height: 0.98;
   font-weight: 800;
@@ -1153,7 +1156,7 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: start;
-  gap: clamp(0.8rem, 2.2vw, 1.6rem);
+  gap: clamp(0.88rem, 2.42vw, 1.76rem);
   width: 68%;
   max-width: none;
   margin: 0;
@@ -1223,6 +1226,7 @@
 .home .cta-band-content p { max-width: 470px; font-size: 0.78rem; line-height: 1.6; }
 
 @keyframes home-hero-photo-pan { from { transform: scale(1.01); object-position: 47% 35%; } to { transform: scale(1.075); object-position: 55% 39%; } }
+@keyframes home-hero-breathe { 0%, 100% { filter: saturate(1) brightness(1); opacity: 0.98; } 50% { filter: saturate(1.08) brightness(1.05); opacity: 1; } }
 @keyframes home-floating-dot { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-12px) rotate(8deg); } }
 @keyframes home-event-tumble { from { opacity: 0; transform: translateY(22px) rotate(7deg) scale(0.9); filter: blur(5px); } 55% { opacity: 1; transform: translateY(-5px) rotate(-1.5deg) scale(1.015); filter: blur(0); } to { opacity: 1; transform: translateY(0) rotate(0) scale(1); } }
 
