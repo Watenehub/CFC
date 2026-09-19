@@ -17,6 +17,7 @@ DEFAULT_SETTINGS = {
     "is_live": False,
     "mission": "To know Christ and make Him known through worship, discipleship, fellowship, and service.",
     "vision": "A growing family of faith rooted in Scripture, united in love, and active in our community.",
+    "motto": "Bible plus nothing. Bible minus nothing.",
     "beliefs": "We believe in one God — Father, Son, and Holy Spirit — and that salvation is found in Jesus Christ alone. Scripture is our authority for faith and life.",
 }
 

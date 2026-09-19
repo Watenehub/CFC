@@ -17,6 +17,7 @@ const emptySettings = {
   is_live: false,
   mission: '',
   vision: '',
+  motto: '',
   beliefs: '',
 }
 
@@ -125,7 +126,7 @@ function Settings() {
             </div>
 
             <div className="admin-form-block">
-              <h3>Mission, vision & beliefs</h3>
+              <h3>Mission, vision, motto & beliefs</h3>
               <div className="form-grid">
                 <div className="form-field full-width">
                   <label>Mission</label>
@@ -134,6 +135,10 @@ function Settings() {
                 <div className="form-field full-width">
                   <label>Vision</label>
                   <textarea rows="3" value={settings.vision} onChange={(event) => setSettings({ ...settings, vision: event.target.value })} />
+                </div>
+                <div className="form-field full-width">
+                  <label>Motto</label>
+                  <textarea rows="3" value={settings.motto} onChange={(event) => setSettings({ ...settings, motto: event.target.value })} />
                 </div>
                 <div className="form-field full-width">
                   <label>What we believe</label>

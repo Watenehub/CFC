@@ -297,7 +297,7 @@
 
 .mvm-scroll-section {
   position: relative;
-  height: 180vh;
+  height: 145vh;
   background: var(--about-mint);
 }
 
@@ -306,7 +306,7 @@
   top: 0;
   height: 100vh;
   min-height: 680px;
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   align-items: center;
   background: var(--about-mint);
@@ -356,7 +356,7 @@
   flex: 1;
   min-height: 390px;
   max-height: 520px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .mvm-slides {
@@ -501,7 +501,7 @@
 
 @media (max-width: 950px) {
   .mvm-scroll-section {
-    height: 220vh;
+    height: 160vh;
   }
 
   .mvm-sticky {
@@ -544,7 +544,7 @@
 
 @media (max-width: 650px) {
   .mvm-scroll-section {
-    height: 220vh;
+    height: 175vh;
   }
 
   .mvm-sticky {
@@ -1073,9 +1073,12 @@
 
 .about-faith-content {
   position: relative;
+  min-width: 0;
 }
 
 .about-faith-card {
+  position: relative;
+  z-index: 1;
   padding: 35px 45px 65px;
 
   background: var(--about-green);
@@ -1113,10 +1116,11 @@
 .about-faith-image {
   position: relative;
 
-  width: 88%;
-  height: 250px;
+  width: 100%;
+  aspect-ratio: 16 / 6;
+  min-height: 190px;
 
-  margin: 15px auto 0;
+  margin: 12px auto 0;
 
   overflow: hidden;
 
@@ -1129,13 +1133,11 @@
 
   object-fit: cover;
 
-  transform: scale(1.15);
-
   transition: transform 1.2s ease;
 }
 
 .about-faith-image:hover img {
-  transform: scale(1);
+  transform: scale(1.03);
 }
 
 
@@ -1533,17 +1535,18 @@
   }
 
   .about-faith-image {
-    width: 94%;
-    height: 200px;
+    width: 100%;
+    aspect-ratio: 16 / 8;
+    min-height: 0;
     margin: 10px auto 0;
   }
 
   .about-faith-image img {
-    transform: scale(1.15);
+    object-fit: cover;
   }
 
   .about-faith-image:hover img {
-    transform: scale(1);
+    transform: scale(1.03);
   }
 
   .about-story {
@@ -1619,3 +1622,5 @@
     transition: none;
   }
 }
+
+

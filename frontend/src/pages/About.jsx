@@ -36,7 +36,7 @@ function About() {
     elements.forEach((element) => observer.observe(element))
 
     // Scroll-driven Mission / Vision / Motto story.
-    // The outer section is 320vh tall and its inner stage is sticky.
+    // The outer section is 145vh tall and its inner stage is sticky.
     // This converts the user's scroll position into a 0 -> 1 progress value.
     const handleMvmScroll = () => {
       const section = document.querySelector('.mvm-scroll-section')
@@ -90,30 +90,30 @@ function About() {
     }
   }, [settings])
 
-  // Build MVM items from settings API
-  const mvmItems = [
+  // Build MVM items from the values saved in admin settings.
+  const mvmItems = settings ? [
     {
       key: 'vision',
       title: 'Our Vision',
-      text: settings?.vision || 'To nurture people to Christlikeness in order for them to reflect Christ in their daily lives.',
+      text: settings.vision,
       image: '/images/cornerstone/page_01/751563519_871022072748257_3613845665156140829_n.jpg',
       imageAlt: 'Cornerstone Family Chapel worship service',
     },
     {
       key: 'mission',
       title: 'Our Mission',
-      text: settings?.mission || 'We exist to nurture people toward Christlikeness and equip them to live their everyday lives for Christ.',
+      text: settings.mission,
       image: '/images/cornerstone/page_02/page02_photo005_conference_fellowship_table.jpg',
       imageAlt: 'Cornerstone Family Chapel fellowship',
     },
     {
       key: 'motto',
       title: 'Our Motto',
-      text: settings?.motto || 'Bible plus nothing. Bible minus nothing.',
+      text: settings.motto,
       image: '/images/cornerstone/page_02/page02_photo008_good_soil_conference_gathering.jpg',
       imageAlt: 'Cornerstone Family Chapel gathering',
     },
-  ].filter(item => item.text) // Only include items with content
+  ].filter(item => item.text?.trim()) : []
 
   return (
     <main className="about-page">
@@ -155,7 +155,7 @@ function About() {
           <div className="about-hero-image-wrap about-reveal">
             <div className="about-hero-image">
               <img
-                src="/images/cornerstone/page_01/751563519_871022072748257_3613845665156140829_n.jpg"
+                src="/images/cornerstone/about/hero.jpg"
                 alt="Cornerstone Family Chapel worship service"
               />
             </div>
@@ -193,7 +193,7 @@ function About() {
                 <div className="mvm-slides">
                   {mvmItems.map((item, index) => {
                     const offset = index - mvmProgress * (mvmItems.length - 1)
-                    const distance = Math.abs(offset)
+                    const distance = Math.min(Math.abs(offset), 1)
 
                     return (
                       <article
@@ -255,7 +255,7 @@ function About() {
 
               <div className="about-photo-angle">
                 <img
-                  src="/images/cornerstone/page_02/page02_photo005_conference_fellowship_table.jpg"
+                  src="/images/cornerstone/about/who-we-are.jpg"
                   alt="Cornerstone Family Chapel fellowship"
                 />
               </div>
@@ -346,7 +346,7 @@ function About() {
             <div className="about-defines-photo">
 
               <img
-                src="/images/cornerstone/page_02/page02_photo008_good_soil_conference_gathering.jpg"
+                src="/images/cornerstone/about/what-defines-us.jpg"
                 alt="Cornerstone Family Chapel gathering"
               />
 
@@ -400,7 +400,7 @@ function About() {
             <div className="about-faith-image">
 
               <img
-                src="/images/cornerstone/page_07/page07_photo030_praise_and_worship_team_group.jpg"
+                src="/images/cornerstone/about/faithfulness.jpg"
                 alt="Cornerstone Family Chapel worship team"
               />
 
@@ -441,7 +441,7 @@ function About() {
             <div className="about-story-photo about-reveal burst-text">
 
               <img
-                src="/images/cornerstone/page_02/page02_photo008_good_soil_conference_gathering.jpg"
+                src="/images/cornerstone/about/rabbit-creek-church.webp"
                 alt="Cornerstone church gathering"
               />
 

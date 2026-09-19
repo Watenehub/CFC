@@ -146,7 +146,7 @@ function Home() {
       <section className="hero">
         <div className="hero-bg">
           <img
-            src="/hero-image.jpg"
+            src="/images/cornerstone/about/landing-page.jpg"
             alt="Congregation gathered at Cornerstone Family Chapel"
             className="hero-bg-image"
             loading="eager"
@@ -156,14 +156,7 @@ function Home() {
         </div>
         <div className="hero-content container">
           <p className="hero-brand fade-up">Cornerstone Family Chapel</p>
-          <h1 className="hero-title fade-up">A family of faith, rooted in Christ</h1>
-          <p className="hero-subtitle fade-up">
-            Join us for worship, teaching from Scripture, and a community that grows together in love.
-          </p>
-          <div className="hero-actions fade-up">
-            <Link to="/about" className="btn btn-hero-solid">Plan a Visit</Link>
-            <Link to="/watch-live" className="btn btn-outline-white">Watch Live</Link>
-          </div>
+          <h1 className="hero-title hero-typewriter">A family of faith, rooted in Christ</h1>
         </div>
         <div className="hero-scroll-hint" aria-hidden="true">
           <span>Scroll</span>
@@ -173,7 +166,7 @@ function Home() {
         </div>
       </section>
 
-      <section className="section experiences">
+      <section className="section experiences section-rise">
         <div className="container">
           <div className="section-header fade-up">
             <span className="section-eyebrow">This week</span>
@@ -200,7 +193,7 @@ function Home() {
       </section>
 
       {latestSermon && (
-        <section className="section sermon-feature">
+        <section className="section sermon-feature section-pan">
           <div className="container">
             <div className="sermon-feature-grid fade-up">
               <div className="sermon-feature-media">
@@ -226,7 +219,7 @@ function Home() {
         </section>
       )}
 
-      <section className="section connect">
+      <section className="section connect section-dissolve">
         <div className="container">
           <div className="section-header fade-up">
             <span className="section-eyebrow">Stay connected</span>
@@ -247,7 +240,7 @@ function Home() {
       </section>
 
       {ministries.length > 0 && (
-        <section className="section ministries-section">
+        <section className="section ministries-section section-wipe">
           <div className="container">
             <div className="section-header fade-up">
               <span className="section-eyebrow">Ministries</span>
@@ -276,7 +269,7 @@ function Home() {
         </section>
       )}
 
-      <section className="section events-section">
+      <section className="section events-section section-slide">
         <div className="container">
           <div className="section-header fade-up">
             <span className="section-eyebrow">Calendar</span>
@@ -351,7 +344,7 @@ function Home() {
         </div>
       </section>
 
-      <section className="section get-involved">
+      <section className="section get-involved section-rise">
         <div className="container">
           <div className="section-header fade-up">
             <span className="section-eyebrow">Take part</span>
@@ -370,7 +363,7 @@ function Home() {
         </div>
       </section>
 
-      <section className="cta-band">
+      <section className="cta-band section-breathe">
         <div className="container">
           <div className="cta-band-content fade-up">
             <h2>We would be glad to welcome you</h2>
