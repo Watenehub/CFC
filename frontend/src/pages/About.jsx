@@ -74,7 +74,7 @@ function About() {
               SPIRIT
             </h1>
 
-            <p className="typewriter-text">
+            <p>
               We exist to nurture people toward Christlikeness and equip them
               to live their everyday lives for Christ.
             </p>
