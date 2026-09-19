@@ -51,7 +51,7 @@
    TEXT ANIMATIONS
 ========================================================= */
 
-/* Typewriter - Hero */
+/* Typewriter - Hero (only for headings) */
 .typewriter-text {
   overflow: hidden;
   white-space: nowrap;
@@ -59,6 +59,14 @@
   animation:
     typewriter 2s steps(40, end),
     blink-caret 0.75s step-end infinite;
+}
+
+.typewriter-text p {
+  white-space: normal;
+  border-right: none;
+  animation: none;
+  opacity: 0;
+  animation: fadeIn 1s ease 2s forwards;
 }
 
 @keyframes typewriter {
@@ -69,6 +77,11 @@
 @keyframes blink-caret {
   from, to { border-color: transparent }
   50% { border-color: var(--about-green) }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Ascend - Who We Are */
