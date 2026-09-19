@@ -1,37 +1,70 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import "./Foundation.css"
 
 export default function Leadership({ title, subtitle, members }) {
-  const [activeSection, setActiveSection] = useState(0)
+  const [scrollProgress, setScrollProgress] = useState(0)
+  const scrollSectionRef = useRef(null)
 
   useEffect(() => {
-    if (!members || members.length === 0) return
+    if (!scrollSectionRef.current) return
 
-    const sections = document.querySelectorAll(".foundation-story")
+    const handleScroll = () => {
+      const section = scrollSectionRef.current
+      if (!section) return
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const index = Number(entry.target.dataset.index)
-            setActiveSection(index)
-          }
-        })
-      },
-      {
-        threshold: 0.3,
-        rootMargin: "-20% 0px -20% 0px",
-      }
-    )
+      const rect = section.getBoundingClientRect()
+      const sectionHeight = section.offsetHeight
+      const viewportHeight = window.innerHeight
 
-    sections.forEach((section) => observer.observe(section))
+      // Calculate how far we've scrolled through the section
+      const scrolled = -rect.top
+      const totalScroll = sectionHeight - viewportHeight
+      const progress = Math.max(0, Math.min(1, scrolled / totalScroll))
 
-    return () => observer.disconnect()
-  }, [members])
+      setScrollProgress(progress)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll() // Initial calculation
+
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   // Don't render if no members
   if (!members || members.length === 0) {
     return null
+  }
+
+  // Calculate which section is active based on scroll progress
+  const sectionCount = members.length
+  const activeIndex = Math.min(Math.floor(scrollProgress * sectionCount), sectionCount - 1)
+  const sectionProgress = (scrollProgress * sectionCount) % 1
+
+  // Calculate opacity and transform for each item
+  const getItemStyles = (index) => {
+    const progress = scrollProgress * sectionCount - index
+
+    if (progress < 0) {
+      // Item hasn't entered yet
+      return {
+        opacity: 0,
+        transform: 'translateY(60px)',
+      }
+    } else if (progress > 1) {
+      // Item has exited
+      return {
+        opacity: 0,
+        transform: 'translateY(-60px)',
+      }
+    } else {
+      // Item is transitioning
+      const opacity = progress < 0.5 ? progress * 2 : (1 - progress) * 2
+      const translateY = progress < 0.5 ? 60 - progress * 120 : -60 + (1 - progress) * 120
+      return {
+        opacity: Math.max(0, Math.min(1, opacity)),
+        transform: `translateY(${translateY}px)`,
+      }
+    }
   }
 
   return (
@@ -56,81 +89,62 @@ export default function Leadership({ title, subtitle, members }) {
       </div>
 
 
-      {/* STORY AREA */}
-      <div className="foundation-story-wrapper">
+      {/* SCROLL SECTION */}
+      <div className="foundation-scroll-section" ref={scrollSectionRef}>
 
-        {/* LEFT STICKY IMAGE */}
-        <div className="foundation-image-column">
+        {/* STICKY CONTAINER */}
+        <div className="foundation-sticky-container">
 
-          <div className="foundation-image-sticky">
+          <div className="foundation-content-wrapper">
 
             {members.map((member, index) => (
-              <img
+              <div
                 key={member.id || `${member.name}-${index}`}
-                src={member.image || '/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg'}
-                alt={member.name}
-                className={
-                  activeSection === index
-                    ? "foundation-image active"
-                    : "foundation-image"
-                }
-              />
+                className="foundation-item"
+                style={getItemStyles(index)}
+              >
+
+                {/* IMAGE */}
+                <div className="foundation-item-image">
+                  <img
+                    src={member.image || '/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg'}
+                    alt={member.name}
+                  />
+                </div>
+
+                {/* CONTENT */}
+                <div className="foundation-item-content">
+
+                  <div className="story-number">
+                    {String(index + 1).padStart(2, "0")}
+                  </div>
+
+                  <div className="story-icon">
+                    {index === 0 ? "◉" : index === 1 ? "◎" : "✦"}
+                  </div>
+
+                  <h2>{member.name}</h2>
+
+                  <p className="leader-role">{member.title || member.role}</p>
+
+                  <p>{member.bio || member.encouragement || ""}</p>
+
+                  <div className="story-bottom">
+
+                    <div className="story-line"></div>
+
+                    <button className="story-arrow">
+                      →
+                    </button>
+
+                  </div>
+
+                </div>
+
+              </div>
             ))}
 
-            {/* Image counter */}
-            <div className="image-counter">
-              <span>
-                {String(activeSection + 1).padStart(2, "0")}
-              </span>
-
-              <div className="counter-line"></div>
-
-              <span>{String(members.length).padStart(2, "0")}</span>
-            </div>
-
           </div>
-
-        </div>
-
-
-        {/* RIGHT CONTENT */}
-        <div className="foundation-content">
-
-          {members.map((member, index) => (
-            <article
-              key={member.id || `${member.name}-${index}`}
-              data-index={index}
-              className={`foundation-story ${
-                activeSection === index ? "active" : ""
-              }`}
-            >
-
-              <div className="story-number">
-                {String(index + 1).padStart(2, "0")}
-              </div>
-
-              <div className="story-icon">
-                {index === 0 ? "◉" : index === 1 ? "◎" : "✦"}
-              </div>
-
-              <h2>{member.name}</h2>
-
-              <p className="leader-role">{member.title || member.role}</p>
-
-              <p>{member.bio || member.encouragement || ""}</p>
-
-              <div className="story-bottom">
-
-                <div className="story-line"></div>
-
-                <button className="story-arrow">
-                  →
-                </button>
-
-              </div>
-
-            </article>
-          ))}
 
         </div>
 
