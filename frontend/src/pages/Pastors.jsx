@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import * as pastorsApi from '../api/pastors'
 import PageHero from '../components/PageHero'
-import './Foundation.css'
+import '../components/Foundation.css'
 
 function Pastors() {
   const [pastors, setPastors] = useState([])

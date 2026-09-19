@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import * as deaconsApi from '../api/deacons'
 import PageHero from '../components/PageHero'
-import './Foundation.css'
+import '../components/Foundation.css'
 
 function Deacons() {
   const [deacons, setDeacons] = useState([])
