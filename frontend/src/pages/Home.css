@@ -947,7 +947,9 @@
     0 0 8px rgba(189, 255, 218, 0.85),
     0 0 20px rgba(73, 255, 154, 0.58),
     0 0 42px rgba(73, 255, 154, 0.32);
-  animation: home-hero-burst 1.15s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s both;
+  animation:
+    home-hero-burst 1.15s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s both,
+    hero-type 2.5s steps(34, end) 0.35s both;
 }
 
 .home .hero-scroll-hint {
