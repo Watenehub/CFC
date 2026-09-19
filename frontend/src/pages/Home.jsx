@@ -124,25 +124,6 @@ function Home() {
 
   return (
     <div className="home">
-      {announcements.length > 0 && (
-        <div className="home-announcement-bar">
-          <div className="container home-announcement-stack">
-            {announcements.map((note) => (
-              <div key={note.id || note.title} className="home-announcement-inner">
-                <span className="home-announcement-label">Announcement</span>
-                <div className="home-announcement-copy">
-                  <strong>{note.title}</strong>
-                  <span>{note.message}</span>
-                </div>
-                {note.link && (
-                  <Link to={note.link} className="home-announcement-link">Learn more</Link>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       <section className="hero">
         <div className="hero-bg">
           <img
