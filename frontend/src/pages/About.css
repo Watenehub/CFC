@@ -815,6 +815,7 @@
 .about-who {
   padding: 0 0 110px;
   background: var(--about-white);
+  margin-top: -80px;
 }
 
 .about-section-title {
