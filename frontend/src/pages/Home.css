@@ -1376,3 +1376,189 @@
   .home .connect-card.home-reveal.skate-text.visible:nth-child(3) { transform: translateY(190px) rotate(-0.7deg); }
   .home .connect-card.home-reveal.skate-text.visible:nth-child(4) { transform: translateY(280px) rotate(0.7deg); }
 }
+
+/* Supplied staggered layout for Ways to be part of Cornerstone. */
+.home .experiences.section-tectonic {
+  position: relative;
+  background: #f3f3f3;
+  padding: 0;
+  overflow: hidden;
+}
+
+.home .experiences-container {
+  position: relative;
+  width: 100%;
+  max-width: 830px;
+  min-height: 620px;
+  margin: 0 auto;
+  padding-top: 1px;
+}
+
+.home .experiences-heading {
+  position: relative;
+  z-index: 5;
+  margin-top: 0;
+  padding-top: 0;
+  text-align: center;
+}
+
+.home .experiences-heading h2 {
+  margin: 0;
+  color: #111;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2.2rem, 4.2vw, 3.1rem);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -1.5px;
+}
+
+.home .experiences-heading p {
+  max-width: 490px;
+  margin: 22px auto 0;
+  color: #555;
+  font-family: Arial, sans-serif;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.home .experience-decoration {
+  position: absolute;
+  z-index: 10;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #2bc77a;
+  pointer-events: none;
+}
+
+.home .experience-decoration-top { top: 23px; left: 43px; }
+.home .experience-decoration-bottom { right: 54px; bottom: 43px; }
+
+.home .experience-stage {
+  position: relative;
+  width: 100%;
+  height: 430px;
+  margin-top: 18px;
+}
+
+.home .experiences.section-tectonic .experience-card {
+  position: absolute;
+  width: 150px;
+  background: #fff;
+  color: #111;
+  border-radius: 0 0 9px 9px;
+  overflow: hidden;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+  z-index: 2;
+  transition: opacity 0.75s ease, transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.45s ease;
+}
+
+.home .experience-card-1 { left: 35px; top: 60px; z-index: 4; border: 3px solid #9d31ff; }
+.home .experience-card-2 { left: 212px; top: 0; z-index: 5; }
+.home .experience-card-3 { left: 374px; top: 68px; z-index: 4; }
+.home .experience-card-4 { left: 528px; top: 0; z-index: 3; }
+
+.home .experiences.section-tectonic .experience-card-image {
+  width: 100%;
+  height: 111px;
+  background: #ddd;
+}
+
+.home .experiences.section-tectonic .experience-card-body {
+  min-height: 135px;
+  padding: 12px 12px 15px;
+  background: #fff;
+}
+
+.home .experiences.section-tectonic .experience-card-body h3 {
+  margin: 0 0 8px;
+  color: #111;
+  font-family: Arial, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.home .experiences.section-tectonic .experience-card-body p {
+  margin: 0 0 14px;
+  color: #666;
+  font-family: Arial, sans-serif;
+  font-size: 0.61rem;
+  line-height: 1.45;
+}
+
+.home .experiences.section-tectonic .experience-card-link {
+  color: #159e58;
+  font-family: Arial, sans-serif;
+  font-size: 0.57rem;
+  font-weight: 700;
+}
+
+.home .experiences.section-tectonic .experience-card:hover {
+  z-index: 20;
+  transform: translateY(-8px);
+  box-shadow: 0 20px 35px rgba(0, 0, 0, 0.14);
+}
+
+.home .experiences.section-tectonic .experience-card-image img {
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.home .experiences.section-tectonic .experience-card:hover .experience-card-image img { transform: scale(1.06); }
+
+.home .experiences.section-tectonic .experience-card-1 { opacity: 0; transform: translate(-80px, 50px) rotate(-4deg); }
+.home .experiences.section-tectonic .experience-card-2 { opacity: 0; transform: translateY(-75px) rotate(3deg); }
+.home .experiences.section-tectonic .experience-card-3 { opacity: 0; transform: translateY(70px) rotate(-3deg); }
+.home .experiences.section-tectonic .experience-card-4 { opacity: 0; transform: translate(80px, -55px) rotate(4deg); }
+
+.home .experiences.section-tectonic.visible .experience-card-1 { opacity: 1; transform: translate(0, 0) rotate(0); transition-delay: 0.05s; }
+.home .experiences.section-tectonic.visible .experience-card-2 { opacity: 1; transform: translate(0, 0) rotate(0); transition-delay: 0.16s; }
+.home .experiences.section-tectonic.visible .experience-card-3 { opacity: 1; transform: translate(0, 0) rotate(0); transition-delay: 0.27s; }
+.home .experiences.section-tectonic.visible .experience-card-4 { opacity: 1; transform: translate(0, 0) rotate(0); transition-delay: 0.38s; }
+
+@media (max-width: 900px) and (min-width: 701px) {
+  .home .experiences-container { max-width: 720px; min-height: 570px; }
+  .home .experience-stage { height: 390px; }
+  .home .experiences.section-tectonic .experience-card { width: 135px; }
+  .home .experience-card-1 { left: 20px; top: 55px; }
+  .home .experience-card-2 { left: 185px; top: 0; }
+  .home .experience-card-3 { left: 350px; top: 62px; }
+  .home .experience-card-4 { left: 515px; top: 0; }
+  .home .experience-decoration-top { left: 25px; }
+  .home .experience-decoration-bottom { right: 25px; }
+}
+
+@media (max-width: 700px) {
+  .home .experiences-container { min-height: auto; padding: 35px 20px 70px; }
+  .home .experiences-heading { padding: 0 10px; }
+  .home .experiences-heading h2 { font-size: 2.15rem; }
+  .home .experiences-heading p { margin-top: 16px; font-size: 0.72rem; }
+  .home .experience-decoration-top { top: 25px; left: 20px; width: 38px; height: 38px; }
+  .home .experience-decoration-bottom { right: 20px; bottom: 25px; width: 38px; height: 38px; }
+  .home .experience-stage { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; height: auto; margin-top: 35px; }
+  .home .experiences.section-tectonic .experience-card,
+  .home .experience-card-1,
+  .home .experience-card-2,
+  .home .experience-card-3,
+  .home .experience-card-4 { position: relative; left: auto; top: auto; width: 100%; transform: none; }
+  .home .experience-card-1 { margin-top: 35px; }
+  .home .experience-card-3 { margin-top: 30px; }
+  .home .experiences.section-tectonic .experience-card { opacity: 0; transform: translateY(35px); }
+  .home .experiences.section-tectonic.visible .experience-card { opacity: 1; transform: translateY(0); }
+  .home .experiences.section-tectonic .experience-card-image { height: 125px; }
+}
+
+@media (max-width: 430px) {
+  .home .experiences-container { padding-left: 15px; padding-right: 15px; }
+  .home .experience-stage { gap: 12px; }
+  .home .experiences.section-tectonic .experience-card-body { padding: 10px; }
+  .home .experiences.section-tectonic .experience-card-image { height: 110px; }
+  .home .experiences.section-tectonic .experience-card-body h3 { font-size: 0.72rem; }
+  .home .experiences.section-tectonic .experience-card-body p { font-size: 0.57rem; }
+  .home .experiences.section-tectonic .experience-card-link { font-size: 0.53rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home .experiences.section-tectonic .experience-card { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .home .experiences.section-tectonic .experience-card-image img { transition: none; }
+}

@@ -82,7 +82,7 @@ function Home() {
   }, [])
 
   useEffect(() => {
-    const elements = document.querySelectorAll('.home-reveal')
+    const elements = document.querySelectorAll('.home-reveal, .section-tectonic')
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -200,19 +200,17 @@ function Home() {
       </section>
 
       <section className="section experiences section-tectonic">
-        <span className="floating-dot floating-dot-one" aria-hidden="true" />
-        <span className="floating-dot floating-dot-two" aria-hidden="true" />
-        <div className="container">
-          <div className="section-header home-reveal ascend-text">
-            <span className="section-eyebrow">This week</span>
-            <h2 className="section-heading">Ways to be part of Cornerstone</h2>
-            <p className="section-subheading">
+        <div className="experiences-container">
+          <div className="experience-decoration experience-decoration-top" aria-hidden="true" />
+          <div className="experiences-heading">
+            <h2>Ways to be part of<br />Cornerstone</h2>
+            <p>
               Come in person, join us online, serve on a team, or walk with us as we serve our neighbours.
             </p>
           </div>
-          <div className="experience-grid">
-            {experiences.map((item) => (
-              <Link key={item.title} to={item.link} className="experience-card home-reveal skate-text">
+          <div className="experience-stage">
+            {experiences.map((item, index) => (
+              <Link key={item.title} to={item.link} className={`experience-card experience-card-${index + 1}`}>
                 <div className="experience-card-image">
                   <img src={item.image} alt={item.title} loading="lazy" />
                 </div>
@@ -224,6 +222,7 @@ function Home() {
               </Link>
             ))}
           </div>
+          <div className="experience-decoration experience-decoration-bottom" aria-hidden="true" />
         </div>
       </section>
 
