@@ -67,9 +67,9 @@ function About() {
             <h1 className="typewriter-text">
               A FAMILY CHURCH
               <br />
-              THAT WORSHIPS IN
+              THAT WORSHIPS
               <br />
-              TRUTH AND IN
+              IN TRUTH AND IN
               <br />
               SPIRIT
             </h1>
