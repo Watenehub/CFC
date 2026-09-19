@@ -297,7 +297,7 @@
 
 .mvm-scroll-section {
   position: relative;
-  height: 320vh;
+  height: 240vh;
   background: var(--about-mint);
 }
 
@@ -500,7 +500,7 @@
 
 @media (max-width: 950px) {
   .mvm-scroll-section {
-    height: 300vh;
+    height: 220vh;
   }
 
   .mvm-sticky {
@@ -543,7 +543,7 @@
 
 @media (max-width: 650px) {
   .mvm-scroll-section {
-    height: 300vh;
+    height: 220vh;
   }
 
   .mvm-sticky {
