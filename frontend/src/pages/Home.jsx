@@ -293,7 +293,6 @@ function Home() {
                     aria-hidden={index !== activeEvent}
                     style={{ '--event-image': `url("${event.image || fallbackEvent.image}")` }}
                   >
-                    <div className="event-slide-background" aria-hidden="true" />
                     <img className="motion-image" src={event.image || fallbackEvent.image} alt={event.title || 'Upcoming Cornerstone event'} loading={index === 0 ? 'eager' : 'lazy'} />
                   </div>
                 ))}
