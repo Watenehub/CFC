@@ -287,7 +287,13 @@ function Home() {
             <div className="event-showcase home-reveal merge-text" aria-live="polite">
               <div className="event-showcase-image">
                 {eventSlides.map((event, index) => (
-                  <div className={`event-slide ${index === activeEvent ? 'is-active' : ''}`} key={event.id} aria-hidden={index !== activeEvent}>
+                  <div
+                    className={`event-slide ${index === activeEvent ? 'is-active' : ''}`}
+                    key={event.id}
+                    aria-hidden={index !== activeEvent}
+                    style={{ '--event-image': `url("${event.image || fallbackEvent.image}")` }}
+                  >
+                    <div className="event-slide-background" aria-hidden="true" />
                     <img className="motion-image" src={event.image || fallbackEvent.image} alt={event.title || 'Upcoming Cornerstone event'} loading={index === 0 ? 'eager' : 'lazy'} />
                   </div>
                 ))}
