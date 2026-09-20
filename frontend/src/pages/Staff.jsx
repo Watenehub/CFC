@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import * as pastorsApi from '../api/pastors'
 import * as deaconsApi from '../api/deacons'
 import PageHero from '../components/PageHero'
+import '../utils/scrollAnimations'
 
 function Staff() {
   const [pastors, setPastors] = useState([])
@@ -49,7 +50,7 @@ function Staff() {
                   <h2 className="section-heading">Pastors</h2>
                   <div className="leadership-grid">
                     {pastors.map((pastor) => (
-                      <article key={pastor.id || `${pastor.name}-${pastor.title}`} className="leader-card">
+                      <article key={pastor.id || `${pastor.name}-${pastor.title}`} className="leader-card fade-up">
                         <div className="leadership-portrait-frame">
                           <div className="leadership-outer-ring"></div>
                           <div className="leadership-inner-ring"></div>
@@ -70,7 +71,7 @@ function Staff() {
                   <h2 className="section-heading" style={{ marginTop: '40px' }}>Deacons</h2>
                   <div className="leadership-grid">
                     {deacons.map((member) => (
-                      <article key={member.id || `${member.name}-${member.role}`} className="leader-card">
+                      <article key={member.id || `${member.name}-${member.role}`} className="leader-card fade-up">
                         <div className="leader-image">
                           <img src={member.image || '/CFC_CHURCH_PHOTO.jpg'} alt={member.name} />
                         </div>

@@ -19,7 +19,9 @@ export default function Leadership({ title, subtitle, members }) {
       // Calculate how far we've scrolled through the section
       const scrolled = -rect.top
       const totalScroll = sectionHeight - viewportHeight
-      const progress = Math.max(0, Math.min(1, scrolled / totalScroll))
+      const progress = totalScroll > 0
+        ? Math.max(0, Math.min(1, scrolled / totalScroll))
+        : 0
 
       setScrollProgress(progress)
     }
@@ -37,38 +39,25 @@ export default function Leadership({ title, subtitle, members }) {
 
   // Calculate which section is active based on scroll progress
   const sectionCount = members.length
-  const activeIndex = Math.min(Math.floor(scrollProgress * sectionCount), sectionCount - 1)
-  const sectionProgress = (scrollProgress * sectionCount) % 1
+  const activeIndex = Math.min(
+    sectionCount - 1,
+    Math.round(scrollProgress * (sectionCount - 1))
+  )
 
-  // Calculate opacity and transform for each item
+  // Continuous crossfade identical to the About page's Mission/Vision/Motto
+  // scroll story: each item slides, scales, and blurs based on its distance
+  // from the active position instead of abruptly swapping in/out.
   const getItemStyles = (index) => {
-    const progress = scrollProgress * sectionCount - index
-
-    if (progress < 0) {
-      // Item hasn't entered yet
-      return {
-        opacity: 0,
-        transform: 'translateY(60px)',
-      }
-    } else if (progress > 1) {
-      // Item has exited
-      return {
-        opacity: 0,
-        transform: 'translateY(-60px)',
-      }
-    } else {
-      // Item is transitioning
-      const opacity = progress < 0.5 ? progress * 2 : (1 - progress) * 2
-      const translateY = progress < 0.5 ? 60 - progress * 120 : -60 + (1 - progress) * 120
-      return {
-        opacity: Math.max(0, Math.min(1, opacity)),
-        transform: `translateY(${translateY}px)`,
-      }
+    const offset = index - scrollProgress * (sectionCount - 1)
+    const distance = Math.min(Math.abs(offset), 1)
+    return {
+      '--mvm-offset': offset,
+      '--mvm-distance': distance,
     }
   }
 
   return (
-    <section className="foundation">
+    <section className="foundation" style={{ '--leadership-count': members.length }}>
 
       {/* HEADER */}
       <div className="foundation-header">
@@ -100,8 +89,9 @@ export default function Leadership({ title, subtitle, members }) {
             {members.map((member, index) => (
               <div
                 key={member.id || `${member.name}-${index}`}
-                className="foundation-item"
+                className={`foundation-item leadership-reveal${index === activeIndex ? ' is-active' : ''}`}
                 style={getItemStyles(index)}
+                aria-hidden={index !== activeIndex}
               >
 
                 {/* IMAGE */}

@@ -95,7 +95,7 @@
 .foundation-scroll-section {
   position: relative;
 
-  height: 300vh;
+  height: calc(var(--leadership-count, 1) * 100vh);
 
   margin-top: 50px;
 }
@@ -158,14 +158,40 @@
 
   align-items: center;
 
-  opacity: 0;
+  opacity: clamp(0, calc(1 - var(--mvm-distance) * 1.15), 1);
 
-  transition: opacity 0.1s ease, transform 0.1s ease;
+  transform:
+    translate3d(0, calc(var(--mvm-offset) * 105%), 0)
+    scale(calc(1 - var(--mvm-distance) * 0.06));
+
+  filter: blur(calc(var(--mvm-distance) * 1.5px));
+
+  transition: opacity 0.08s linear, transform 0.08s linear, filter 0.08s linear;
 
   pointer-events: none;
+
+  will-change: transform, opacity;
 }
 
-.foundation-item[style*="opacity: 1"] {
+.leadership-reveal {
+  animation: leadership-slide-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.foundation-item-image {
+  animation: leadership-photo-breathe 8s ease-in-out infinite alternate;
+}
+
+@keyframes leadership-slide-in {
+  from { opacity: 0; transform: translateY(38px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes leadership-photo-breathe {
+  from { transform: scale(1); }
+  to { transform: scale(1.025); }
+}
+
+.foundation-item.is-active {
   pointer-events: auto;
 }
 
@@ -257,22 +283,19 @@
 
 /* Different icon backgrounds */
 
-.foundation-item:nth-child(1)
-.story-icon {
+.foundation-item:nth-child(1) .story-icon {
   background: var(--about-mint, #b8efd2);
 
   color: var(--about-green, #22c879);
 }
 
-.foundation-item:nth-child(2)
-.story-icon {
+.foundation-item:nth-child(2) .story-icon {
   background: var(--about-green, #22c879);
 
   color: white;
 }
 
-.foundation-item:nth-child(3)
-.story-icon {
+.foundation-item:nth-child(3) .story-icon {
   background: var(--about-dark-green, #073c2c);
 
   color: var(--about-mint, #b8efd2);
@@ -380,7 +403,7 @@
   }
 
   .foundation-scroll-section {
-    height: 200vh;
+    height: calc(var(--leadership-count, 1) * 100vh);
   }
 
   .foundation-item {
@@ -424,7 +447,7 @@
   }
 
   .foundation-scroll-section {
-    height: 200vh;
+    height: calc(var(--leadership-count, 1) * 100vh);
   }
 
   .foundation-content-wrapper {
@@ -463,4 +486,11 @@
     margin-bottom: 35px;
   }
 
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .leadership-reveal,
+  .foundation-item-image {
+    animation: none;
+  }
 }

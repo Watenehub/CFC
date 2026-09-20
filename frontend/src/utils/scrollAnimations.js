@@ -15,12 +15,11 @@ export const initScrollAnimations = () => {
   if (typeof document === 'undefined') return null
 
   if (!intersectionObserver) {
+    // Reversible reveal (matches the About page): fades back out when a
+    // section scrolls out of view, then replays when it returns.
     intersectionObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible')
-          intersectionObserver.unobserve(entry.target)
-        }
+        entry.target.classList.toggle('visible', entry.isIntersecting)
       })
     }, {
       root: null,

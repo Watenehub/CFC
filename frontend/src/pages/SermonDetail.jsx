@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import * as sermonsApi from '../api/sermons'
+import '../utils/scrollAnimations'
 import './SermonDetail.css'
 
 function SermonDetail() {
@@ -61,7 +62,7 @@ function SermonDetail() {
           ← Back to Sermons
         </Link>
 
-        <div className="sermon-detail-content">
+        <div className="sermon-detail-content fade-up">
           <div className="sermon-detail-header">
             <div className="sermon-detail-category">{sermonData.category}</div>
             <h1>{sermonData.title}</h1>

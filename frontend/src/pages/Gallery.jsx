@@ -4,6 +4,18 @@ import PageHero from '../components/PageHero'
 import '../styles/ModernDesignSystem.css'
 import './Gallery.css'
 
+const normalizeCategory = (value) => {
+  const label = String(value || '').trim().replace(/\s+/g, ' ')
+  const aliases = {
+    conference: 'Conferences',
+    conferences: 'Conferences',
+    membership: 'Membership',
+    memberships: 'Membership',
+    worship: 'Worship',
+  }
+  return aliases[label.toLowerCase()] || label || 'General'
+}
+
 function Gallery() {
   const [galleryContent, setGalleryContent] = useState([])
   const [loading, setLoading] = useState(true)
@@ -27,7 +39,7 @@ function Gallery() {
 
   const galleryByCategory = galleryContent.reduce((groups, item) => ({
     ...groups,
-    [item.category || 'General']: [...(groups[item.category || 'General'] || []), {
+    [normalizeCategory(item.category)]: [...(groups[normalizeCategory(item.category)] || []), {
       ...item,
       image: item.image || item.image_url,
     }],
@@ -73,11 +85,11 @@ function Gallery() {
               <p>No gallery photos yet. Check back soon as our media team shares more from church life.</p>
             </div>
           ) : categories.map((category) => (
-            <section key={category} className="gallery-section">
+            <section key={category} className="gallery-section fade-up">
               <h2 className="gallery-category">{category.replace(/([A-Z])/g, ' $1').trim()}</h2>
               <div className="masonry-gallery">
                 {galleryByCategory[category].map((photo, i) => (
-                  <div key={photo.id || photo.image} className="gallery-item" onClick={() => openLightbox(category, i)}>
+                  <div key={photo.id || photo.image} className="gallery-item fade-up" onClick={() => openLightbox(category, i)}>
                     <img src={photo.image} alt={photo.description || `${category} ${i + 1}`} loading="lazy" />
                     <div className="gallery-overlay">
                       <div className="gallery-caption">{photo.description || 'View'}</div>

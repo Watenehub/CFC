@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
+import '../utils/scrollAnimations'
 
 function GivingDetail() {
   const { id } = useParams()
@@ -67,7 +68,7 @@ function GivingDetail() {
           ← Back to Giving
         </Link>
 
-        <section className="giving-detail-card">
+        <section className="giving-detail-card fade-up">
           {giving.poster && (
             <div className="giving-detail-image-wrapper">
               <img

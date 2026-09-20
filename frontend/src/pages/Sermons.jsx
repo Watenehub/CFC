@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import * as sermonsApi from '../api/sermons'
 import PageHero from '../components/PageHero'
+import '../utils/scrollAnimations'
 import './Sermons.css'
 
 function Sermons() {
@@ -77,7 +78,7 @@ function Sermons() {
       <div className="page-body page-body--white">
       <div className="container">
 
-        <section className="sermons-filters">
+        <section className="sermons-filters fade-up">
           <div className="search-bar">
             <input
               type="text"
@@ -120,7 +121,7 @@ function Sermons() {
         ) : (
           <div className="sermons-grid">
             {filteredSermons.map((sermon) => (
-              <Link key={sermon.id} to={`/sermons/${sermon.id}`} className="sermon-card">
+              <Link key={sermon.id} to={`/sermons/${sermon.id}`} className="sermon-card fade-up">
                 <div className="sermon-thumbnail">
                   <img src={sermon.thumbnail || '/CFC_CHURCH_PHOTO.jpg'} alt={sermon.title} loading="lazy" />
                   {sermon.video_url && <span className="sermon-play-badge" aria-hidden="true">▶</span>}

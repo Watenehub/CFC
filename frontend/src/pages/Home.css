@@ -1213,6 +1213,9 @@
 
 .home .events-copy { max-width: 500px; }
 .home .events-copy .section-heading { max-width: 460px; font-size: clamp(2.25rem, 4.3vw, 4rem); }
+.home .events-copy-dynamic {
+  animation: home-event-copy-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
 .home .events-description { max-width: 420px; margin: 2rem 0 1rem; }
 .home .event-current-details { min-height: 2.7rem; margin-bottom: 1.1rem; display: flex; flex-direction: column; gap: 0.25rem; color: #666660; font-size: 0.7rem; }
 .home .event-current-details strong { color: #1b1b1b; font-size: 0.84rem; }
@@ -1243,6 +1246,7 @@
 }
 @keyframes home-floating-dot { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-12px) rotate(8deg); } }
 @keyframes home-event-tumble { from { opacity: 0; transform: translateY(22px) rotate(7deg) scale(0.9); filter: blur(5px); } 55% { opacity: 1; transform: translateY(-5px) rotate(-1.5deg) scale(1.015); filter: blur(0); } to { opacity: 1; transform: translateY(0) rotate(0) scale(1); } }
+@keyframes home-event-copy-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
 @media (max-width: 1100px) {
   .home .experience-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 720px; margin: 0 auto; }
@@ -1480,6 +1484,7 @@
 .home .experiences.section-tectonic .experience-card-image {
   width: 100%;
   height: 111px;
+  overflow: hidden;
   background: #ddd;
 }
 
@@ -1520,6 +1525,9 @@
 }
 
 .home .experiences.section-tectonic .experience-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 

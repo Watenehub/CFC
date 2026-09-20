@@ -272,13 +272,15 @@ function Home() {
 
         <section className="section events-section section-tumble">
           <div className="container events-layout">
-            <div className="events-copy home-reveal ascend-text event-copy-motion" key={`event-copy-${currentEvent.id}`}>
+            <div className="events-copy home-reveal ascend-text">
               <span className="section-eyebrow">Calendar</span>
               <h2 className="section-heading">Coming up at the chapel</h2>
-              <p className="events-description">{currentEvent.description || 'Bible conferences, membership classes, worship nights, and outreach throughout the year.'}</p>
-              <div className="event-current-details">
-                {currentEvent.title && currentEvent.title !== fallbackEvent.title && <strong>{currentEvent.title}</strong>}
-                {currentEvent.type === 'event' && <span>{[formatEventDate(currentEvent.date), formatTimeRange(currentEvent.start_time, currentEvent.end_time)].filter(Boolean).join(' · ')}</span>}
+              <div className="events-copy-dynamic" key={`event-copy-${currentEvent.id}`}>
+                <p className="events-description">{currentEvent.description || 'Bible conferences, membership classes, worship nights, and outreach throughout the year.'}</p>
+                <div className="event-current-details">
+                  {currentEvent.title && currentEvent.title !== fallbackEvent.title && <strong>{currentEvent.title}</strong>}
+                  {currentEvent.type === 'event' && <span>{[formatEventDate(currentEvent.date), formatTimeRange(currentEvent.start_time, currentEvent.end_time)].filter(Boolean).join(' · ')}</span>}
+                </div>
               </div>
               <Link to="/events" className="btn btn-primary events-calendar-button">Full calendar</Link>
             </div>

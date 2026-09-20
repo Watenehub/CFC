@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import * as eventsApi from '../api/events'
 import * as settingsApi from '../api/settings'
+import '../utils/scrollAnimations'
 import './EventDetail.css'
 
 function EventDetail() {
@@ -105,7 +106,7 @@ function EventDetail() {
           ← Back to Events
         </Link>
 
-        <div className="event-detail-content">
+        <div className="event-detail-content fade-up">
           <div className="event-detail-image">
             <img src={eventData.image || '/CFC_CHURCH_PHOTO.jpg'} alt={eventData.title} />
             {isPastEvent && (
