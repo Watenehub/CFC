@@ -1,5 +1,6 @@
 from functools import wraps
 from datetime import date
+from concurrent.futures import ThreadPoolExecutor
 from flask import Blueprint, jsonify, session
 from ..database.mongodb import get_db
 from pymongo import ASCENDING, DESCENDING
@@ -25,8 +26,46 @@ def get_dashboard_stats():
     db = get_db()
     today = date.today().isoformat()
 
-    open_enquiries = db.enquiries.count_documents({"status": {"$in": ["New", "In Progress"]}})
-    new_prayer = db.prayer_requests.count_documents({"status": "New"})
+    def count(collection, query=None):
+        return collection.count_documents(query or {})
+
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        counts = list(executor.map(
+            lambda task: count(task[0], task[1]),
+            [
+                (db.users, None),
+                (db.events, None),
+                (db.sermons, None),
+                (db.enquiries, None),
+                (db.enquiries, {"status": {"$in": ["New", "In Progress"]}}),
+                (db.prayer_requests, None),
+                (db.prayer_requests, {"status": "New"}),
+                (db.giving, None),
+                (db.gallery, None),
+                (db.ministries, None),
+                (db.pastors, None),
+                (db.deacons, None),
+                (db.notifications, None),
+                (db.services, None),
+            ],
+        ))
+
+    (
+        users_count,
+        events_count,
+        sermons_count,
+        enquiries_count,
+        open_enquiries,
+        prayer_requests_count,
+        new_prayer,
+        giving_count,
+        gallery_count,
+        ministries_count,
+        pastors_count,
+        deacons_count,
+        notifications_count,
+        services_count,
+    ) = counts
 
     event_projection = {
         "_id": 0,
@@ -57,20 +96,20 @@ def get_dashboard_stats():
     )
 
     return jsonify({
-        "users": db.users.count_documents({}),
-        "events": db.events.count_documents({}),
-        "sermons": db.sermons.count_documents({}),
-        "enquiries": db.enquiries.count_documents({}),
+        "users": users_count,
+        "events": events_count,
+        "sermons": sermons_count,
+        "enquiries": enquiries_count,
         "open_enquiries": open_enquiries,
-        "prayer_requests": db.prayer_requests.count_documents({}),
+        "prayer_requests": prayer_requests_count,
         "new_prayer_requests": new_prayer,
-        "giving": db.giving.count_documents({}),
-        "gallery": db.gallery.count_documents({}),
-        "ministries": db.ministries.count_documents({}),
-        "pastors": db.pastors.count_documents({}),
-        "deacons": db.deacons.count_documents({}),
-        "notifications": db.notifications.count_documents({}),
-        "services": db.services.count_documents({}),
+        "giving": giving_count,
+        "gallery": gallery_count,
+        "ministries": ministries_count,
+        "pastors": pastors_count,
+        "deacons": deacons_count,
+        "notifications": notifications_count,
+        "services": services_count,
         "recent_enquiries": [
             {
                 "id": item.get("id"),

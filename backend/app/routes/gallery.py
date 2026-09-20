@@ -7,6 +7,19 @@ from pymongo import DESCENDING
 gallery_bp = Blueprint("gallery", __name__)
 
 
+def normalize_category(value):
+    """Keep equivalent admin category labels in one public/admin group."""
+    label = " ".join(str(value or "").strip().split())
+    aliases = {
+        "conference": "Conferences",
+        "conferences": "Conferences",
+        "membership": "Membership",
+        "memberships": "Membership",
+        "worship": "Worship",
+    }
+    return aliases.get(label.lower(), label or "General")
+
+
 def serialize_gallery_item(item):
     """Convert MongoDB document into a JSON-safe API response."""
     if item is None:
@@ -20,6 +33,7 @@ def serialize_gallery_item(item):
         item["image"] = item["image_url"]
     if not item.get("image_url") and item.get("image"):
         item["image_url"] = item["image"]
+    item["category"] = normalize_category(item.get("category"))
 
     return item
 
@@ -84,7 +98,7 @@ def create_gallery_item():
         "description": data.get("description", ""),
         "image": image,
         "image_url": image,
-        "category": data.get("category", ""),
+        "category": normalize_category(data.get("category")),
         "date": data.get("date", ""),
         "featured": data.get("featured", False)
     }
@@ -120,6 +134,9 @@ def update_gallery_item(item_id):
         for field in allowed_fields
         if field in data
     }
+
+    if "category" in update_data:
+        update_data["category"] = normalize_category(update_data["category"])
 
     if "image" in update_data and "image_url" not in update_data:
         update_data["image_url"] = update_data["image"]

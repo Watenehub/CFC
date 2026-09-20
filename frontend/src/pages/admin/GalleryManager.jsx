@@ -7,6 +7,18 @@ import * as galleryApi from '../../api/gallery'
 const categories = ['Worship', 'Conferences', 'Membership', 'ChildrenAndTeens', 'Media', 'MedicalOutreach', 'CommunityOutreach', 'CurrentNeeds']
 const emptyPhoto = { image: '', description: '', category: 'Worship' }
 
+const normalizeCategory = (value) => {
+  const label = String(value || '').trim().replace(/\s+/g, ' ')
+  const aliases = {
+    conference: 'Conferences',
+    conferences: 'Conferences',
+    membership: 'Membership',
+    memberships: 'Membership',
+    worship: 'Worship',
+  }
+  return aliases[label.toLowerCase()] || label || 'General'
+}
+
 function GalleryManager() {
   const [photos, setPhotos] = useState([])
   const [loading, setLoading] = useState(true)
@@ -51,14 +63,14 @@ function GalleryManager() {
         await galleryApi.updateGalleryItem(editingId, {
           image: formData.image,
           description: formData.description,
-          category: formData.category,
+              category: normalizeCategory(formData.category),
         })
       } else {
         for (const file of pendingImages) {
           await galleryApi.createGalleryItem({
             image: file.image,
             description: formData.description,
-            category: formData.category,
+            category: normalizeCategory(formData.category),
           })
         }
       }
@@ -91,10 +103,10 @@ function GalleryManager() {
     }
   }
 
-  const allCategories = [...new Set([...categories, ...photos.map((photo) => photo.category).filter(Boolean)])]
+  const allCategories = [...new Set([...categories, ...photos.map((photo) => normalizeCategory(photo.category))])]
   const groupedPhotos = allCategories.map((category) => ({
     category,
-    items: photos.filter((photo) => photo.category === category),
+    items: photos.filter((photo) => normalizeCategory(photo.category) === category),
   }))
 
   return (
