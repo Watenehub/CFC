@@ -188,6 +188,9 @@ function Home() {
           <div className="hero-overlay" />
         </div>
         <div className="hero-content container">
+          <div className="hero-logo fade-up">
+            <img src="/logo.png" alt="Cornerstone Family Chapel" />
+          </div>
           <p className="hero-brand fade-up">Cornerstone Family Chapel</p>
           <h1 className="hero-title hero-typewriter">A family of faith, rooted in Christ</h1>
         </div>
