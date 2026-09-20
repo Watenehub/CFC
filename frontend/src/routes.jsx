@@ -1,41 +1,43 @@
+import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
-import GivingDetail from './pages/GivingDetail'
 import { STAFF_ROLES, dashboardPath } from './utils/permissions'
 import Home from './pages/Home'
-import About from './pages/About'
-import Ministries from './pages/Ministries'
-import Sermons from './pages/Sermons'
-import SermonDetail from './pages/SermonDetail'
-import WatchLive from './pages/WatchLive'
-import Gallery from './pages/Gallery'
-import Events from './pages/Events'
-import EventDetail from './pages/EventDetail'
-import Giving from './pages/Giving'
-import Prayer from './pages/Prayer'
-import Contact from './pages/Contact'
-import Login from './pages/Login'
-import ForgotPassword from './pages/ForgotPassword'
-import ResetPassword from './pages/ResetPassword'
-import Pastors from './pages/Pastors'
-import Deacons from './pages/Deacons'
-import Staff from './pages/Staff'
-import AdminDashboard from './pages/admin/Dashboard'
-import AdminUsers from './pages/admin/Users'
-import AdminEventCreate from './pages/admin/EventsCreate'
-import AdminSermonsCreate from './pages/admin/SermonsCreate'
-import AdminEnquiries from './pages/admin/Enquiries'
-import AdminGiving from './pages/admin/Giving'
-import AdminSettings from './pages/admin/Settings'
-import AdminPeople from './pages/admin/PeopleManager'
-import GalleryManager from './pages/admin/GalleryManager'
-import AdminPrayer from './pages/admin/PrayerRequests'
-import AdminAnnouncements from './pages/admin/Announcements'
-import AdminServices from './pages/admin/Services'
-import MediaDashboard from './pages/media/Dashboard'
-import SecretaryDashboard from './pages/secretary/Dashboard'
-import MemberDashboard from './pages/member/Dashboard'
-import NotFound from './pages/NotFound'
+
+const GivingDetail = lazy(() => import('./pages/GivingDetail'))
+const About = lazy(() => import('./pages/About'))
+const Ministries = lazy(() => import('./pages/Ministries'))
+const Sermons = lazy(() => import('./pages/Sermons'))
+const SermonDetail = lazy(() => import('./pages/SermonDetail'))
+const WatchLive = lazy(() => import('./pages/WatchLive'))
+const Gallery = lazy(() => import('./pages/Gallery'))
+const Events = lazy(() => import('./pages/Events'))
+const EventDetail = lazy(() => import('./pages/EventDetail'))
+const Giving = lazy(() => import('./pages/Giving'))
+const Prayer = lazy(() => import('./pages/Prayer'))
+const Contact = lazy(() => import('./pages/Contact'))
+const Login = lazy(() => import('./pages/Login'))
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
+const ResetPassword = lazy(() => import('./pages/ResetPassword'))
+const Pastors = lazy(() => import('./pages/Pastors'))
+const Deacons = lazy(() => import('./pages/Deacons'))
+const Staff = lazy(() => import('./pages/Staff'))
+const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'))
+const AdminUsers = lazy(() => import('./pages/admin/Users'))
+const AdminEventCreate = lazy(() => import('./pages/admin/EventsCreate'))
+const AdminSermonsCreate = lazy(() => import('./pages/admin/SermonsCreate'))
+const AdminEnquiries = lazy(() => import('./pages/admin/Enquiries'))
+const AdminGiving = lazy(() => import('./pages/admin/Giving'))
+const AdminSettings = lazy(() => import('./pages/admin/Settings'))
+const AdminPeople = lazy(() => import('./pages/admin/PeopleManager'))
+const GalleryManager = lazy(() => import('./pages/admin/GalleryManager'))
+const AdminPrayer = lazy(() => import('./pages/admin/PrayerRequests'))
+const AdminAnnouncements = lazy(() => import('./pages/admin/Announcements'))
+const AdminServices = lazy(() => import('./pages/admin/Services'))
+const MediaDashboard = lazy(() => import('./pages/media/Dashboard'))
+const SecretaryDashboard = lazy(() => import('./pages/secretary/Dashboard'))
+const MemberDashboard = lazy(() => import('./pages/member/Dashboard'))
+const NotFound = lazy(() => import('./pages/NotFound'))
 
 function ProtectedRoute({ children, allowedRoles, permission }) {
   const { user, loading, hasPermission } = useAuth()
@@ -65,7 +67,8 @@ function AppRoutes() {
   const { user } = useAuth()
 
   return (
-    <Routes>
+    <Suspense fallback={<div className="route-loading" role="status">Loading page...</div>}>
+      <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/about" element={<About />} />
       <Route path="/ministries" element={<Ministries />} />
@@ -129,7 +132,8 @@ function AppRoutes() {
       />
 
       <Route path="*" element={<NotFound />} />
-    </Routes>
+      </Routes>
+    </Suspense>
   )
 }
 

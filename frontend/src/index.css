@@ -75,6 +75,14 @@ body {
   overflow-x: hidden;
 }
 
+.route-loading {
+  min-height: 50vh;
+  display: grid;
+  place-items: center;
+  color: var(--color-primary-dark);
+  font-weight: 700;
+}
+
 ::selection {
   background: var(--color-accent-light);
   color: var(--color-primary-dark);
