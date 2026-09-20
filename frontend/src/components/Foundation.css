@@ -8,7 +8,7 @@
   background: var(--about-mint, #b8efd2);
   padding: 120px 6% 160px;
 
-  overflow: hidden;
+  overflow-x: clip;
 }
 
 
@@ -173,17 +173,8 @@
   will-change: transform, opacity;
 }
 
-.leadership-reveal {
-  animation: leadership-slide-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
 .foundation-item-image {
   animation: leadership-photo-breathe 8s ease-in-out infinite alternate;
-}
-
-@keyframes leadership-slide-in {
-  from { opacity: 0; transform: translateY(38px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes leadership-photo-breathe {

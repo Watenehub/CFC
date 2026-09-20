@@ -89,7 +89,7 @@ export default function Leadership({ title, subtitle, members }) {
             {members.map((member, index) => (
               <div
                 key={member.id || `${member.name}-${index}`}
-                className={`foundation-item leadership-reveal${index === activeIndex ? ' is-active' : ''}`}
+                className={`foundation-item${index === activeIndex ? ' is-active' : ''}`}
                 style={getItemStyles(index)}
                 aria-hidden={index !== activeIndex}
               >
