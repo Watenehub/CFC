@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import * as givingApi from '../api/giving'
+import * as mpesaApi from '../api/mpesa'
 import './Giving.css'
 import '../styles/ModernDesignSystem.css'
 import '../utils/scrollAnimations'
@@ -10,6 +11,16 @@ function Giving() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [selectedCategory, setSelectedCategory] = useState('')
+  const [selectedDigitalGiving, setSelectedDigitalGiving] = useState('')
+
+  // Digital giving form state
+  const [showPaymentForm, setShowPaymentForm] = useState(false)
+  const [paymentAmount, setPaymentAmount] = useState('')
+  const [paymentPhone, setPaymentPhone] = useState('')
+  const [formErrors, setFormErrors] = useState({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const navigate = useNavigate()
 
   useEffect(() => {
     loadGivingOptions()
@@ -29,9 +40,142 @@ function Giving() {
 
   const categories = ['Offering', 'Tithe', 'Missions', 'Building Fund', 'Donations', 'Other']
 
-  const filteredOptions = selectedCategory 
+  const filteredOptions = selectedCategory
     ? givingOptions.filter(option => option.category === selectedCategory)
     : givingOptions
+
+  /*
+   * When the visitor selects a giving option
+   * from "Give Digitally", show the payment form.
+   *
+   * Later this is where we can connect the
+   * M-PESA/Daraja payment process.
+   */
+  const handleDigitalGivingChange = (event) => {
+    const givingId = event.target.value
+
+    setSelectedDigitalGiving(givingId)
+
+    if (!givingId) {
+      setShowPaymentForm(false)
+      setPaymentAmount('')
+      setPaymentPhone('')
+      setFormErrors({})
+      return
+    }
+
+    setShowPaymentForm(true)
+  }
+
+  const validateForm = () => {
+    const errors = {}
+
+    // Validate giving option
+    if (!selectedDigitalGiving) {
+      errors.giving = 'Please select a giving option'
+    }
+
+    // Validate amount
+    if (!paymentAmount) {
+      errors.amount = 'Please enter an amount'
+    } else {
+      const amount = parseFloat(paymentAmount)
+      if (isNaN(amount) || amount <= 0) {
+        errors.amount = 'Amount must be greater than 0'
+      }
+    }
+
+    // Validate phone number
+    if (!paymentPhone) {
+      errors.phone = 'Please enter your M-PESA phone number'
+    } else {
+      // Remove spaces and common formatting
+      const cleanPhone = paymentPhone.replace(/\s/g, '')
+
+      // Validate Kenyan phone number format
+      // Accept formats: 07XXXXXXXX, 2547XXXXXXXX, +2547XXXXXXXX
+      const phoneRegex = /^(\+?254|0)[17]\d{8}$/
+
+      if (!phoneRegex.test(cleanPhone)) {
+        errors.phone = 'Please enter a valid Kenyan phone number (e.g., 07XXXXXXXX or 2547XXXXXXXX)'
+      }
+    }
+
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const formatPhoneNumber = (phone) => {
+    // Convert to Daraja format: 2547XXXXXXXX or 2541XXXXXXXX
+    const cleanPhone = phone.replace(/\s/g, '')
+
+    if (cleanPhone.startsWith('+254')) {
+      return cleanPhone.substring(1) // Remove +, keep 254
+    } else if (cleanPhone.startsWith('0')) {
+      return '254' + cleanPhone.substring(1) // Replace 0 with 254
+    } else if (cleanPhone.startsWith('254')) {
+      return cleanPhone // Already in correct format
+    }
+
+    return cleanPhone
+  }
+
+  const handlePaymentSubmit = async (event) => {
+    event.preventDefault()
+
+    if (!validateForm()) {
+      return
+    }
+
+    setIsSubmitting(true)
+    setFormErrors({})
+
+    try {
+      const selectedGiving = givingOptions.find(option => option.id === parseInt(selectedDigitalGiving))
+
+      const paymentData = {
+        giving_id: parseInt(selectedDigitalGiving),
+        amount: parseFloat(paymentAmount),
+        phone: formatPhoneNumber(paymentPhone)
+      }
+
+      const response = await mpesaApi.initiateMpesaPayment(paymentData)
+
+      // Show success message from backend
+      alert(response.message || response.customer_message || 'STK Push initiated successfully')
+
+      // Reset form after successful submission
+      closePaymentForm()
+
+    } catch (error) {
+      console.error('Payment submission error:', error)
+      console.error('Error status:', error.status)
+      console.error('Error payload:', error.payload)
+
+      // Handle different error types
+      if (error.status === 404) {
+        setFormErrors({ giving: 'Giving option not found' })
+      } else if (error.status === 400) {
+        setFormErrors({ general: error.payload?.error || error.payload?.details || 'Invalid payment details' })
+      } else if (error.status === 503) {
+        setFormErrors({ general: 'Payment service unavailable. Please check your Daraja credentials.' })
+      } else if (error.status === 502) {
+        setFormErrors({ general: 'Payment service error. Please try again.' })
+      } else {
+        setFormErrors({ general: `Failed to initiate payment: ${error.message || 'Unknown error'}` })
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const closePaymentForm = () => {
+    setShowPaymentForm(false)
+    setSelectedDigitalGiving('')
+    setPaymentAmount('')
+    setPaymentPhone('')
+    setFormErrors({})
+  }
 
   if (loading) {
     return (
@@ -66,6 +210,134 @@ function Giving() {
             <p className="giving-subtitle fade-up">
               Whether supporting the church's ministry, missions, community outreach, or a specific project, every contribution can help us serve others and extend the impact of the church.
             </p>
+
+            {/* =========================================
+                DIGITAL GIVING DROPDOWN
+            ========================================= */}
+            <div className="digital-giving-wrapper fade-up">
+              <label
+                htmlFor="digital-giving"
+                className="digital-giving-label"
+              >
+                Give Digitally
+              </label>
+
+              <select
+                id="digital-giving"
+                className="digital-giving-select"
+                value={selectedDigitalGiving}
+                onChange={handleDigitalGivingChange}
+              >
+                <option value="">
+                  Select how you would like to give
+                </option>
+
+                {givingOptions.map((option) => (
+                  <option
+                    key={option.id}
+                    value={option.id}
+                  >
+                    {option.title}
+                  </option>
+                ))}
+              </select>
+
+              <p className="digital-giving-helper">
+                Choose a giving option to continue.
+              </p>
+            </div>
+
+            {/* =========================================
+                DIGITAL GIVING PAYMENT FORM
+            ========================================= */}
+            {showPaymentForm && (
+              <div className="digital-payment-form fade-up">
+                <div className="payment-form-header">
+                  <h3>Digital Giving</h3>
+                  <button
+                    type="button"
+                    className="close-form-button"
+                    onClick={closePaymentForm}
+                    aria-label="Close payment form"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                {formErrors.general && (
+                  <div className="form-general-error">
+                    {formErrors.general}
+                  </div>
+                )}
+
+                <form onSubmit={handlePaymentSubmit}>
+                  {/* Selected Giving Type */}
+                  <div className="form-group">
+                    <label htmlFor="giving-type" className="form-label">
+                      Giving
+                    </label>
+                    <div className="form-value">
+                      {givingOptions.find(option => option.id === parseInt(selectedDigitalGiving))?.title || 'Not selected'}
+                    </div>
+                  </div>
+
+                  {/* Amount */}
+                  <div className="form-group">
+                    <label htmlFor="payment-amount" className="form-label">
+                      Amount (KSh)
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      id="payment-amount"
+                      className={`form-input ${formErrors.amount ? 'error' : ''}`}
+                      value={paymentAmount}
+                      onChange={(e) => {
+                        // Only allow numbers and decimal point
+                        const value = e.target.value.replace(/[^0-9.]/g, '')
+                        setPaymentAmount(value)
+                      }}
+                      placeholder=""
+                      disabled={isSubmitting}
+                    />
+                    {formErrors.amount && (
+                      <span className="form-error">{formErrors.amount}</span>
+                    )}
+                  </div>
+
+                  {/* Phone Number */}
+                  <div className="form-group">
+                    <label htmlFor="payment-phone" className="form-label">
+                      M-PESA Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      id="payment-phone"
+                      className={`form-input ${formErrors.phone ? 'error' : ''}`}
+                      value={paymentPhone}
+                      onChange={(e) => setPaymentPhone(e.target.value)}
+                      placeholder="07XXXXXXXX"
+                      disabled={isSubmitting}
+                    />
+                    {formErrors.phone && (
+                      <span className="form-error">{formErrors.phone}</span>
+                    )}
+                    <span className="form-hint">
+                      Enter your M-PESA number (e.g., 07XXXXXXXX or 2547XXXXXXXX)
+                    </span>
+                  </div>
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    className="payment-submit-button"
+                    disabled={isSubmitting || !paymentAmount}
+                  >
+                    {isSubmitting ? 'Processing...' : paymentAmount ? `Give KSh ${paymentAmount}` : 'Give'}
+                  </button>
+                </form>
+              </div>
+            )}
           </div>
         </section>
 

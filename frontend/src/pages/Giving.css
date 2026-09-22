@@ -337,3 +337,314 @@
     width: 100%;
   }
 }
+
+/* =========================================
+   DIGITAL GIVING
+========================================= */
+
+.digital-giving-wrapper {
+  margin-top: 2rem;
+  max-width: 430px;
+}
+
+.digital-giving-label {
+  display: block;
+  margin-bottom: 0.7rem;
+
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  color: var(--color-primary, #8b5e34);
+}
+
+.digital-giving-select {
+  width: 100%;
+  min-height: 56px;
+
+  padding: 0 3rem 0 1.2rem;
+
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 12px;
+
+  background-color: #ffffff;
+
+  color: #222;
+
+  font-size: 1rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  appearance: none;
+
+  background-image:
+    linear-gradient(45deg, transparent 50%, #555 50%),
+    linear-gradient(135deg, #555 50%, transparent 50%);
+
+  background-position:
+    calc(100% - 22px) 24px,
+    calc(100% - 16px) 24px;
+
+  background-size:
+    6px 6px,
+    6px 6px;
+
+  background-repeat: no-repeat;
+
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+.digital-giving-select:hover {
+  border-color: var(--color-primary, #8b5e34);
+}
+
+.digital-giving-select:focus {
+  outline: none;
+
+  border-color: var(--color-primary, #8b5e34);
+
+  box-shadow:
+    0 0 0 4px rgba(139, 94, 52, 0.12);
+}
+
+.digital-giving-select:active {
+  transform: translateY(1px);
+}
+
+.digital-giving-helper {
+  margin: 0.6rem 0 0;
+
+  font-size: 0.85rem;
+
+  color: #777;
+}
+
+
+/* =========================================
+   MOBILE DIGITAL GIVING
+========================================= */
+
+@media (max-width: 760px) {
+
+  .digital-giving-wrapper {
+    max-width: 100%;
+    margin: 1.5rem auto 0;
+  }
+
+  .digital-giving-select {
+    min-height: 52px;
+
+    font-size: 0.95rem;
+  }
+
+}
+
+/* =========================================
+   DIGITAL PAYMENT FORM
+========================================= */
+
+.digital-payment-form {
+  margin-top: 2rem;
+  padding: 2rem;
+
+  background: var(--color-white);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.form-general-error {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-md);
+
+  color: var(--color-error);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.payment-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+
+  border-bottom: 1px solid var(--color-border);
+}
+
+.payment-form-header h3 {
+  margin: 0;
+
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.close-form-button {
+  width: 32px;
+  height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: var(--radius-full);
+
+  background: var(--color-bg-light);
+  color: var(--color-text);
+
+  font-size: 1.5rem;
+  font-weight: 300;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition: all var(--transition-fast);
+}
+
+.close-form-button:hover {
+  background: var(--color-error);
+  color: white;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-dark);
+}
+
+.form-value {
+  padding: 0.75rem 1rem;
+
+  background: var(--color-bg-light);
+  border-radius: var(--radius-md);
+
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+
+  background: var(--color-white);
+  color: var(--color-text);
+
+  font-size: 1rem;
+  font-weight: 500;
+
+  transition: all var(--transition-fast);
+}
+
+.form-input:focus {
+  outline: none;
+
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(139, 94, 52, 0.1);
+}
+
+.form-input.error {
+  border-color: var(--color-error);
+}
+
+.form-input.error:focus {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.form-input:disabled {
+  background: var(--color-bg-light);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.form-error {
+  display: block;
+  margin-top: 0.5rem;
+
+  font-size: 0.8rem;
+  color: var(--color-error);
+  font-weight: 500;
+}
+
+.form-hint {
+  display: block;
+  margin-top: 0.5rem;
+
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+}
+
+.payment-submit-button {
+  width: 100%;
+  padding: 1rem;
+
+  background: var(--color-primary);
+  color: white;
+
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-md);
+
+  cursor: pointer;
+
+  transition: all var(--transition-fast);
+}
+
+.payment-submit-button:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.payment-submit-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.payment-submit-button:disabled {
+  background: var(--color-text-light);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* =========================================
+   MOBILE PAYMENT FORM
+========================================= */
+
+@media (max-width: 760px) {
+
+  .digital-payment-form {
+    padding: 1.5rem;
+  }
+
+  .payment-form-header h3 {
+    font-size: 1.125rem;
+  }
+
+  .form-input {
+    font-size: 0.95rem;
+  }
+
+}
