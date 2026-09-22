@@ -157,6 +157,8 @@ function About() {
               <img
                 src="/images/cornerstone/about/hero.jpg"
                 alt="Cornerstone Family Chapel worship service"
+                loading="eager"
+                decoding="async"
               />
             </div>
           </div>
@@ -206,7 +208,12 @@ function About() {
                         }}
                       >
                         <div className="mvm-image-wrap">
-                          <img src={item.image} alt={item.imageAlt} />
+                          <img 
+                            src={item.image} 
+                            alt={item.imageAlt}
+                            loading="lazy"
+                            decoding="async"
+                          />
                         </div>
 
                         <div className="mvm-copy">
@@ -257,6 +264,8 @@ function About() {
                 <img
                   src="/images/cornerstone/about/who-we-are.jpg"
                   alt="Cornerstone Family Chapel fellowship"
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
 
@@ -348,6 +357,8 @@ function About() {
               <img
                 src="/images/cornerstone/about/what-defines-us.jpg"
                 alt="Cornerstone Family Chapel gathering"
+                loading="lazy"
+                decoding="async"
               />
 
             </div>
@@ -402,6 +413,8 @@ function About() {
               <img
                 src="/images/cornerstone/about/faithfulness.jpg"
                 alt="Cornerstone Family Chapel worship team"
+                loading="lazy"
+                decoding="async"
               />
 
             </div>
@@ -443,6 +456,8 @@ function About() {
               <img
                 src="/images/cornerstone/about/rabbit-creek-church.webp"
                 alt="Cornerstone church gathering"
+                loading="lazy"
+                decoding="async"
               />
 
             </div>
@@ -453,6 +468,8 @@ function About() {
               <img
                 src="/images/cornerstone/page_02/page02_photo006_conference_participants.jpg"
                 alt="Cornerstone Family Chapel community"
+                loading="lazy"
+                decoding="async"
               />
 
             </div>
@@ -513,6 +530,8 @@ function About() {
             <img
               src="/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg"
               alt="Cornerstone Family Chapel pastor"
+              loading="lazy"
+              decoding="async"
             />
 
           </div>

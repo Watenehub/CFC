@@ -220,7 +220,12 @@ function Home() {
             {experiences.map((item, index) => (
               <Link key={item.title} to={item.link} className={`experience-card experience-card-${index + 1}`}>
                 <div className="experience-card-image">
-                  <img src={item.image} alt={item.title} loading="lazy" />
+                  <img 
+                    src={item.image} 
+                    alt={item.title} 
+                    loading="lazy"
+                    decoding="async"
+                  />
                 </div>
                 <div className="experience-card-body">
                   <h3>{item.title}</h3>
@@ -238,7 +243,13 @@ function Home() {
           <div className="container">
             <div className="sermon-feature-grid home-reveal merge-text">
               <div className="sermon-feature-media">
-                <img className="motion-image" src={latestSermon?.thumbnail || '/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg'} alt={latestSermon?.title || 'Cornerstone Family Chapel sermon'} />
+                <img 
+                  className="motion-image" 
+                  src={latestSermon?.thumbnail || '/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg'} 
+                  alt={latestSermon?.title || 'Cornerstone Family Chapel sermon'}
+                  loading="eager"
+                  decoding="async"
+                />
               </div>
               <div className="sermon-feature-content">
                 <span className="section-eyebrow">From the pulpit</span>
@@ -266,7 +277,12 @@ function Home() {
             <div className="connect-scroll">
               {connectCards.map((card) => (
                 <Link key={card.title} to={card.link} className="connect-card home-reveal skate-text">
-                  <img src={card.image} alt={card.title} loading="lazy" />
+                  <img 
+                    src={card.image} 
+                    alt={card.title} 
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <div className="connect-card-overlay">
                     <h3>{card.title}</h3>
                     <p>{card.subtitle}</p>
@@ -301,7 +317,13 @@ function Home() {
                     aria-hidden={index !== activeEvent}
                     style={{ '--event-image': `url("${event.image || fallbackEvent.image}")` }}
                   >
-                    <img className="motion-image" src={event.image || fallbackEvent.image} alt={event.title || 'Upcoming Cornerstone event'} loading={index === 0 ? 'eager' : 'lazy'} />
+                    <img 
+                      className="motion-image" 
+                      src={event.image || fallbackEvent.image} 
+                      alt={event.title || 'Upcoming Cornerstone event'} 
+                      loading={index === 0 ? 'eager' : 'lazy'}
+                      decoding="async"
+                    />
                   </div>
                 ))}
               </div>
@@ -344,7 +366,13 @@ function Home() {
             <div className="ministries-grid">
               {ministries.map((ministry) => (
                 <Link key={ministry.id} to="/ministries" className="ministry-feature-frame home-reveal fade-up">
-                  <img src={ministry.image || '/chapel.jpg'} alt={ministry.name} className="ministry-feature-image" loading="lazy" />
+                  <img 
+                    src={ministry.image || '/chapel.jpg'} 
+                    alt={ministry.name} 
+                    className="ministry-feature-image" 
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <div className="ministry-feature-content">
                     <h3 className="ministry-feature-title">{ministry.name}</h3>
                     <p className="ministry-feature-description">{ministry.description}</p>
@@ -374,7 +402,12 @@ function Home() {
               {sermons.map((sermon) => (
                 <Link key={sermon.id} to={`/sermons/${sermon.id}`} className="sermon-card home-reveal fade-up">
                   <div className="sermon-thumbnail">
-                    <img src={sermon.thumbnail || '/CFC_CHURCH_PHOTO.jpg'} alt={sermon.title} loading="lazy" />
+                    <img 
+                      src={sermon.thumbnail || '/CFC_CHURCH_PHOTO.jpg'} 
+                      alt={sermon.title} 
+                      loading="lazy"
+                      decoding="async"
+                    />
                     {sermon.video_url && <span className="sermon-play-badge" aria-hidden="true">▶</span>}
                   </div>
                   <div className="sermon-content">

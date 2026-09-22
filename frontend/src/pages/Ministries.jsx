@@ -13,6 +13,17 @@ function Ministries() {
     loadMinistries()
   }, [])
 
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (loading) {
+        setLoading(false)
+        setError('Loading took too long. Please refresh the page.')
+      }
+    }, 15000) // 15 second timeout
+
+    return () => clearTimeout(timeout)
+  }, [loading])
+
   const loadMinistries = async () => {
     try {
       const data = await ministriesApi.getMinistries()
@@ -66,7 +77,13 @@ function Ministries() {
             <div className="ministries-grid">
               {ministries.map((ministry) => (
                 <div key={ministry.id} className="ministry-feature-frame fade-up">
-                  <img src={ministry.image || '/chapel.jpg'} alt={ministry.name} className="ministry-feature-image" />
+                  <img 
+                    src={ministry.image || '/chapel.jpg'} 
+                    alt={ministry.name} 
+                    className="ministry-feature-image"
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <div className="ministry-feature-content">
                     <h3 className="ministry-feature-title">{ministry.name}</h3>
                     <p className="ministry-feature-description">{ministry.description}</p>

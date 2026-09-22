@@ -37,6 +37,17 @@ function Gallery() {
     loadGallery()
   }, [])
 
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (loading) {
+        setLoading(false)
+        setGalleryContent([])
+      }
+    }, 15000) // 15 second timeout
+
+    return () => clearTimeout(timeout)
+  }, [loading])
+
   const galleryByCategory = galleryContent.reduce((groups, item) => ({
     ...groups,
     [normalizeCategory(item.category)]: [...(groups[normalizeCategory(item.category)] || []), {
@@ -90,7 +101,12 @@ function Gallery() {
               <div className="masonry-gallery">
                 {galleryByCategory[category].map((photo, i) => (
                   <div key={photo.id || photo.image} className="gallery-item fade-up" onClick={() => openLightbox(category, i)}>
-                    <img src={photo.image} alt={photo.description || `${category} ${i + 1}`} loading="lazy" />
+                    <img 
+                      src={photo.image} 
+                      alt={photo.description || `${category} ${i + 1}`} 
+                      loading="lazy"
+                      decoding="async"
+                    />
                     <div className="gallery-overlay">
                       <div className="gallery-caption">{photo.description || 'View'}</div>
                     </div>
@@ -105,7 +121,13 @@ function Gallery() {
               <>
                 <button className="lightbox-close" onClick={closeLightbox}>×</button>
                 <button className="lightbox-nav lightbox-prev" onClick={prev}>‹</button>
-                <img className="lightbox-image" src={galleryByCategory[current.category][current.index].image} alt="Gallery" />
+                <img 
+                  className="lightbox-image" 
+                  src={galleryByCategory[current.category][current.index].image} 
+                  alt="Gallery"
+                  loading="eager"
+                  decoding="async"
+                />
                 <button className="lightbox-nav lightbox-next" onClick={next}>›</button>
               </>
             )}
