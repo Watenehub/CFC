@@ -146,6 +146,17 @@ function Home() {
     }
   }, [])
 
+  // Add timeout for home page data loading
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!latestSermon) {
+        console.warn('Home page data loading timeout')
+      }
+    }, 10000) // 10 second timeout
+
+    return () => clearTimeout(timeout)
+  }, [latestSermon])
+
   const eventSlides = useMemo(() => {
     const apiEvents = upcomingEvents.map((event) => ({
       ...event,
@@ -243,13 +254,26 @@ function Home() {
           <div className="container">
             <div className="sermon-feature-grid home-reveal merge-text">
               <div className="sermon-feature-media">
-                <img 
-                  className="motion-image" 
-                  src={latestSermon?.thumbnail || '/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg'} 
-                  alt={latestSermon?.title || 'Cornerstone Family Chapel sermon'}
-                  loading="eager"
-                  decoding="async"
-                />
+                {latestSermon?.thumbnail ? (
+                  <img 
+                    className="motion-image" 
+                    src={latestSermon.thumbnail} 
+                    alt={latestSermon.title || 'Cornerstone Family Chapel sermon'}
+                    loading="eager"
+                    decoding="async"
+                    onError={(e) => {
+                      e.target.src = '/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg'
+                    }}
+                  />
+                ) : (
+                  <img 
+                    className="motion-image" 
+                    src="/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg" 
+                    alt="Cornerstone Family Chapel sermon"
+                    loading="eager"
+                    decoding="async"
+                  />
+                )}
               </div>
               <div className="sermon-feature-content">
                 <span className="section-eyebrow">From the pulpit</span>
