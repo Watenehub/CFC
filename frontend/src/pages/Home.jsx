@@ -4,6 +4,7 @@ import { initScrollAnimations, cleanupScrollAnimations } from '../utils/scrollAn
 import * as sermonsApi from '../api/sermons'
 import * as eventsApi from '../api/events'
 import * as notificationsApi from '../api/notifications'
+import * as ministriesApi from '../api/ministries'
 import './Home.css'
 
 const experiences = [
@@ -75,6 +76,8 @@ function Home() {
   const [upcomingEvents, setUpcomingEvents] = useState([])
   const [announcements, setAnnouncements] = useState([])
   const [activeEvent, setActiveEvent] = useState(0)
+  const [ministries, setMinistries] = useState([])
+  const [sermons, setSermons] = useState([])
 
   useEffect(() => {
     const observer = initScrollAnimations()
@@ -102,16 +105,18 @@ function Home() {
     const loadData = async () => {
       try {
         // Load critical content first
-        const [sermonsData, eventsData, notesData] = await Promise.allSettled([
+        const [sermonsData, eventsData, notesData, ministriesData] = await Promise.allSettled([
           sermonsApi.getSermons(),
           eventsApi.getEvents(),
           notificationsApi.getNotifications(true),
+          ministriesApi.getMinistries(),
         ])
 
         if (isMounted) {
           if (sermonsData.status === 'fulfilled' && sermonsData.value?.length) {
             const sorted = [...sermonsData.value].sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
             setLatestSermon(sorted[0])
+            setSermons(sorted.slice(0, 6))
           }
           if (eventsData.status === 'fulfilled') {
             const now = new Date()
@@ -123,6 +128,9 @@ function Home() {
           }
           if (notesData.status === 'fulfilled') {
             setAnnouncements(notesData.value.slice(0, 6))
+          }
+          if (ministriesData.status === 'fulfilled') {
+            setMinistries(ministriesData.value.slice(0, 6))
           }
         }
 
@@ -188,9 +196,6 @@ function Home() {
           <div className="hero-overlay" />
         </div>
         <div className="hero-content container">
-          <div className="hero-logo fade-up">
-            <img src="/logo.png" alt="Cornerstone Family Chapel" />
-          </div>
           <p className="hero-brand fade-up">Cornerstone Family Chapel</p>
           <h1 className="hero-title hero-typewriter">A family of faith, rooted in Christ</h1>
         </div>
@@ -322,6 +327,76 @@ function Home() {
                 <span className="involved-link">Learn more →</span>
               </Link>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section ministries-section section-tumble">
+        <div className="container">
+          <div className="section-header home-reveal ascend-text">
+            <span className="section-eyebrow">Ministries</span>
+            <h2 className="section-heading">Our Ministries</h2>
+            <p className="section-subheading">Find your place to serve and grow in faith.</p>
+          </div>
+          {ministries.length === 0 ? (
+            <div className="empty-state"><p>No ministries listed yet. Check back soon.</p></div>
+          ) : (
+            <div className="ministries-grid">
+              {ministries.map((ministry) => (
+                <Link key={ministry.id} to="/ministries" className="ministry-feature-frame home-reveal fade-up">
+                  <img src={ministry.image || '/chapel.jpg'} alt={ministry.name} className="ministry-feature-image" loading="lazy" />
+                  <div className="ministry-feature-content">
+                    <h3 className="ministry-feature-title">{ministry.name}</h3>
+                    <p className="ministry-feature-description">{ministry.description}</p>
+                    <span className="ministry-feature-button">Learn more</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+          <div className="section-footer">
+            <Link to="/ministries" className="btn btn-primary">View all ministries</Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="section sermons-section section-pan">
+        <div className="container">
+          <div className="section-header home-reveal bounce-text">
+            <span className="section-eyebrow">Teaching</span>
+            <h2 className="section-heading">Recent Sermons</h2>
+            <p className="section-subheading">Messages from our pulpit to encourage you in the Word.</p>
+          </div>
+          {sermons.length === 0 ? (
+            <div className="empty-state"><p>No sermons available yet. Check back soon.</p></div>
+          ) : (
+            <div className="sermons-grid">
+              {sermons.map((sermon) => (
+                <Link key={sermon.id} to={`/sermons/${sermon.id}`} className="sermon-card home-reveal fade-up">
+                  <div className="sermon-thumbnail">
+                    <img src={sermon.thumbnail || '/CFC_CHURCH_PHOTO.jpg'} alt={sermon.title} loading="lazy" />
+                    {sermon.video_url && <span className="sermon-play-badge" aria-hidden="true">▶</span>}
+                  </div>
+                  <div className="sermon-content">
+                    {sermon.category && <div className="sermon-category">{sermon.category}</div>}
+                    <h3>{sermon.title}</h3>
+                    <p className="sermon-speaker">{sermon.speaker}</p>
+                    {sermon.date && (
+                      <p className="sermon-date">{new Date(sermon.date).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}</p>
+                    )}
+                    {sermon.scripture && <p className="sermon-scripture">{sermon.scripture}</p>}
+                    <span className="btn btn-primary">Watch Sermon</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+          <div className="section-footer">
+            <Link to="/sermons" className="btn btn-primary">View all sermons</Link>
           </div>
         </div>
       </section>

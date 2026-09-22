@@ -95,7 +95,13 @@ function Events() {
               {upcomingEvents.map((event) => (
                 <div key={event.id} className="conference-showcase-frame fade-up">
                   <div className="conference-label">Upcoming</div>
-                  <img src={event.image || '/chapel.jpg'} alt={event.title} className="conference-image" />
+                  <img 
+                    src={event.image || '/chapel.jpg'} 
+                    alt={event.title} 
+                    className="conference-image"
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <div className="conference-content">
                     <div className="event-organizer">{event.organizer}</div>
                     <h3 className="conference-title">{event.title}</h3>
@@ -136,7 +142,12 @@ function Events() {
               {pastEvents.map((event) => (
                 <div key={event.id} className="event-card event-card-past">
                   <div className="event-image">
-                    <img src={event.image || '/chapel.jpg'} alt={event.title} />
+                    <img 
+                      src={event.image || '/chapel.jpg'} 
+                      alt={event.title}
+                      loading="lazy"
+                      decoding="async"
+                    />
                     <div className="event-date-badge past">
                       {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </div>

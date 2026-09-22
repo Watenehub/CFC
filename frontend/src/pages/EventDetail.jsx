@@ -77,26 +77,17 @@ function EventDetail() {
   const isPastEvent = new Date(eventData.date) < new Date()
 
   const addToCalendar = () => {
-    const start = `${eventData.date.replaceAll('-', '')}T${eventData.start_time.replace(':', '')}00`
-    const end = `${eventData.date.replaceAll('-', '')}T${eventData.end_time.replace(':', '')}00`
-    const calendarEvent = [
-      'BEGIN:VCALENDAR',
-      'VERSION:2.0',
-      'PRODID:-//Cornerstone Family Chapel//Events//EN',
-      'BEGIN:VEVENT',
-      `UID:event-${eventData.id}@cornerstonechapel.org`,
-      `DTSTART:${start}`,
-      `DTEND:${end}`,
-      `SUMMARY:${eventData.title}`,
-      `DESCRIPTION:${eventData.description}`,
-      `LOCATION:${eventData.location}`,
-      'END:VEVENT',
-      'END:VCALENDAR',
-    ].join('\r\n')
-    const link = document.createElement('a')
-    link.href = `data:text/calendar;charset=utf-8,${encodeURIComponent(calendarEvent)}`
-    link.download = `${eventData.title.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.ics`
-    link.click()
+    const formatGoogleCalendarTime = (dateString, timeString) => {
+      const dateTime = new Date(`${dateString}T${timeString}`)
+      return dateTime.toISOString().replace(/-|:|\.\d\d\d/g, '')
+    }
+
+    const start = formatGoogleCalendarTime(eventData.date, eventData.start_time)
+    const end = formatGoogleCalendarTime(eventData.date, eventData.end_time)
+
+    const googleCalendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventData.title)}&dates=${start}/${end}&details=${encodeURIComponent(eventData.description)}&location=${encodeURIComponent(eventData.location)}&sf=true&output=xml`
+
+    window.open(googleCalendarUrl, '_blank')
   }
 
   return (
@@ -108,7 +99,12 @@ function EventDetail() {
 
         <div className="event-detail-content fade-up">
           <div className="event-detail-image">
-            <img src={eventData.image || '/CFC_CHURCH_PHOTO.jpg'} alt={eventData.title} />
+            <img 
+              src={eventData.image || '/CFC_CHURCH_PHOTO.jpg'} 
+              alt={eventData.title}
+              loading="lazy"
+              decoding="async"
+            />
             {isPastEvent && (
               <div className="event-badge past">Past Event</div>
             )}

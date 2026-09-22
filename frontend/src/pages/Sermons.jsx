@@ -123,7 +123,12 @@ function Sermons() {
             {filteredSermons.map((sermon) => (
               <Link key={sermon.id} to={`/sermons/${sermon.id}`} className="sermon-card fade-up">
                 <div className="sermon-thumbnail">
-                  <img src={sermon.thumbnail || '/CFC_CHURCH_PHOTO.jpg'} alt={sermon.title} loading="lazy" />
+                  <img 
+                    src={sermon.thumbnail || '/CFC_CHURCH_PHOTO.jpg'} 
+                    alt={sermon.title} 
+                    loading="lazy"
+                    decoding="async"
+                  />
                   {sermon.video_url && <span className="sermon-play-badge" aria-hidden="true">▶</span>}
                 </div>
                 <div className="sermon-content">

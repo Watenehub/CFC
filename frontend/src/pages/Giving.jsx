@@ -26,6 +26,17 @@ function Giving() {
     loadGivingOptions()
   }, [])
 
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (loading) {
+        setLoading(false)
+        setError('Loading took too long. Please refresh the page.')
+      }
+    }, 15000) // 15 second timeout
+
+    return () => clearTimeout(timeout)
+  }, [loading])
+
   const loadGivingOptions = async () => {
     try {
       const data = await givingApi.getGiving()
@@ -388,7 +399,13 @@ function Giving() {
                       }}
                     />
                   ) : (
-                    <img src="/chapel.jpg" alt={option.title} className="ministry-feature-image" />
+                    <img 
+                      src="/chapel.jpg" 
+                      alt={option.title} 
+                      className="ministry-feature-image"
+                      loading="lazy"
+                      decoding="async"
+                    />
                   )}
                   <div className="giving-category-badge">{option.category}</div>
                   <div className="ministry-feature-content">

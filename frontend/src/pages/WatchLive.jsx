@@ -49,7 +49,7 @@ function WatchLive() {
               <span className="live-dot"></span>
               LIVE NOW
             </div>
-            <h2 className="section-title">Sunday Morning Worship</h2>
+            <h2 className="section-title">Blessings as you continue watching, Welcome</h2>
             <div className="live-player-container">
               <iframe
                 width="100%"
