@@ -14,7 +14,7 @@ def staff_required(function):
     def wrapper(*args, **kwargs):
         if not session.get("role"):
             return jsonify({"error": "Authentication required"}), 401
-        if session.get("role") not in ("admin", "media", "secretary"):
+        if session.get("role") not in ("admin", "media", "secretary", "guest"):
             return jsonify({"error": "Access denied"}), 403
         return function(*args, **kwargs)
     return wrapper
