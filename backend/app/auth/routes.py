@@ -1,16 +1,58 @@
 import hashlib
-import os
-import secrets
-from datetime import datetime, timedelta, timezone
+import hashlib
+import re
 from flask import Blueprint, jsonify, request, session
 from werkzeug.security import generate_password_hash, check_password_hash
-from .permissions import role_required, effective_permissions
+from .permissions import admin_required, get_session_user, role_required, effective_permissions
 from ..database.mongodb import get_db
+from ..security import audit_event, csrf, limiter
+from ..security import pagination_args
+from flask_limiter.util import get_remote_address
 from pymongo import DESCENDING
 
 
 auth_bp = Blueprint("auth", __name__)
-RESET_HOURS = 1
+
+
+def valid_password(value):
+    return (
+        isinstance(value, str)
+        and 12 <= len(value) <= 128
+        and re.search(r"[a-z]", value)
+        and re.search(r"[A-Z]", value)
+        and re.search(r"\d", value)
+        and re.search(r"[^A-Za-z0-9]", value)
+    )
+
+
+def valid_email(value):
+    return isinstance(value, str) and len(value) <= 254 and re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", value)
+
+
+def _login_limit_key():
+    email = request.get_json(silent=True) or {}
+    normalized = email.get("email", "")
+    if not isinstance(normalized, str):
+        normalized = ""
+    return f"{get_remote_address()}:{_hash_token(normalized.strip().lower())}"
+
+
+def _login_account_limit_key():
+    data = request.get_json(silent=True) or {}
+    email = data.get("email", "") if isinstance(data, dict) else ""
+    return f"login-account:{_hash_token(email.strip().lower() if isinstance(email, str) else '')}"
+
+
+def _hash_token(value):
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def _active_admin_count(db):
+    return db.users.count_documents({
+        "role": "admin",
+        "active": {"$ne": False},
+        "status": {"$ne": "disabled"},
+    })
 
 
 def serialize_user(user):
@@ -26,23 +68,17 @@ def serialize_user(user):
     }
 
 
-def _hash_token(token):
-    return hashlib.sha256(token.encode("utf-8")).hexdigest()
-
-
-def _apply_password(update_data, password):
-    update_data["password"] = generate_password_hash(password)
-    return None
-
-
 @auth_bp.route("/api/auth/login", methods=["POST"])
+@limiter.limit("5 per minute", key_func=_login_limit_key)
+@limiter.limit("20 per hour", key_func=_login_account_limit_key)
 def login():
     data = request.get_json() or {}
 
-    email = data.get("email", "").strip().lower()
+    raw_email = data.get("email", "")
+    email = raw_email.strip().lower() if isinstance(raw_email, str) else ""
     password = data.get("password", "")
 
-    if not email or not password:
+    if not email or not isinstance(password, str) or not password or len(password) > 256:
         return jsonify({
             "error": "Email and password are required"
         }), 400
@@ -50,7 +86,20 @@ def login():
     db = get_db()
     user = db.users.find_one({"email": email})
 
-    if not user or not check_password_hash(user["password"], password):
+    password_matches = False
+    if user and isinstance(user.get("password"), str):
+        try:
+            password_matches = check_password_hash(user["password"], password)
+        except (ValueError, TypeError):
+            password_matches = False
+    if (
+        not user
+        or user.get("role") not in {"admin", "media", "secretary"}
+        or user.get("active") is False
+        or user.get("status") == "disabled"
+        or not password_matches
+    ):
+        audit_event("login_failed", success=False)
         return jsonify({
             "error": "Invalid email or password"
         }), 401
@@ -60,6 +109,8 @@ def login():
     session["user_id"] = user["id"]
     session["role"] = user["role"]
     session["permissions"] = effective_permissions(user["role"], user.get("permissions"))
+    session["session_version"] = user.get("session_version", 0)
+    audit_event("login_succeeded", target_id=user["id"])
 
     return jsonify({
         "message": "Login successful",
@@ -69,27 +120,19 @@ def login():
 
 @auth_bp.route("/api/auth/me", methods=["GET"])
 def current_user():
-    user_id = session.get("user_id")
-
-    if not user_id:
-        return jsonify({
-            "error": "Not authenticated"
-        }), 401
-
-    db = get_db()
-    user = db.users.find_one({"id": user_id})
-
+    user = get_session_user()
     if not user:
-        session.clear()
         return jsonify({
-            "error": "User not found"
-        }), 404
+            "error": "Authentication required"
+        }), 401
 
     return jsonify(serialize_user(user))
 
 
 @auth_bp.route("/api/auth/logout", methods=["POST"])
 def logout():
+    if session.get("user_id"):
+        audit_event("logout", target_id=session.get("user_id"))
     session.clear()
     return jsonify({
         "message": "Logout successful"
@@ -97,84 +140,29 @@ def logout():
 
 
 @auth_bp.route("/api/auth/register", methods=["POST"])
+@csrf.exempt
 def register():
-    return jsonify({
-        "error": "Public registration is disabled. Ask an administrator to create a staff account."
-    }), 403
+    return jsonify({"error": "Not found"}), 404
 
 
 @auth_bp.route("/api/auth/forgot-password", methods=["POST"])
+@csrf.exempt
 def forgot_password():
-    data = request.get_json() or {}
-    email = data.get("email", "").strip().lower()
-    generic = {
-        "message": "If that email is registered, a password reset link has been sent."
-    }
-    if not email:
-        return jsonify(generic)
-
-    db = get_db()
-    user = db.users.find_one({"email": email})
-    if not user:
-        return jsonify(generic)
-
-    raw_token = secrets.token_urlsafe(32)
-    db.password_resets.delete_many({"user_id": user["id"]})
-    db.password_resets.insert_one({
-        "token_hash": _hash_token(raw_token),
-        "user_id": user["id"],
-        "expires_at": datetime.now(timezone.utc) + timedelta(hours=RESET_HOURS),
-        "used": False,
-    })
-
-    frontend = os.getenv("FRONTEND_URL", "http://localhost:3000").rstrip("/")
-    reset_url = f"{frontend}/reset-password?token={raw_token}"
-    body = (
-        "You requested a password reset for your Cornerstone Family Chapel staff account.\n\n"
-        f"Open this link within {RESET_HOURS} hour(s):\n{reset_url}\n\n"
-        "If you did not request this, you can ignore this email."
-    )
-    try:
-        send_email(user["email"], "Reset your CFC staff password", body)
-    except Exception:
-        pass
-
-    return jsonify(generic)
+    return jsonify({"error": "Not found"}), 404
 
 
 @auth_bp.route("/api/auth/reset-password", methods=["POST"])
+@csrf.exempt
 def reset_password():
-    data = request.get_json() or {}
-    token = data.get("token", "")
-    new_password = data.get("new_password", "")
-
-    if not token:
-        return jsonify({"error": "A valid reset token is required"}), 400
-
-    db = get_db()
-    record = db.password_resets.find_one({"token_hash": _hash_token(token), "used": False})
-    expires = record.get("expires_at") if record else None
-    if expires and expires.tzinfo is None:
-        expires = expires.replace(tzinfo=timezone.utc)
-
-    if not record or (expires and expires < datetime.now(timezone.utc)):
-        return jsonify({"error": "This reset link is invalid or has expired."}), 400
-
-    db.users.update_one(
-        {"id": record["user_id"]},
-        {"$set": {"password": generate_password_hash(new_password), "failed_login_attempts": 0},
-         "$unset": {"lock_until": ""}},
-    )
-    db.password_resets.update_one({"_id": record["_id"]}, {"$set": {"used": True}})
-    db.password_resets.delete_many({"user_id": record["user_id"], "used": False})
-    return jsonify({"message": "Password updated. You can sign in with your new password."})
+    return jsonify({"error": "Not found"}), 404
 
 
 @auth_bp.route("/api/auth/users", methods=["GET"])
-@role_required("manage_users")
+@admin_required
 def get_users():
     db = get_db()
-    users = db.users.find().sort("id", 1)
+    page, page_size = pagination_args(request.args, default_size=50)
+    users = db.users.find().sort("id", 1).skip((page - 1) * page_size).limit(page_size)
     return jsonify([
         serialize_user(user)
         for user in users
@@ -182,24 +170,21 @@ def get_users():
 
 
 @auth_bp.route("/api/auth/users", methods=["POST"])
-@role_required("manage_users")
+@admin_required
 def create_user():
     data = request.get_json() or {}
 
-    name = data.get("name", "").strip()
-    email = data.get("email", "").strip().lower()
+    name_value = data.get("name", "")
+    email_value = data.get("email", "")
+    name = name_value.strip() if isinstance(name_value, str) else ""
+    email = email_value.strip().lower() if isinstance(email_value, str) else ""
     password = data.get("password", "")
     role = data.get("role", "").strip().lower()
     permissions = effective_permissions(role, data.get("permissions"))
 
-    allowed_roles = [
-        "admin",
-        "media",
-        "secretary",
-        "guest",
-    ]
+    allowed_roles = ["admin", "media", "secretary"]
 
-    if not name or not email or not password or not role:
+    if not name or len(name) > 160 or not valid_email(email) or not password or not role:
         return jsonify({
             "error": "Name, email, password and role are required"
         }), 400
@@ -209,6 +194,9 @@ def create_user():
             "error": "Invalid role",
             "allowed_roles": allowed_roles
         }), 400
+
+    if not valid_password(password):
+        return jsonify({"error": "Password must be 12-128 characters and include upper/lowercase letters, a number, and a symbol."}), 400
 
     db = get_db()
     existing_user = db.users.find_one({"email": email})
@@ -232,6 +220,7 @@ def create_user():
     }
 
     db.users.insert_one(new_user)
+    audit_event("staff_created", target_id=next_id)
 
     return jsonify({
         "message": "User created successfully",
@@ -240,7 +229,7 @@ def create_user():
 
 
 @auth_bp.route("/api/auth/users/<int:user_id>", methods=["PUT"])
-@role_required("manage_users")
+@admin_required
 def update_user(user_id):
     db = get_db()
     user = db.users.find_one({"id": user_id})
@@ -254,9 +243,13 @@ def update_user(user_id):
     update_data = {}
 
     if "name" in data:
+        if not isinstance(data["name"], str) or not data["name"].strip() or len(data["name"]) > 160:
+            return jsonify({"error": "Invalid name"}), 400
         update_data["name"] = data["name"].strip()
 
     if "email" in data:
+        if not valid_email(data["email"]):
+            return jsonify({"error": "Invalid email"}), 400
         email = data["email"].strip().lower()
         other = db.users.find_one({"email": email, "id": {"$ne": user_id}})
         if other:
@@ -267,30 +260,49 @@ def update_user(user_id):
         update_data["email"] = email
 
     if "role" in data:
+        if not isinstance(data["role"], str):
+            return jsonify({"error": "Invalid role"}), 400
         role = data["role"].strip().lower()
-        if role not in ["admin", "media", "secretary", "guest"]:
+        if role not in ["admin", "media", "secretary"]:
             return jsonify({
                 "error": "Invalid role"
             }), 400
+        if user.get("role") == "admin" and role != "admin" and _active_admin_count(db) <= 1:
+            return jsonify({"error": "The last active administrator cannot be demoted"}), 409
         update_data["role"] = role
+        update_data["session_version"] = user.get("session_version", 0) + 1
 
     if "permissions" in data:
+        if not isinstance(data["permissions"], list):
+            return jsonify({"error": "Permissions must be a list"}), 400
         update_data["permissions"] = effective_permissions(
             update_data.get("role", user.get("role")),
             data.get("permissions"),
         )
 
-    if data.get("password"):
-        _apply_password(update_data, data["password"])
+    if "password" in data:
+        if not valid_password(data["password"]):
+            return jsonify({"error": "Password must be 12-128 characters and include upper/lowercase letters, a number, and a symbol."}), 400
+        update_data["password"] = generate_password_hash(data["password"])
+        update_data["session_version"] = user.get("session_version", 0) + 1
+
+    if "active" in data:
+        if not isinstance(data["active"], bool):
+            return jsonify({"error": "active must be a boolean"}), 400
+        if user.get("role") == "admin" and not data["active"] and _active_admin_count(db) <= 1:
+            return jsonify({"error": "The last active administrator cannot be disabled"}), 409
+        update_data["active"] = data["active"]
+        update_data["session_version"] = user.get("session_version", 0) + 1
+    if data.get("status") == "disabled":
+        update_data["active"] = False
+        update_data["session_version"] = user.get("session_version", 0) + 1
 
     if update_data:
         db.users.update_one({"id": user_id}, {"$set": update_data})
+        audit_event("staff_updated", target_id=user_id)
 
         if session.get("user_id") == user_id:
-            if "role" in update_data:
-                session["role"] = update_data["role"]
-            if "permissions" in update_data:
-                session["permissions"] = update_data["permissions"]
+            session.clear()
 
     updated_user = db.users.find_one({"id": user_id})
     return jsonify({
@@ -300,36 +312,35 @@ def update_user(user_id):
 
 
 @auth_bp.route("/api/auth/change-password", methods=["POST"])
+@admin_required
 def change_password():
-    user_id = session.get("user_id")
+    data = request.get_json() or {}
+    current_password = data.get("old_password", "")
+    new_password = data.get("new_password", "")
+    admin = get_session_user()
 
-    if not user_id:
-        return jsonify({"error": "Authentication required"}), 401
+    if not isinstance(current_password, str) or not isinstance(new_password, str):
+        return jsonify({"error": "Invalid password values"}), 400
+    if not check_password_hash(admin.get("password", ""), current_password):
+        return jsonify({"error": "Current password is incorrect"}), 400
+    if not valid_password(new_password):
+        return jsonify({"error": "Password must be 12-128 characters and include upper/lowercase letters, a number, and a symbol."}), 400
 
     db = get_db()
-    data = request.get_json() or {}
-    old_password = data.get("old_password", "")
-    new_password = data.get("new_password", "")
-
-    if not old_password or not new_password:
-        return jsonify({"error": "Old password and new password are required"}), 400
-
-    user = db.users.find_one({"id": user_id})
-    if not user:
-        return jsonify({"error": "User not found"}), 404
-
-    if not check_password_hash(user["password"], old_password):
-        return jsonify({"error": "Incorrect old password"}), 400
-
     db.users.update_one(
-        {"id": user_id},
-        {"$set": {"password": generate_password_hash(new_password)}}
+        {"id": admin["id"]},
+        {"$set": {
+            "password": generate_password_hash(new_password),
+            "session_version": admin.get("session_version", 0) + 1,
+        }},
     )
-    return jsonify({"message": "Password changed successfully"})
+    audit_event("admin_password_changed", target_id=admin["id"])
+    session.clear()
+    return jsonify({"message": "Password changed. Please sign in again."})
 
 
 @auth_bp.route("/api/auth/users/<int:user_id>", methods=["DELETE"])
-@role_required("manage_users")
+@admin_required
 def delete_user(user_id):
     db = get_db()
 
@@ -338,12 +349,18 @@ def delete_user(user_id):
             "error": "You cannot remove your own account"
         }), 400
 
+    target = db.users.find_one({"id": user_id})
+    if target and target.get("role") == "admin" and _active_admin_count(db) <= 1:
+        return jsonify({"error": "The last active administrator cannot be deleted"}), 409
+
     result = db.users.delete_one({"id": user_id})
 
     if result.deleted_count == 0:
         return jsonify({
             "error": "User not found"
         }), 404
+
+    audit_event("staff_deleted", target_id=user_id)
 
     return jsonify({
         "message": "User removed successfully"

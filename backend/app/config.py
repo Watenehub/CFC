@@ -22,10 +22,16 @@ class Config:
     MAX_CONTENT_LENGTH = 10 * 1024 * 1024
     SESSION_COOKIE_NAME = "cfc_session"
     SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SECURE = os.getenv("FLASK_ENV", "development") == "production"
+    IS_PRODUCTION = (
+        os.getenv("APP_ENV", "").lower() == "production"
+        or os.getenv("FLASK_ENV", "").lower() == "production"
+        or os.getenv("RENDER", "").lower() == "true"
+        or bool(os.getenv("RENDER_SERVICE_ID"))
+    )
+    SESSION_COOKIE_SECURE = IS_PRODUCTION
     SESSION_COOKIE_SAMESITE = os.getenv(
         "SESSION_COOKIE_SAMESITE",
-        "None" if os.getenv("FLASK_ENV", "development") == "production" else "Lax",
+        "None" if IS_PRODUCTION else "Lax",
     )
     PERMANENT_SESSION_LIFETIME = timedelta(
         hours=int(os.getenv("SESSION_HOURS", "8"))
@@ -34,5 +40,23 @@ class Config:
     WTF_CSRF_ENABLED = True
     WTF_CSRF_TIME_LIMIT = int(os.getenv("CSRF_TIME_LIMIT", str(8 * 3600)))
     WTF_CSRF_HEADERS = ["X-CSRFToken", "X-CSRF-Token"]
-    WTF_CSRF_SSL_STRICT = os.getenv("FLASK_ENV") == "production"
+    WTF_CSRF_SSL_STRICT = False
     WTF_CSRF_CHECK_DEFAULT = True
+    RATELIMIT_STORAGE_URI = os.getenv("RATELIMIT_STORAGE_URI", "memory://")
+    RATELIMIT_HEADERS_ENABLED = True
+    MAX_IMAGE_PIXELS = int(os.getenv("MAX_IMAGE_PIXELS", "40000000"))
+    MAX_IMAGE_SIDE = int(os.getenv("MAX_IMAGE_SIDE", "12000"))
+    MPESA_CALLBACK_TOKEN = os.getenv("MPESA_CALLBACK_TOKEN")
+
+    if IS_PRODUCTION:
+        CORS_ORIGINS = [origin.strip() for origin in os.getenv("CORS_ORIGINS", "https://cfckenya.vercel.app").split(",") if origin.strip()]
+    else:
+        CORS_ORIGINS = [
+            origin.strip()
+            for origin in os.getenv(
+                "CORS_ORIGINS",
+                "https://cfckenya.vercel.app,http://localhost:3000,http://localhost:5173",
+            ).split(",")
+            if origin.strip()
+        ]
+    RATELIMIT_DEFAULT = os.getenv("RATELIMIT_DEFAULT", "300 per minute")

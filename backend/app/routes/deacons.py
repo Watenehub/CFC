@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from ..auth.permissions import role_required
 from ..database.mongodb import get_db
+from ..security import pagination_args
 from pymongo import DESCENDING
 
 
@@ -12,10 +13,8 @@ def serialize_deacon(deacon):
     if deacon is None:
         return None
 
-    deacon = deacon.copy()
-    deacon.pop("_id", None)
-
-    return deacon
+    fields = ("id", "name", "title", "role", "bio", "image", "encouragement")
+    return {field: deacon[field] for field in fields if field in deacon}
 
 
 @deacons_bp.route("/api/deacons", methods=["GET"])
@@ -23,9 +22,8 @@ def get_deacons():
     """Get all deacons."""
     db = get_db()
 
-    deacons = list(
-        db.deacons.find().sort("_id", DESCENDING)
-    )
+    page, page_size = pagination_args(request.args)
+    deacons = list(db.deacons.find({"status": {"$ne": "draft"}}).sort("_id", DESCENDING).skip((page - 1) * page_size).limit(page_size))
 
     return jsonify([
         serialize_deacon(deacon)
@@ -38,9 +36,7 @@ def get_deacon(deacon_id):
     """Get a single deacon by ID."""
     db = get_db()
 
-    deacon = db.deacons.find_one({
-        "id": deacon_id
-    })
+    deacon = db.deacons.find_one({"id": deacon_id, "status": {"$ne": "draft"}})
 
     if not deacon:
         return jsonify({"error": "Deacon not found"}), 404

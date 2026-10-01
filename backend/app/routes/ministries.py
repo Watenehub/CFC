@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from ..auth.permissions import role_required
 from ..database.mongodb import get_db
+from ..security import pagination_args
 from pymongo import DESCENDING
 
 
@@ -12,10 +13,8 @@ def serialize_ministry(ministry):
     if ministry is None:
         return None
 
-    ministry = ministry.copy()
-    ministry.pop("_id", None)
-
-    return ministry
+    fields = ("id", "name", "description", "leader", "meeting_time", "location", "contact", "image", "encouragement")
+    return {field: ministry[field] for field in fields if field in ministry}
 
 
 @ministries_bp.route("/api/ministries", methods=["GET"])
@@ -23,9 +22,8 @@ def get_ministries():
     """Get all ministries (public endpoint)."""
     db = get_db()
 
-    ministries = list(
-        db.ministries.find().sort("_id", DESCENDING)
-    )
+    page, page_size = pagination_args(request.args)
+    ministries = list(db.ministries.find({"status": {"$ne": "draft"}}).sort("_id", DESCENDING).skip((page - 1) * page_size).limit(page_size))
 
     return jsonify([
         serialize_ministry(ministry)
@@ -38,9 +36,7 @@ def get_ministry(ministry_id):
     """Get a single ministry by ID."""
     db = get_db()
 
-    ministry = db.ministries.find_one({
-        "id": ministry_id
-    })
+    ministry = db.ministries.find_one({"id": ministry_id, "status": {"$ne": "draft"}})
 
     if not ministry:
         return jsonify({"error": "Ministry not found"}), 404

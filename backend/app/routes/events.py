@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from ..auth.permissions import role_required
 from ..database.mongodb import get_db
+from ..security import pagination_args, safe_web_url
 from pymongo import DESCENDING
 
 
@@ -12,10 +13,12 @@ def serialize_event(event):
     if event is None:
         return None
 
-    event = event.copy()
-    event.pop("_id", None)
-
-    return event
+    fields = ("id", "title", "description", "date", "start_time", "end_time", "location", "map_url", "image", "organizer", "registration_status", "max_participants", "registration_deadline")
+    public = {field: event[field] for field in fields if field in event}
+    for field in ("map_url", "image"):
+        if field in public:
+            public[field] = safe_web_url(public[field])
+    return public
 
 
 @events_bp.route("/api/events", methods=["GET"])
@@ -23,9 +26,8 @@ def get_events():
     """Get all events (public endpoint)."""
     db = get_db()
 
-    events = list(
-        db.events.find().sort("_id", DESCENDING)
-    )
+    page, page_size = pagination_args(request.args)
+    events = list(db.events.find({"status": {"$ne": "draft"}}).sort("_id", DESCENDING).skip((page - 1) * page_size).limit(page_size))
 
     return jsonify([
         serialize_event(event)
@@ -38,9 +40,7 @@ def get_event(event_id):
     """Get a single event by ID."""
     db = get_db()
 
-    event = db.events.find_one({
-        "id": event_id
-    })
+    event = db.events.find_one({"id": event_id, "status": {"$ne": "draft"}})
 
     if not event:
         return jsonify({

@@ -7,6 +7,11 @@ import base64
 from datetime import datetime
 import requests
 import json
+import hmac
+import math
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+from ..security import csrf, limiter
+from ..auth.permissions import roles_required
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +50,7 @@ def get_timestamp():
 
 def simulate_stk_push(giving_id, amount, phone, giving):
     """Simulate STK Push for testing when Daraja is unavailable."""
-    logger.info(f"Simulated STK Push: giving_id={giving_id}, amount={amount}, phone={phone}")
+    logger.info("Simulated STK Push requested for giving_id=%s", giving_id)
 
     import time
     timestamp = time.time()
@@ -75,7 +80,7 @@ def simulate_stk_push(giving_id, amount, phone, giving):
         logger.info(f"Simulated transaction recorded: {checkout_request_id}")
 
     except Exception as e:
-        logger.error(f"Error creating simulated transaction: {str(e)}")
+        logger.exception("Could not record simulated payment")
 
     return jsonify({
         "success": True,
@@ -105,7 +110,7 @@ def get_daraja_access_token():
         )
 
         if response.status_code != 200:
-            logger.error(f"Daraja authentication failed: {response.status_code} - {response.text}")
+            logger.error("Daraja authentication failed with status %s", response.status_code)
             return None, f"Authentication failed: {response.status_code}"
 
         data = response.json()
@@ -122,8 +127,8 @@ def get_daraja_access_token():
         logger.error("Daraja authentication request timed out")
         return None, "Authentication request timed out. Please check your internet connection."
     except requests.exceptions.RequestException as e:
-        logger.error(f"Daraja authentication request failed: {str(e)}")
-        return None, f"Authentication request failed: {str(e)}"
+        logger.warning("Daraja authentication request failed (%s)", type(e).__name__)
+        return None, "Authentication request failed"
 
 mpesa_bp = Blueprint("mpesa", __name__)
 
@@ -160,6 +165,8 @@ def validate_amount(amount):
 
     try:
         amount_float = float(amount)
+        if not math.isfinite(amount_float):
+            return None, "Invalid amount format"
         if amount_float <= 0:
             return None, "Amount must be greater than 0"
         if amount_float > 150000:  # M-PESA limit
@@ -170,6 +177,7 @@ def validate_amount(amount):
 
 
 @mpesa_bp.route("/api/mpesa/stkpush", methods=["POST"])
+@limiter.limit("5 per minute")
 def initiate_stk_push():
     """
     Initiate M-PESA STK Push payment.
@@ -181,13 +189,11 @@ def initiate_stk_push():
         "phone": "2547XXXXXXXX"
     }
     """
-    logger.info("STK Push endpoint called")
     try:
         db = get_db()
         data = request.get_json()
-        logger.info(f"Request data: {data}")
 
-        if not data:
+        if not isinstance(data, dict):
             return jsonify({"error": "Request body is required"}), 400
 
         # Extract and validate fields
@@ -219,54 +225,27 @@ def initiate_stk_push():
         if phone_error:
             return jsonify({"error": phone_error}), 400
 
-        logger.info(f"STK Push request received: giving_id={giving_id}, amount={validated_amount}, phone={formatted_phone}")
+        logger.info("STK Push request validated for giving_id=%s", giving_id)
 
         # Check if we should use simulated mode (for testing when Daraja is unavailable)
         use_simulated = os.getenv('MPESA_USE_SIMULATED', 'false').lower() == 'true'
         if use_simulated:
+            if current_app.config.get("IS_PRODUCTION"):
+                return jsonify({"error": "Simulated payments are disabled in production"}), 503
             logger.info("Using simulated mode for M-PESA testing")
             return simulate_stk_push(giving_id, validated_amount, formatted_phone, giving)
 
-        # Extract and validate fields
-        giving_id = data.get("giving_id")
-        amount = data.get("amount")
-        phone = data.get("phone")
-
-        # Validate giving_id
-        if not giving_id:
-            return jsonify({"error": "Giving ID is required"}), 400
-
-        try:
-            giving_id = int(giving_id)
-        except (ValueError, TypeError):
-            return jsonify({"error": "Invalid Giving ID format"}), 400
-
-        # Verify giving option exists in MongoDB
-        giving = db.giving.find_one({"id": giving_id})
-        if not giving:
-            return jsonify({"error": "Giving option not found"}), 404
-
-        # Validate amount
-        validated_amount, amount_error = validate_amount(amount)
-        if amount_error:
-            return jsonify({"error": amount_error}), 400
-
-        # Validate and format phone number
-        formatted_phone, phone_error = validate_phone_number(phone)
-        if phone_error:
-            return jsonify({"error": phone_error}), 400
-
-        logger.info(f"STK Push request received: giving_id={giving_id}, amount={validated_amount}, phone={formatted_phone}")
-
         # Get M-PESA config
         config = get_mpesa_config()
-        logger.info(f"Config check - Consumer Key exists: {bool(config['consumer_key'])}, Consumer Secret exists: {bool(config['consumer_secret'])}, Passkey exists: {bool(config['passkey'])}")
+        callback_token = current_app.config.get("MPESA_CALLBACK_TOKEN")
+        if not callback_token or not config["callback_url"]:
+            return jsonify({"error": "Payment callback is not securely configured"}), 503
 
         # Get Daraja access token
         access_token, auth_error = get_daraja_access_token()
         if auth_error:
-            logger.error(f"Failed to get Daraja access token: {auth_error}")
-            return jsonify({"error": f"Payment service unavailable: {auth_error}"}), 503
+            logger.error("Failed to obtain Daraja access token")
+            return jsonify({"error": "Payment service unavailable"}), 503
 
         # Prepare STK Push request
         base_url = get_daraja_base_url()
@@ -279,6 +258,19 @@ def initiate_stk_push():
         account_reference = f"Giving-{giving_id}"
         transaction_desc = f"Payment for {giving.get('title', 'Giving')}"
 
+        callback_parts = urlsplit(config["callback_url"])
+        if callback_parts.scheme != "https" or not callback_parts.netloc:
+            return jsonify({"error": "Payment callback URL must use HTTPS"}), 503
+        callback_query = dict(parse_qsl(callback_parts.query, keep_blank_values=True))
+        callback_query["callback_token"] = callback_token
+        secured_callback_url = urlunsplit((
+            callback_parts.scheme,
+            callback_parts.netloc,
+            callback_parts.path,
+            urlencode(callback_query),
+            callback_parts.fragment,
+        ))
+
         stk_push_payload = {
             "BusinessShortCode": config['shortcode'],
             "Password": password,
@@ -288,7 +280,7 @@ def initiate_stk_push():
             "PartyA": formatted_phone,
             "PartyB": config['shortcode'],
             "PhoneNumber": formatted_phone,
-            "CallBackURL": config['callback_url'],
+            "CallBackURL": secured_callback_url,
             "AccountReference": account_reference,
             "TransactionDesc": transaction_desc
         }
@@ -325,25 +317,21 @@ def initiate_stk_push():
                 timeout=60  # Increased timeout
             )
 
-            logger.info(f"Daraja response status: {response.status_code}")
-            logger.info(f"Daraja response body: {response.text}")
+            logger.info("Daraja STK response status: %s", response.status_code)
 
             if response.status_code != 200:
-                logger.error(f"STK Push request failed: {response.status_code} - {response.text}")
-
-                # Fallback to simulated mode for testing if Daraja is unavailable
-                logger.warning("Falling back to simulated mode for testing")
-                return simulate_stk_push(giving_id, validated_amount, formatted_phone, giving)
+                logger.error("STK Push request failed with status %s", response.status_code)
+                db.mpesa_transactions.update_one({"_id": pending_id}, {"$set": {"status": "failed", "result_description": "Payment provider unavailable"}})
+                return jsonify({"error": "Payment provider unavailable; please try again later"}), 503
 
             response_data = response.json()
 
             # Check for Daraja error codes
             if response_data.get('ResponseCode') != '0':
-                error_message = response_data.get('errorMessage', 'Payment initiation failed')
-                logger.error(f"STK Push error: {error_message}")
+                logger.warning("STK Push rejected by provider")
+                db.mpesa_transactions.update_one({"_id": pending_id}, {"$set": {"status": "failed", "result_description": "Payment request rejected"}})
                 return jsonify({
-                    "error": "Payment initiation failed",
-                    "details": error_message
+                    "error": "Payment initiation failed"
                 }), 400
 
             # Success - return safe information to frontend
@@ -372,62 +360,47 @@ def initiate_stk_push():
 
         except requests.exceptions.Timeout:
             logger.error("Daraja STK Push request timed out")
-            logger.warning("Falling back to simulated mode for testing")
-            return simulate_stk_push(giving_id, validated_amount, formatted_phone, giving)
+            db.mpesa_transactions.update_one({"_id": pending_id}, {"$set": {"status": "failed", "result_description": "Payment provider timed out"}})
+            return jsonify({"error": "Payment provider timed out; please try again later"}), 503
         except requests.exceptions.RequestException as e:
-            logger.error(f"Daraja STK Push request failed: {str(e)}")
-            logger.warning("Falling back to simulated mode for testing")
-            return simulate_stk_push(giving_id, validated_amount, formatted_phone, giving)
-
-        response_data = response.json()
-
-        # Check for Daraja error codes
-        if response_data.get('ResponseCode') != '0':
-            error_message = response_data.get('errorMessage', 'Payment initiation failed')
-            logger.error(f"STK Push error: {error_message}")
-            return jsonify({
-                "error": "Payment initiation failed",
-                "details": error_message
-            }), 400
-
-        # Success - return safe information to frontend
-        return jsonify({
-            "success": True,
-            "message": "STK Push initiated successfully",
-            "merchant_request_id": response_data.get('MerchantRequestID'),
-            "checkout_request_id": response_data.get('CheckoutRequestID'),
-            "customer_message": f"Please check your phone {formatted_phone} and enter your M-PESA PIN to complete KSh {validated_amount} payment for {giving.get('title', 'Giving')}"
-        }), 200
+            logger.warning("Daraja STK Push request failed (%s)", type(e).__name__)
+            db.mpesa_transactions.update_one({"_id": pending_id}, {"$set": {"status": "failed", "result_description": "Payment provider unavailable"}})
+            return jsonify({"error": "Payment provider unavailable; please try again later"}), 503
 
     except Exception as e:
-        logger.error(f"Unexpected error in STK Push: {str(e)}", exc_info=True)
-        return jsonify({
-            "error": "Internal server error",
-            "details": str(e)
-        }), 500
+        logger.exception("Unexpected error in STK Push")
+        return jsonify({"error": "Internal server error"}), 500
 
 
 @mpesa_bp.route("/api/mpesa/callback", methods=["POST"])
+@csrf.exempt
 def mpesa_callback():
     """
     Handle M-PESA transaction callback from Safaricom Daraja.
 
     This endpoint will be called by Safaricom when a transaction is completed.
     """
+    expected_token = current_app.config.get("MPESA_CALLBACK_TOKEN")
+    supplied_token = request.args.get("callback_token", "")
+    if not expected_token or not hmac.compare_digest(supplied_token, expected_token):
+        return jsonify({"error": "Not found"}), 404
+
     db = get_db()
     data = request.get_json()
 
-    if not data:
+    if not isinstance(data, dict):
         logger.error("Callback received with no data")
         return jsonify({"success": False, "message": "No data received"}), 400
 
-    logger.info(f"M-PESA callback received: {data}")
+    logger.info("M-PESA callback received")
 
     try:
         # Extract callback data
         # Daraja callback structure: Body.stkCallback
-        body = data.get('Body', {})
-        stk_callback = body.get('stkCallback', {})
+        body = data.get('Body')
+        stk_callback = body.get('stkCallback') if isinstance(body, dict) else None
+        if not isinstance(stk_callback, dict):
+            return jsonify({"error": "Invalid callback"}), 400
 
         merchant_request_id = stk_callback.get('MerchantRequestID')
         checkout_request_id = stk_callback.get('CheckoutRequestID')
@@ -458,95 +431,73 @@ def mpesa_callback():
 
         # Determine transaction status based on result code
         # ResultCode 0 = success, other codes = various failure scenarios
-        if result_code == 0:
+        try:
+            normalized_result_code = int(result_code)
+        except (TypeError, ValueError):
+            return jsonify({"error": "Invalid callback"}), 400
+
+        if normalized_result_code == 0:
             status = 'completed'
-        elif result_code == '1032':
+        elif normalized_result_code == 1032:
             status = 'cancelled'
-        elif result_code == '1037':
+        elif normalized_result_code == 1037:
             status = 'timeout'
-        elif result_code == '2001':
+        elif normalized_result_code == 2001:
             status = 'insufficient_funds'
         else:
             status = 'failed'
 
-        # Check if transaction already exists (idempotency)
+        if not checkout_request_id:
+            return jsonify({"error": "Invalid callback"}), 400
+
+        # Only accept a callback for a known pending checkout.
         existing_transaction = db.mpesa_transactions.find_one({
             "checkout_request_id": checkout_request_id
         })
 
-        if existing_transaction:
-            logger.info(f"Transaction already recorded: {checkout_request_id}")
-            # Update existing transaction with callback data
-            db.mpesa_transactions.update_one(
-                {"checkout_request_id": checkout_request_id},
-                {
-                    "$set": {
-                        "result_code": result_code,
-                        "result_description": result_desc,
-                        "amount": amount,
-                        "mpesa_receipt_number": mpesa_receipt,
-                        "transaction_date": transaction_date,
-                        "phone": phone_number,
-                        "status": status,
-                        "callback_metadata": metadata_items,
-                        "callback_received_at": datetime.now()
-                    }
-                }
-            )
-            return jsonify({"success": True, "message": "Callback processed (duplicate)"}), 200
+        if not existing_transaction:
+            return jsonify({"error": "Unknown checkout request"}), 404
+        if existing_transaction.get("status") != "pending":
+            return jsonify({"success": True, "message": "Callback already processed"}), 200
+        if merchant_request_id != existing_transaction.get("merchant_request_id"):
+            return jsonify({"error": "Invalid callback"}), 400
+        if normalized_result_code == 0:
+            try:
+                amount_matches = amount is not None and float(amount) == float(existing_transaction.get("amount", -1))
+            except (TypeError, ValueError):
+                amount_matches = False
+            phone_matches = phone_number is not None and str(phone_number) == str(existing_transaction.get("phone"))
+            if not amount_matches or not phone_matches or not mpesa_receipt:
+                return jsonify({"error": "Callback transaction details do not match"}), 400
 
-        # Find pending transaction by merchant_request_id if available
-        pending_transaction = None
-        if merchant_request_id:
-            pending_transaction = db.mpesa_transactions.find_one({
-                "merchant_request_id": merchant_request_id
-            })
-
-        # Create transaction record
         transaction = {
             "merchant_request_id": merchant_request_id,
-            "checkout_request_id": checkout_request_id,
-            "result_code": result_code,
-            "result_description": result_desc,
-            "amount": amount,
+            "result_code": normalized_result_code,
+            "result_description": str(result_desc or "")[:240],
             "mpesa_receipt_number": mpesa_receipt,
             "transaction_date": transaction_date,
-            "phone": phone_number,
             "status": status,
-            "callback_metadata": metadata_items,
             "callback_received_at": datetime.now()
         }
 
-        # If we found a pending transaction, update it with callback data
-        if pending_transaction:
-            db.mpesa_transactions.update_one(
-                {"_id": pending_transaction['_id']},
-                {"$set": transaction}
-            )
-            logger.info(f"Pending transaction updated with callback: {checkout_request_id}")
-        else:
-            # Create new transaction record
-            transaction["created_at"] = datetime.now()
-            db.mpesa_transactions.insert_one(transaction)
-            logger.info(f"New transaction created from callback: {checkout_request_id}")
-
-        logger.info(f"Transaction recorded successfully: {checkout_request_id} - Status: {status}")
+        db.mpesa_transactions.update_one(
+            {"_id": existing_transaction["_id"], "status": "pending"},
+            {"$set": transaction},
+        )
+        logger.info("M-PESA callback processed for checkout request")
 
         return jsonify({
             "success": True,
             "message": "Callback processed successfully",
-            "transaction_id": str(transaction.get('_id'))
         }), 200
 
     except Exception as e:
-        logger.error(f"Error processing M-PESA callback: {str(e)}", exc_info=True)
-        return jsonify({
-            "success": False,
-            "message": "Error processing callback"
-        }), 500
+        logger.exception("M-PESA callback processing failed")
+        return jsonify({"success": False, "message": "Error processing callback"}), 500
 
 
 @mpesa_bp.route("/api/mpesa/transaction/<checkout_request_id>", methods=["GET"])
+@roles_required("admin", "secretary")
 def get_transaction_status(checkout_request_id):
     """
     Get the status of a transaction by checkout request ID.
@@ -575,6 +526,7 @@ def get_transaction_status(checkout_request_id):
 
 
 @mpesa_bp.route("/api/mpesa/transactions", methods=["GET"])
+@roles_required("admin", "secretary")
 def list_transactions():
     """
     List all M-PESA transactions (for debugging/admin).
@@ -601,23 +553,9 @@ def list_transactions():
 
 
 @mpesa_bp.route("/api/mpesa/transactions/debug", methods=["GET"])
+@roles_required("admin")
 def list_transactions_debug():
     """
     List all M-PESA transactions with full fields for debugging.
     """
-    db = get_db()
-
-    transactions = list(
-        db.mpesa_transactions.find().sort("created_at", -1).limit(10)
-    )
-
-    # Convert ObjectId to string for JSON serialization
-    for transaction in transactions:
-        if '_id' in transaction:
-            transaction['_id'] = str(transaction['_id'])
-        if 'created_at' in transaction and transaction['created_at']:
-            transaction['created_at'] = transaction['created_at'].isoformat()
-        if 'callback_received_at' in transaction and transaction['callback_received_at']:
-            transaction['callback_received_at'] = transaction['callback_received_at'].isoformat()
-
-    return jsonify(transactions), 200
+    return jsonify({"error": "Not found"}), 404

@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from ..auth.permissions import role_required
 from ..database.mongodb import get_db
+from ..security import pagination_args
 from pymongo import DESCENDING
 
 
@@ -19,7 +20,8 @@ def serialize_prayer(item):
 @role_required("manage_enquiries")
 def get_prayer_requests():
     db = get_db()
-    items = list(db.prayer_requests.find().sort("_id", DESCENDING))
+    page, page_size = pagination_args(request.args)
+    items = list(db.prayer_requests.find().sort("_id", DESCENDING).skip((page - 1) * page_size).limit(page_size))
     return jsonify([serialize_prayer(item) for item in items])
 
 

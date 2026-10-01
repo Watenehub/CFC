@@ -17,8 +17,6 @@ const Giving = lazy(() => import('./pages/Giving'))
 const Prayer = lazy(() => import('./pages/Prayer'))
 const Contact = lazy(() => import('./pages/Contact'))
 const Login = lazy(() => import('./pages/Login'))
-const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
-const ResetPassword = lazy(() => import('./pages/ResetPassword'))
 const Pastors = lazy(() => import('./pages/Pastors'))
 const Deacons = lazy(() => import('./pages/Deacons'))
 const Staff = lazy(() => import('./pages/Staff'))
@@ -83,8 +81,6 @@ function AppRoutes() {
       <Route path="/prayer" element={<Prayer />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/register" element={<Navigate to="/login" replace />} />
       <Route path="/pastors" element={<Pastors />} />
       <Route path="/deacons" element={<Deacons />} />

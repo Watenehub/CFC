@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from ..auth.permissions import role_required
 from ..database.mongodb import get_db
+from ..security import pagination_args
 from pymongo import ASCENDING, DESCENDING
 
 
@@ -10,22 +11,22 @@ services_bp = Blueprint("services", __name__)
 def serialize_service(item):
     if item is None:
         return None
-    item = item.copy()
-    item.pop("_id", None)
-    return item
+    fields = ("id", "name", "day", "day_order", "time", "location", "description")
+    return {field: item[field] for field in fields if field in item}
 
 
 @services_bp.route("/api/services", methods=["GET"])
 def get_services():
     db = get_db()
-    items = list(db.services.find().sort([("day_order", ASCENDING), ("id", ASCENDING)]))
+    page, page_size = pagination_args(request.args)
+    items = list(db.services.find({"status": {"$ne": "draft"}}).sort([("day_order", ASCENDING), ("id", ASCENDING)]).skip((page - 1) * page_size).limit(page_size))
     return jsonify([serialize_service(item) for item in items])
 
 
 @services_bp.route("/api/services/<int:service_id>", methods=["GET"])
 def get_service(service_id):
     db = get_db()
-    item = db.services.find_one({"id": service_id})
+    item = db.services.find_one({"id": service_id, "status": {"$ne": "draft"}})
     if not item:
         return jsonify({"error": "Service not found"}), 404
     return jsonify(serialize_service(item))

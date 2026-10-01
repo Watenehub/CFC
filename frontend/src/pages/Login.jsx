@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import './Login.css'
 
@@ -103,11 +103,6 @@ function Login() {
                   )}
                 </button>
               </div>
-            </div>
-
-            <div className="form-options">
-              <span />
-              <Link to="/forgot-password" className="forgot-password">Forgot password?</Link>
             </div>
 
             <button 

@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from ..auth.permissions import role_required
 from ..database.mongodb import get_db
+from ..security import pagination_args
 from pymongo import DESCENDING
 
 
@@ -12,10 +13,8 @@ def serialize_giving(giving):
     if giving is None:
         return None
 
-    giving = giving.copy()
-    giving.pop("_id", None)
-
-    return giving
+    fields = ("id", "title", "description", "category", "payment_method", "payment_details", "poster", "mpesa_business_no", "mpesa_account_no", "bank_name", "bank_account_name", "bank_account_no", "cheque_payee")
+    return {field: giving[field] for field in fields if field in giving}
 
 
 @giving_bp.route("/api/giving", methods=["GET"])
@@ -23,9 +22,8 @@ def get_giving():
     """Get all giving options (public endpoint)."""
     db = get_db()
 
-    giving = list(
-        db.giving.find().sort("_id", DESCENDING)
-    )
+    page, page_size = pagination_args(request.args)
+    giving = list(db.giving.find({"status": {"$ne": "draft"}}).sort("_id", DESCENDING).skip((page - 1) * page_size).limit(page_size))
 
     return jsonify([
         serialize_giving(item)
@@ -38,9 +36,7 @@ def get_giving_option(giving_id):
     """Get a single giving option by ID."""
     db = get_db()
 
-    giving = db.giving.find_one({
-        "id": giving_id
-    })
+    giving = db.giving.find_one({"id": giving_id, "status": {"$ne": "draft"}})
 
     if not giving:
         return jsonify({"error": "Giving option not found"}), 404

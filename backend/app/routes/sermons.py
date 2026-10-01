@@ -1,21 +1,22 @@
 from flask import Blueprint, jsonify, request
-from ..auth.permissions import role_required
+from ..auth.permissions import get_session_user, role_required
 from ..database.mongodb import get_db
 from pymongo import DESCENDING
+from ..security import pagination_args, safe_web_url
 
 
 sermons_bp = Blueprint("sermons", __name__)
 
 
 def serialize_sermon(sermon):
-    """Convert MongoDB document into a JSON-safe API response."""
     if sermon is None:
         return None
-
-    sermon = sermon.copy()
-    sermon.pop("_id", None)
-
-    return sermon
+    fields = ("id", "title", "description", "speaker", "date", "video_url", "audio_url", "thumbnail", "scripture", "category", "tags", "key_takeaways")
+    public = {field: sermon[field] for field in fields if field in sermon}
+    for field in ("video_url", "audio_url", "thumbnail"):
+        if field in public:
+            public[field] = safe_web_url(public[field])
+    return public
 
 
 @sermons_bp.route("/api/sermons", methods=["GET"])
@@ -23,9 +24,15 @@ def get_sermons():
     """Get all sermons."""
     db = get_db()
 
-    sermons = list(
-        db.sermons.find().sort("_id", DESCENDING)
-    )
+    query = {"status": {"$ne": "draft"}}
+    if request.args.get("include_drafts") == "1":
+        user = get_session_user()
+        if not user or user.get("role") != "admin":
+            return jsonify({"error": "Access denied"}), 403
+        query = {}
+    page, page_size = pagination_args(request.args)
+    cursor = db.sermons.find(query).sort("_id", DESCENDING).skip((page - 1) * page_size).limit(page_size)
+    sermons = list(cursor)
 
     return jsonify([
         serialize_sermon(sermon)
@@ -38,9 +45,7 @@ def get_sermon(sermon_id):
     """Get a single sermon by ID."""
     db = get_db()
 
-    sermon = db.sermons.find_one({
-        "id": sermon_id
-    })
+    sermon = db.sermons.find_one({"id": sermon_id, "status": {"$ne": "draft"}})
 
     if not sermon:
         return jsonify({

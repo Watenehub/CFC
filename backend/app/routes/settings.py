@@ -1,6 +1,8 @@
 from flask import Blueprint, jsonify, request
-from ..auth.permissions import role_required
+from urllib.parse import urlsplit
+from ..auth.permissions import admin_required, role_required
 from ..database.mongodb import get_db
+from ..security import audit_event, safe_web_url
 
 
 settings_bp = Blueprint("settings", __name__)
@@ -26,10 +28,14 @@ def serialize_settings(settings):
     if settings is None:
         return DEFAULT_SETTINGS.copy()
 
-    settings = settings.copy()
-    settings.pop("_id", None)
-    settings.pop("id", None)
-    return {**DEFAULT_SETTINGS, **settings}
+    public = {field: settings.get(field, default) for field, default in DEFAULT_SETTINGS.items()}
+    public["map_url"] = safe_web_url(public.get("map_url"), allow_relative=False) or DEFAULT_SETTINGS["map_url"]
+    livestream_url = safe_web_url(public.get("livestream_url"), allow_relative=False)
+    host = urlsplit(livestream_url).hostname or ""
+    if host not in {"youtube.com", "www.youtube.com", "youtube-nocookie.com", "www.youtube-nocookie.com"}:
+        livestream_url = DEFAULT_SETTINGS["livestream_url"]
+    public["livestream_url"] = livestream_url
+    return public
 
 
 @settings_bp.route("/api/settings", methods=["GET"])
@@ -41,7 +47,7 @@ def get_settings():
 
 
 @settings_bp.route("/api/settings", methods=["PUT"])
-@role_required("manage_users")
+@admin_required
 def update_settings():
     db = get_db()
     data = request.get_json() or {}
@@ -56,11 +62,35 @@ def update_settings():
     if not update_data:
         return jsonify({"error": "No valid fields provided for update"}), 400
 
+    text_fields = ("church_name", "address", "phone", "email", "service_times", "office_hours", "mission", "vision", "motto", "beliefs")
+    for field in text_fields:
+        value = update_data.get(field)
+        if value is not None and (not isinstance(value, str) or len(value) > 10000):
+            return jsonify({"error": f"Invalid value for {field}"}), 400
+
+    for field in ("map_url",):
+        value = update_data.get(field)
+        if value is not None and (not isinstance(value, str) or (value and not value.startswith("https://"))):
+            return jsonify({"error": f"{field} must be an HTTPS URL"}), 400
+
+    if "livestream_url" in update_data:
+        url = update_data["livestream_url"]
+        if not isinstance(url, str) or len(url) > 2048 or not (
+            url.startswith("https://www.youtube.com/")
+            or url.startswith("https://youtube.com/")
+            or url.startswith("https://www.youtube-nocookie.com/")
+        ):
+            return jsonify({"error": "Livestream URL must be a valid HTTPS YouTube URL"}), 400
+
+    if "is_live" in update_data and not isinstance(update_data["is_live"], bool):
+        return jsonify({"error": "is_live must be a boolean"}), 400
+
     db.settings.update_one(
         {"id": "site"},
         {"$set": update_data},
         upsert=True,
     )
+    audit_event("site_settings_updated", target_id="site")
 
     settings = db.settings.find_one({"id": "site"})
     return jsonify({
@@ -78,8 +108,17 @@ def update_livestream():
 
     update_data = {}
     if "is_live" in data:
-        update_data["is_live"] = bool(data["is_live"])
+        if not isinstance(data["is_live"], bool):
+            return jsonify({"error": "is_live must be a boolean"}), 400
+        update_data["is_live"] = data["is_live"]
     if "livestream_url" in data:
+        url = data["livestream_url"]
+        if not isinstance(url, str) or len(url) > 2048 or not (
+            url.startswith("https://www.youtube.com/")
+            or url.startswith("https://youtube.com/")
+            or url.startswith("https://www.youtube-nocookie.com/")
+        ):
+            return jsonify({"error": "Livestream URL must be a valid HTTPS YouTube URL"}), 400
         update_data["livestream_url"] = data["livestream_url"]
 
     if not update_data:
@@ -90,6 +129,7 @@ def update_livestream():
         {"$set": update_data},
         upsert=True,
     )
+    audit_event("livestream_settings_updated", target_id="site")
 
     settings = db.settings.find_one({"id": "site"})
     return jsonify({

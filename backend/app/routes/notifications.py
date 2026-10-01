@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
-from ..auth.permissions import role_required
+from ..auth.permissions import effective_permissions, get_session_user, role_required
 from ..database.mongodb import get_db
+from ..security import pagination_args, safe_web_url
 from pymongo import DESCENDING
 
 
@@ -10,17 +11,30 @@ notifications_bp = Blueprint("notifications", __name__)
 def serialize_notification(item):
     if item is None:
         return None
-    item = item.copy()
-    item.pop("_id", None)
-    return item
+    fields = ("id", "title", "message", "link", "image", "active", "priority")
+    public = {field: item[field] for field in fields if field in item}
+    for field in ("link", "image"):
+        if field in public:
+            public[field] = safe_web_url(public[field])
+    return public
 
 
 @notifications_bp.route("/api/notifications", methods=["GET"])
 def get_notifications():
     db = get_db()
-    active_only = request.args.get("active") == "1"
-    query = {"active": True} if active_only else {}
-    items = list(db.notifications.find(query).sort("_id", DESCENDING))
+    active_only = request.args.get("active", "1") == "1"
+    if active_only:
+        query = {"active": True}
+    else:
+        user = get_session_user()
+        if not user:
+            return jsonify({"error": "Authentication required"}), 401
+        permissions = effective_permissions(user.get("role"), user.get("permissions"))
+        if user.get("role") != "admin" and "manage_notifications" not in permissions:
+            return jsonify({"error": "Access denied"}), 403
+        query = {}
+    page, page_size = pagination_args(request.args)
+    items = list(db.notifications.find(query).sort("_id", DESCENDING).skip((page - 1) * page_size).limit(page_size))
     return jsonify([serialize_notification(item) for item in items])
 
 
@@ -28,6 +42,14 @@ def get_notifications():
 def get_notification(notification_id):
     db = get_db()
     item = db.notifications.find_one({"id": notification_id})
+    if item and not item.get("active", False):
+        user = get_session_user()
+        if not user:
+            item = None
+        else:
+            permissions = effective_permissions(user.get("role"), user.get("permissions"))
+            if user.get("role") != "admin" and "manage_notifications" not in permissions:
+                item = None
     if not item:
         return jsonify({"error": "Notification not found"}), 404
     return jsonify(serialize_notification(item))

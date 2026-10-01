@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from ..auth.permissions import role_required
 from ..database.mongodb import get_db
+from ..security import pagination_args
 from pymongo import DESCENDING
 
 
@@ -25,8 +26,8 @@ def serialize_gallery_item(item):
     if item is None:
         return None
 
-    item = item.copy()
-    item.pop("_id", None)
+    public_fields = ("id", "title", "description", "image", "image_url", "category", "date", "featured")
+    item = {field: item[field] for field in public_fields if field in item}
 
     # Frontend uses `image`; older docs may only have `image_url`
     if not item.get("image") and item.get("image_url"):
@@ -43,9 +44,8 @@ def get_gallery():
     """Get all gallery items."""
     db = get_db()
 
-    gallery = list(
-        db.gallery.find().sort("_id", DESCENDING)
-    )
+    page, page_size = pagination_args(request.args)
+    gallery = list(db.gallery.find({"status": {"$ne": "draft"}}).sort("_id", DESCENDING).skip((page - 1) * page_size).limit(page_size))
 
     return jsonify([
         serialize_gallery_item(item)
@@ -58,9 +58,7 @@ def get_gallery_item(item_id):
     """Get a single gallery item by ID."""
     db = get_db()
 
-    item = db.gallery.find_one({
-        "id": item_id
-    })
+    item = db.gallery.find_one({"id": item_id, "status": {"$ne": "draft"}})
 
     if not item:
         return jsonify({"error": "Gallery item not found"}), 404

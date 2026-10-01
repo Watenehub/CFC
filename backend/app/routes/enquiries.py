@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from ..auth.permissions import role_required
 from ..database.mongodb import get_db
+from ..security import pagination_args
 from pymongo import DESCENDING
 
 
@@ -24,9 +25,8 @@ def get_enquiries():
     """Get all enquiries."""
     db = get_db()
 
-    enquiries = list(
-        db.enquiries.find().sort("_id", DESCENDING)
-    )
+    page, page_size = pagination_args(request.args)
+    enquiries = list(db.enquiries.find().sort("_id", DESCENDING).skip((page - 1) * page_size).limit(page_size))
 
     return jsonify([
         serialize_enquiry(enquiry)

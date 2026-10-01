@@ -1,7 +1,7 @@
-from functools import wraps
 from datetime import date
 from concurrent.futures import ThreadPoolExecutor
-from flask import Blueprint, jsonify, session
+from flask import Blueprint, jsonify
+from ..auth.permissions import get_session_user, roles_required
 from ..database.mongodb import get_db
 from pymongo import ASCENDING, DESCENDING
 
@@ -9,63 +9,43 @@ from pymongo import ASCENDING, DESCENDING
 stats_bp = Blueprint("stats", __name__)
 
 
-def staff_required(function):
-    @wraps(function)
-    def wrapper(*args, **kwargs):
-        if not session.get("role"):
-            return jsonify({"error": "Authentication required"}), 401
-        if session.get("role") not in ("admin", "media", "secretary", "guest"):
-            return jsonify({"error": "Access denied"}), 403
-        return function(*args, **kwargs)
-    return wrapper
-
-
 @stats_bp.route("/api/dashboard/stats", methods=["GET"])
-@staff_required
+@roles_required("admin", "media", "secretary")
 def get_dashboard_stats():
     db = get_db()
+    role = get_session_user()["role"]
     today = date.today().isoformat()
 
     def count(collection, query=None):
         return collection.count_documents(query or {})
 
-    with ThreadPoolExecutor(max_workers=10) as executor:
-        counts = list(executor.map(
-            lambda task: count(task[0], task[1]),
-            [
-                (db.users, None),
-                (db.events, None),
-                (db.sermons, None),
-                (db.enquiries, None),
-                (db.enquiries, {"status": {"$in": ["New", "In Progress"]}}),
-                (db.prayer_requests, None),
-                (db.prayer_requests, {"status": "New"}),
-                (db.giving, None),
-                (db.gallery, None),
-                (db.ministries, None),
-                (db.pastors, None),
-                (db.deacons, None),
-                (db.notifications, None),
-                (db.services, None),
-            ],
-        ))
+    count_tasks = {
+        "admin": [
+            ("users", db.users, None), ("events", db.events, None),
+            ("sermons", db.sermons, None), ("enquiries", db.enquiries, None),
+            ("open_enquiries", db.enquiries, {"status": {"$in": ["New", "In Progress"]}}),
+            ("prayer_requests", db.prayer_requests, None),
+            ("new_prayer_requests", db.prayer_requests, {"status": "New"}),
+            ("giving", db.giving, None), ("gallery", db.gallery, None),
+            ("ministries", db.ministries, None), ("pastors", db.pastors, None),
+            ("deacons", db.deacons, None), ("notifications", db.notifications, None),
+            ("services", db.services, None),
+        ],
+        "media": [
+            ("events", db.events, None), ("sermons", db.sermons, None),
+            ("gallery", db.gallery, None), ("notifications", db.notifications, {"active": True}),
+        ],
+        "secretary": [
+            ("enquiries", db.enquiries, None),
+            ("open_enquiries", db.enquiries, {"status": {"$in": ["New", "In Progress"]}}),
+            ("prayer_requests", db.prayer_requests, None),
+            ("new_prayer_requests", db.prayer_requests, {"status": "New"}),
+            ("giving", db.giving, None), ("services", db.services, None),
+        ],
+    }[role]
 
-    (
-        users_count,
-        events_count,
-        sermons_count,
-        enquiries_count,
-        open_enquiries,
-        prayer_requests_count,
-        new_prayer,
-        giving_count,
-        gallery_count,
-        ministries_count,
-        pastors_count,
-        deacons_count,
-        notifications_count,
-        services_count,
-    ) = counts
+    with ThreadPoolExecutor(max_workers=min(10, len(count_tasks))) as executor:
+        counts = dict(executor.map(lambda task: (task[0], count(task[1], task[2])), count_tasks))
 
     event_projection = {
         "_id": 0,
@@ -88,47 +68,13 @@ def get_dashboard_stats():
         "speaker": 1,
         "date": 1,
     }
-    upcoming_events = list(
-        db.events.find(
-            {"date": {"$gte": today}},
-            event_projection,
-        ).sort("date", ASCENDING).limit(5)
-    )
-
-    return jsonify({
-        "users": users_count,
-        "events": events_count,
-        "sermons": sermons_count,
-        "enquiries": enquiries_count,
-        "open_enquiries": open_enquiries,
-        "prayer_requests": prayer_requests_count,
-        "new_prayer_requests": new_prayer,
-        "giving": giving_count,
-        "gallery": gallery_count,
-        "ministries": ministries_count,
-        "pastors": pastors_count,
-        "deacons": deacons_count,
-        "notifications": notifications_count,
-        "services": services_count,
-        "recent_enquiries": [
-            {
-                "id": item.get("id"),
-                "subject": item.get("subject", ""),
-                "name": item.get("name", ""),
-                "status": item.get("status", ""),
-            }
-            for item in list(db.enquiries.find({}, enquiry_projection).sort("_id", DESCENDING).limit(5))
-        ],
-        "recent_sermons": [
-            {
-                "id": item.get("id"),
-                "title": item.get("title", ""),
-                "speaker": item.get("speaker", ""),
-                "date": item.get("date", ""),
-            }
-            for item in list(db.sermons.find({}, sermon_projection).sort("_id", DESCENDING).limit(5))
-        ],
-        "upcoming_events": [
+    result = dict(counts)
+    if role in {"admin", "media"}:
+        upcoming_events = list(
+            db.events.find({"date": {"$gte": today}, "status": {"$ne": "draft"}}, event_projection)
+            .sort("date", ASCENDING).limit(5)
+        )
+        result["upcoming_events"] = [
             {
                 "id": item.get("id"),
                 "title": item.get("title", ""),
@@ -136,5 +82,19 @@ def get_dashboard_stats():
                 "location": item.get("location", ""),
             }
             for item in upcoming_events
-        ],
-    })
+        ]
+        result["recent_sermons"] = [
+            {"id": item.get("id"), "title": item.get("title", ""), "speaker": item.get("speaker", ""), "date": item.get("date", "")}
+            for item in list(db.sermons.find({"status": {"$ne": "draft"}}, sermon_projection).sort("_id", DESCENDING).limit(5))
+        ]
+    if role in {"admin", "secretary"}:
+        result["recent_enquiries"] = [
+            {
+                "id": item.get("id"),
+                "subject": item.get("subject", ""),
+                "name": item.get("name", ""),
+                "status": item.get("status", ""),
+            }
+            for item in list(db.enquiries.find({}, enquiry_projection).sort("_id", DESCENDING).limit(5))
+        ]
+    return jsonify(result)

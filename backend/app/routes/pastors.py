@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from ..auth.permissions import role_required
 from ..database.mongodb import get_db
+from ..security import pagination_args
 from pymongo import DESCENDING
 
 
@@ -12,10 +13,8 @@ def serialize_pastor(pastor):
     if pastor is None:
         return None
 
-    pastor = pastor.copy()
-    pastor.pop("_id", None)
-
-    return pastor
+    fields = ("id", "name", "title", "bio", "image", "encouragement")
+    return {field: pastor[field] for field in fields if field in pastor}
 
 
 @pastors_bp.route("/api/pastors", methods=["GET"])
@@ -23,9 +22,8 @@ def get_pastors():
     """Get all pastors."""
     db = get_db()
 
-    pastors = list(
-        db.pastors.find().sort("_id", DESCENDING)
-    )
+    page, page_size = pagination_args(request.args)
+    pastors = list(db.pastors.find({"status": {"$ne": "draft"}}).sort("_id", DESCENDING).skip((page - 1) * page_size).limit(page_size))
 
     return jsonify([
         serialize_pastor(pastor)
@@ -38,9 +36,7 @@ def get_pastor(pastor_id):
     """Get a single pastor by ID."""
     db = get_db()
 
-    pastor = db.pastors.find_one({
-        "id": pastor_id
-    })
+    pastor = db.pastors.find_one({"id": pastor_id, "status": {"$ne": "draft"}})
 
     if not pastor:
         return jsonify({"error": "Pastor not found"}), 404
