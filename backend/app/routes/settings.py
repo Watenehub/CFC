@@ -32,7 +32,7 @@ def serialize_settings(settings):
     public["map_url"] = safe_web_url(public.get("map_url"), allow_relative=False) or DEFAULT_SETTINGS["map_url"]
     livestream_url = safe_web_url(public.get("livestream_url"), allow_relative=False)
     host = urlsplit(livestream_url).hostname or ""
-    if host not in {"youtube.com", "www.youtube.com", "youtube-nocookie.com", "www.youtube-nocookie.com"}:
+    if host not in {"youtube.com", "www.youtube.com", "youtu.be", "youtube-nocookie.com", "www.youtube-nocookie.com"}:
         livestream_url = DEFAULT_SETTINGS["livestream_url"]
     public["livestream_url"] = livestream_url
     return public
@@ -81,6 +81,7 @@ def update_settings():
         if not isinstance(url, str) or len(url) > 2048 or not (
             url.startswith("https://www.youtube.com/")
             or url.startswith("https://youtube.com/")
+            or url.startswith("https://youtu.be/")
             or url.startswith("https://www.youtube-nocookie.com/")
         ):
             return jsonify({"error": "Livestream URL must be a valid HTTPS YouTube URL"}), 400
@@ -119,6 +120,7 @@ def update_livestream():
         if not isinstance(url, str) or len(url) > 2048 or not (
             url.startswith("https://www.youtube.com/")
             or url.startswith("https://youtube.com/")
+            or url.startswith("https://youtu.be/")
             or url.startswith("https://www.youtube-nocookie.com/")
         ):
             return jsonify({"error": "Livestream URL must be a valid HTTPS YouTube URL"}), 400

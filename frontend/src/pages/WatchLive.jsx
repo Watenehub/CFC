@@ -1,3 +1,4 @@
+import { fitStyle } from '../utils/fitStyle'
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import useLiveSettings from '../hooks/useLiveSettings'
@@ -25,8 +26,8 @@ function WatchLive() {
   const getYouTubeEmbedUrl = (url) => {
     if (!url) return null
     if (url.includes('/embed/')) return url
-    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/)
-    return match ? `https://www.youtube.com/embed/${match[1]}` : null
+    const match = url.match(/(?:youtube\.com\/(?:watch\?(?:[^#\s]*&)?v=|embed\/|live\/|shorts\/|v\/)|youtu\.be\/)([\w-]{6,})/)
+    return match ? `https://www.youtube.com/embed/${match[1]}?autoplay=1&rel=0` : null
   }
 
   const isLive = Boolean(settings.is_live)
@@ -42,7 +43,7 @@ function WatchLive() {
           </p>
         </section>
 
-        {isLive && liveEmbed ? (
+        {isLive ? (
           <section className="live-now-section">
             <div className="live-badge">
               <span className="live-dot"></span>
@@ -50,16 +51,24 @@ function WatchLive() {
             </div>
             <h2 className="section-title">Blessings as you continue watching, Welcome</h2>
             <div className="live-player-container">
-              <iframe
-                width="100%"
-                height="500"
-                src={liveEmbed}
-                title="Live Stream"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="live-player"
-              ></iframe>
+              {liveEmbed ? (
+                <iframe
+                  width="100%"
+                  height="500"
+                  src={liveEmbed}
+                  title="Live Stream"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="live-player"
+                ></iframe>
+              ) : (
+                <p className="service-date-time">
+                  The stream is starting. {settings.livestream_url ? (
+                    <a href={settings.livestream_url} target="_blank" rel="noopener noreferrer">Watch on YouTube</a>
+                  ) : 'Please check back in a moment.'}
+                </p>
+              )}
             </div>
           </section>
         ) : (
@@ -81,7 +90,9 @@ function WatchLive() {
             <div className="streams-grid">
               {previousStreams.map((stream) => (
                 <Link key={stream.id} to={`/sermons/${stream.id}`} className="ministry-feature-frame fade-up">
-                  <img loading="lazy" decoding="async" src={stream.thumbnail || '/chapel.jpg'} alt={stream.title} className="ministry-feature-image" />
+                  <div className="fit-media fit-media--card" style={fitStyle(stream.thumbnail || '/chapel.jpg')}>
+                    <img loading="lazy" decoding="async" src={stream.thumbnail || '/chapel.jpg'} alt={stream.title} />
+                  </div>
                   <div className="ministry-feature-content">
                     <h3 className="ministry-feature-title">{stream.title}</h3>
                     <p className="stream-date">{stream.speaker}{stream.date ? ` · ${new Date(stream.date).toLocaleDateString()}` : ''}</p>

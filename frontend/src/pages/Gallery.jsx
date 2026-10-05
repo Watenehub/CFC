@@ -1,3 +1,4 @@
+import { fitStyle } from '../utils/fitStyle'
 import { useState, useEffect } from 'react'
 import * as galleryApi from '../api/gallery'
 import PageHero from '../components/PageHero'
@@ -100,7 +101,7 @@ function Gallery() {
               <h2 className="gallery-category">{category.replace(/([A-Z])/g, ' $1').trim()}</h2>
               <div className="masonry-gallery">
                 {galleryByCategory[category].map((photo, i) => (
-                  <div key={photo.id || photo.image} className="gallery-item fade-up" onClick={() => openLightbox(category, i)}>
+                  <div key={photo.id || photo.image} className="gallery-item fit-media fade-up" style={fitStyle(photo.image)} onClick={() => openLightbox(category, i)}>
                     <img 
                       src={photo.image} 
                       alt={photo.description || `${category} ${i + 1}`} 

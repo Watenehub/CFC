@@ -1,3 +1,4 @@
+import { fitStyle } from '../utils/fitStyle'
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import * as eventsApi from '../api/events'
@@ -95,13 +96,14 @@ function Events() {
               {upcomingEvents.map((event) => (
                 <div key={event.id} className="conference-showcase-frame fade-up">
                   <div className="conference-label">Upcoming</div>
-                  <img 
-                    src={event.image || '/chapel.jpg'} 
-                    alt={event.title} 
-                    className="conference-image"
-                    loading="lazy"
-                    decoding="async"
-                  />
+                  <div className="fit-media" style={fitStyle(event.image || '/chapel.jpg')}>
+                    <img
+                      src={event.image || '/chapel.jpg'}
+                      alt={event.title}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
                   <div className="conference-content">
                     <div className="event-organizer">{event.organizer}</div>
                     <h3 className="conference-title">{event.title}</h3>
@@ -141,7 +143,7 @@ function Events() {
             <div className="events-grid">
               {pastEvents.map((event) => (
                 <div key={event.id} className="event-card event-card-past">
-                  <div className="event-image">
+                  <div className="event-image fit-media" style={fitStyle(event.image || '/chapel.jpg')}>
                     <img 
                       src={event.image || '/chapel.jpg'} 
                       alt={event.title}

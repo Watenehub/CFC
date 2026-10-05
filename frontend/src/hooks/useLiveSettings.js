@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { apiCall } from '../api/client'
 
-const POLL_MS = 8000
+const POLL_MS = 5000
 
 export default function useLiveSettings(initial = { livestream_url: '', is_live: false }) {
   const [settings, setSettings] = useState(initial)

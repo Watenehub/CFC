@@ -1,3 +1,4 @@
+import { fitStyle } from '../utils/fitStyle'
 import { Link, useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import '../utils/scrollAnimations'
@@ -70,11 +71,10 @@ function GivingDetail() {
 
         <section className="giving-detail-card fade-up">
           {giving.poster && (
-            <div className="giving-detail-image-wrapper">
+            <div className="giving-detail-image-wrapper fit-media fit-media--card" style={fitStyle(giving.poster)}>
               <img loading="lazy" decoding="async"
                 src={giving.poster}
                 alt={giving.title || 'Giving campaign'}
-                className="giving-detail-image"
               />
             </div>
           )}

@@ -1,3 +1,4 @@
+import { fitStyle } from '../utils/fitStyle'
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import * as givingApi from '../api/giving'
@@ -114,27 +115,15 @@ function Giving() {
             <div className="giving-grid">
               {filteredOptions.map((option) => (
                 <div key={option.id} className="ministry-feature-frame fade-up">
-                  {option.poster ? (
-                    <img 
-                      src={option.poster} 
-                      alt={option.title} 
-                      className="ministry-feature-image"
+                  <div className="fit-media fit-media--card" style={fitStyle(option.poster || '/chapel.jpg')}>
+                    <img
+                      src={option.poster || '/chapel.jpg'}
+                      alt={option.title}
                       loading="lazy"
                       decoding="async"
-                      onError={(e) => {
-                        console.error('Failed to load image:', option.poster)
-                        e.target.src = '/chapel.jpg'
-                      }}
+                      onError={(e) => { e.target.src = '/chapel.jpg' }}
                     />
-                  ) : (
-                    <img 
-                      src="/chapel.jpg" 
-                      alt={option.title} 
-                      className="ministry-feature-image"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  )}
+                  </div>
                   <div className="giving-category-badge">{option.category}</div>
                   <div className="ministry-feature-content">
                     <h3 className="ministry-feature-title">{option.title}</h3>

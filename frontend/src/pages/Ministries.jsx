@@ -1,3 +1,4 @@
+import { fitStyle } from '../utils/fitStyle'
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import * as ministriesApi from '../api/ministries'
@@ -77,13 +78,14 @@ function Ministries() {
             <div className="ministries-grid">
               {ministries.map((ministry) => (
                 <div key={ministry.id} className="ministry-feature-frame fade-up">
-                  <img 
-                    src={ministry.image || '/chapel.jpg'} 
-                    alt={ministry.name} 
-                    className="ministry-feature-image"
-                    loading="lazy"
-                    decoding="async"
-                  />
+                  <div className="fit-media fit-media--card" style={fitStyle(ministry.image || '/chapel.jpg')}>
+                    <img
+                      src={ministry.image || '/chapel.jpg'}
+                      alt={ministry.name}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
                   <div className="ministry-feature-content">
                     <h3 className="ministry-feature-title">{ministry.name}</h3>
                     <p className="ministry-feature-description">{ministry.description}</p>

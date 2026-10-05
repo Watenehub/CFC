@@ -1,40 +1,32 @@
-/* Uploaded images (any size/ratio) must fit their frames without cropping. */
-.event-card .event-image,
-.event-card .event-image img,
-.event-detail-image,
-.sermon-card .sermon-thumbnail,
-.giving-card .giving-poster,
-.stream-card .stream-thumbnail,
-.ministry-feature-frame .ministry-feature-image,
-.gallery-item {
-  background-color: #e9e6df;
+﻿/* Uploaded images of any ratio show in full over a blurred copy of themselves. */
+.fit-media {
+  position: relative;
+  overflow: hidden;
+  background: #d8d8d3 var(--fit-src, none) center / cover no-repeat;
 }
 
-.event-card .event-image img,
-.event-detail-image img,
-.sermon-card .sermon-thumbnail img,
-.giving-card .giving-poster img,
-.stream-card .stream-thumbnail img,
-.ministry-feature-frame img.ministry-feature-image,
-html body .gallery-item img {
+.fit-media::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.fit-media > img {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   object-position: center;
-  max-width: 100%;
 }
 
-.event-detail-image {
-  height: auto;
-  min-height: 240px;
-  max-height: 600px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+.fit-media--card { aspect-ratio: 16 / 10; }
 
-.event-detail-image img {
-  height: auto;
-  max-height: 600px;
-}
-
+.conference-showcase-frame .fit-media { height: 300px; }
 .event-card .event-image { height: 220px; }
-.giving-card .giving-poster { height: 280px; }
+.event-detail-image { height: clamp(240px, 46vw, 460px); }
+html body .gallery-item.fit-media { aspect-ratio: 4 / 3; }
+html body .gallery-item.fit-media > img { height: 100%; }

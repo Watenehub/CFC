@@ -1,3 +1,4 @@
+import { fitStyle } from '../utils/fitStyle'
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import * as eventsApi from '../api/events'
@@ -98,7 +99,7 @@ function EventDetail() {
         </Link>
 
         <div className="event-detail-content fade-up">
-          <div className="event-detail-image">
+          <div className="event-detail-image fit-media" style={fitStyle(eventData.image || '/CFC_CHURCH_PHOTO.jpg')}>
             <img 
               src={eventData.image || '/CFC_CHURCH_PHOTO.jpg'} 
               alt={eventData.title}
