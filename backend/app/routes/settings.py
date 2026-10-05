@@ -13,7 +13,7 @@ DEFAULT_SETTINGS = {
     "phone": "+254 700 000 000",
     "email": "hello@cornerstonechapel.org",
     "service_times": "Sunday Worship: 9:00 AM, Bible Study: Wednesday 6:30 PM",
-    "livestream_url": "https://www.youtube.com/embed/live_stream?channel=UC_x5XG1OV2P6uZZ5FSM9Ttw",
+    "livestream_url": "",
     "map_url": "https://maps.google.com/?q=Cornerstone Family Chapel Nairobi",
     "office_hours": "Mon-Fri 8:00 AM - 5:00 PM",
     "is_live": False,
@@ -30,11 +30,12 @@ def serialize_settings(settings):
 
     public = {field: settings.get(field, default) for field, default in DEFAULT_SETTINGS.items()}
     public["map_url"] = safe_web_url(public.get("map_url"), allow_relative=False) or DEFAULT_SETTINGS["map_url"]
-    livestream_url = safe_web_url(public.get("livestream_url"), allow_relative=False)
+    livestream_url = safe_web_url(public.get("livestream_url"), allow_relative=False) or ""
     host = urlsplit(livestream_url).hostname or ""
     if host not in {"youtube.com", "www.youtube.com", "youtu.be", "youtube-nocookie.com", "www.youtube-nocookie.com"}:
-        livestream_url = DEFAULT_SETTINGS["livestream_url"]
+        livestream_url = ""
     public["livestream_url"] = livestream_url
+    public["is_live"] = bool(public.get("is_live")) and bool(livestream_url)
     return public
 
 
@@ -78,13 +79,15 @@ def update_settings():
 
     if "livestream_url" in update_data:
         url = update_data["livestream_url"]
-        if not isinstance(url, str) or len(url) > 2048 or not (
+        if not isinstance(url, str) or len(url) > 2048 or (url and not (
             url.startswith("https://www.youtube.com/")
             or url.startswith("https://youtube.com/")
             or url.startswith("https://youtu.be/")
             or url.startswith("https://www.youtube-nocookie.com/")
-        ):
+        )):
             return jsonify({"error": "Livestream URL must be a valid HTTPS YouTube URL"}), 400
+        if not url:
+            update_data["is_live"] = False
 
     if "is_live" in update_data and not isinstance(update_data["is_live"], bool):
         return jsonify({"error": "is_live must be a boolean"}), 400
@@ -117,14 +120,16 @@ def update_livestream():
         update_data["is_live"] = data["is_live"]
     if "livestream_url" in data:
         url = data["livestream_url"]
-        if not isinstance(url, str) or len(url) > 2048 or not (
+        if not isinstance(url, str) or len(url) > 2048 or (url and not (
             url.startswith("https://www.youtube.com/")
             or url.startswith("https://youtube.com/")
             or url.startswith("https://youtu.be/")
             or url.startswith("https://www.youtube-nocookie.com/")
-        ):
+        )):
             return jsonify({"error": "Livestream URL must be a valid HTTPS YouTube URL"}), 400
-        update_data["livestream_url"] = data["livestream_url"]
+        update_data["livestream_url"] = url
+        if not url:
+            update_data["is_live"] = False
 
     if not update_data:
         return jsonify({"error": "No livestream fields provided"}), 400

@@ -30,7 +30,7 @@ function WatchLive() {
     return match ? `https://www.youtube.com/embed/${match[1]}?autoplay=1&rel=0` : null
   }
 
-  const isLive = Boolean(settings.is_live)
+  const isLive = Boolean(settings.is_live && settings.livestream_url)
   const liveEmbed = getYouTubeEmbedUrl(settings.livestream_url)
 
   return (
