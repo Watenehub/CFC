@@ -37,6 +37,15 @@ const SecretaryDashboard = lazy(() => import('./pages/secretary/Dashboard'))
 const MemberDashboard = lazy(() => import('./pages/member/Dashboard'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 
+if (typeof window !== 'undefined') {
+  const warm = () => [
+    import('./pages/Sermons'), import('./pages/Events'), import('./pages/Ministries'),
+    import('./pages/About'), import('./pages/WatchLive'), import('./pages/Giving'),
+    import('./pages/Gallery'), import('./pages/Contact'),
+  ]
+  ;(window.requestIdleCallback || ((fn) => setTimeout(fn, 2000)))(warm)
+}
+
 function ProtectedRoute({ children, allowedRoles, permission }) {
   const { user, loading, hasPermission } = useAuth()
 

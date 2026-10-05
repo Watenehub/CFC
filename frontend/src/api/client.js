@@ -2,6 +2,8 @@ export const API_BASE = import.meta.env.VITE_API_BASE || ''
 
 let csrfToken = ''
 let csrfPromise = null
+const getCache = new Map()
+const GET_TTL_MS = 30000
 
 function isJsonMethod(method) {
   return method !== 'GET' && method !== 'HEAD' && method !== 'OPTIONS'
@@ -48,6 +50,23 @@ async function parseBody(response) {
 }
 
 export async function apiCall(endpoint, options = {}, retry = true) {
+  const method = (options.method || 'GET').toUpperCase()
+
+  if (method !== 'GET') {
+    getCache.clear()
+  } else if (retry && !options.cache && !endpoint.startsWith('/api/auth')) {
+    const hit = getCache.get(endpoint)
+    if (hit && Date.now() - hit.at < GET_TTL_MS) return hit.promise
+    const promise = request(endpoint, options, retry)
+    getCache.set(endpoint, { at: Date.now(), promise })
+    promise.catch(() => getCache.delete(endpoint))
+    return promise
+  }
+
+  return request(endpoint, options, retry)
+}
+
+async function request(endpoint, options, retry) {
   const url = `${API_BASE}${endpoint}`
   const method = (options.method || 'GET').toUpperCase()
   const isGetRequest = method === 'GET'

@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import * as authApi from '../api/auth'
-import { getCsrfToken } from '../api/client'
 import { dashboardPath, permissionsForRole, STAFF_ROLES } from '../utils/permissions'
 
 const AuthContext = createContext(null)
@@ -15,7 +14,6 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      await getCsrfToken()
       const response = await authApi.getCurrentUser()
       setUser(response)
     } catch (error) {
