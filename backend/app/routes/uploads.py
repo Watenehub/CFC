@@ -41,6 +41,7 @@ def _normalize_image(stream, claimed_extension=None):
         source.verify()
         stream.seek(0)
         image = ImageOps.exif_transpose(Image.open(stream))
+        image.thumbnail((1920, 1920))
         if image_format == "JPEG":
             image = image.convert("RGB")
             extension, content_type = "jpg", "image/jpeg"
@@ -52,7 +53,7 @@ def _normalize_image(stream, claimed_extension=None):
             extension, content_type = "webp", "image/webp"
 
         output = BytesIO()
-        image.save(output, format=image_format, quality=86, optimize=True)
+        image.save(output, format=image_format, quality=82, optimize=True)
 
     if output.tell() > MAX_UPLOAD_BYTES:
         raise ValueError("Processed image exceeds the maximum allowed size")

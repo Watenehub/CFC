@@ -96,7 +96,7 @@ export default function Leadership({ title, subtitle, members }) {
 
                 {/* IMAGE */}
                 <div className="foundation-item-image">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={member.image || '/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg'}
                     alt={member.name}
                   />

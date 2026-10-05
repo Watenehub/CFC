@@ -54,7 +54,7 @@ function Staff() {
                         <div className="leadership-portrait-frame">
                           <div className="leadership-outer-ring"></div>
                           <div className="leadership-inner-ring"></div>
-                          <img src={pastor.image || '/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg'} alt={pastor.name} className="leadership-photo" />
+                          <img loading="lazy" decoding="async" src={pastor.image || '/images/cornerstone/page_01/page01_photo000_pastor_portrait.jpg'} alt={pastor.name} className="leadership-photo" />
                         </div>
                         <h3>{pastor.name}</h3>
                         <p className="leader-title">{pastor.title}</p>
@@ -73,7 +73,7 @@ function Staff() {
                     {deacons.map((member) => (
                       <article key={member.id || `${member.name}-${member.role}`} className="leader-card fade-up">
                         <div className="leader-image">
-                          <img src={member.image || '/CFC_CHURCH_PHOTO.jpg'} alt={member.name} />
+                          <img loading="lazy" decoding="async" src={member.image || '/CFC_CHURCH_PHOTO.jpg'} alt={member.name} />
                         </div>
                         <h3>{member.name}</h3>
                         <p className="leader-bio">{member.role || member.title}</p>

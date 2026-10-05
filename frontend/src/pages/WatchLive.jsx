@@ -81,7 +81,7 @@ function WatchLive() {
             <div className="streams-grid">
               {previousStreams.map((stream) => (
                 <Link key={stream.id} to={`/sermons/${stream.id}`} className="ministry-feature-frame fade-up">
-                  <img src={stream.thumbnail || '/chapel.jpg'} alt={stream.title} className="ministry-feature-image" />
+                  <img loading="lazy" decoding="async" src={stream.thumbnail || '/chapel.jpg'} alt={stream.title} className="ministry-feature-image" />
                   <div className="ministry-feature-content">
                     <h3 className="ministry-feature-title">{stream.title}</h3>
                     <p className="stream-date">{stream.speaker}{stream.date ? ` · ${new Date(stream.date).toLocaleDateString()}` : ''}</p>

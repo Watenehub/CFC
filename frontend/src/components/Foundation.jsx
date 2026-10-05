@@ -144,7 +144,7 @@ export default function Foundation() {
 
                 {/* IMAGE */}
                 <div className="foundation-item-image">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={item.image}
                     alt={item.title}
                   />

@@ -71,7 +71,7 @@ function GivingDetail() {
         <section className="giving-detail-card fade-up">
           {giving.poster && (
             <div className="giving-detail-image-wrapper">
-              <img
+              <img loading="lazy" decoding="async"
                 src={giving.poster}
                 alt={giving.title || 'Giving campaign'}
                 className="giving-detail-image"
