@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import * as settingsApi from '../api/settings'
+import useLiveSettings from '../hooks/useLiveSettings'
 import * as sermonsApi from '../api/sermons'
 import './WatchLive.css'
 import '../styles/ModernDesignSystem.css'
 import '../utils/scrollAnimations'
 
 function WatchLive() {
-  const [settings, setSettings] = useState({ livestream_url: '', is_live: false })
+  const settings = useLiveSettings()
   const [previousStreams, setPreviousStreams] = useState([])
 
   useEffect(() => {
-    settingsApi.getSettings().then(setSettings).catch(console.error)
     sermonsApi.getSermons()
       .then((sermons) => {
         const withVideo = sermons

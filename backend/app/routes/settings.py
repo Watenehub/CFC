@@ -43,7 +43,10 @@ def get_settings():
     """Get site settings (public endpoint)."""
     db = get_db()
     settings = db.settings.find_one({"id": "site"})
-    return jsonify(serialize_settings(settings))
+    response = jsonify(serialize_settings(settings))
+    response.headers["Cache-Control"] = "no-store, no-cache, max-age=0, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    return response
 
 
 @settings_bp.route("/api/settings", methods=["PUT"])

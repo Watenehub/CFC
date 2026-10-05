@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import * as settingsApi from '../api/settings'
+import useLiveSettings from '../hooks/useLiveSettings'
 import './Header.css'
 
 const getInvolvedLinks = [
@@ -47,7 +47,7 @@ function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [aboutOpen, setAboutOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [isLive, setIsLive] = useState(false)
+  const isLive = Boolean(useLiveSettings().is_live)
   const { user, logout } = useAuth()
   const location = useLocation()
   const isHome = location.pathname === '/'
@@ -57,14 +57,6 @@ function Header() {
     window.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
     return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
-  useEffect(() => {
-    let isMounted = true
-    settingsApi.getSettings()
-      .then((data) => { if (isMounted) setIsLive(Boolean(data?.is_live)) })
-      .catch(() => {})
-    return () => { isMounted = false }
   }, [])
 
   useEffect(() => {

@@ -1,0 +1,40 @@
+/* Uploaded images (any size/ratio) must fit their frames without cropping. */
+.event-card .event-image,
+.event-card .event-image img,
+.event-detail-image,
+.sermon-card .sermon-thumbnail,
+.giving-card .giving-poster,
+.stream-card .stream-thumbnail,
+.ministry-feature-frame .ministry-feature-image,
+.gallery-item {
+  background-color: #e9e6df;
+}
+
+.event-card .event-image img,
+.event-detail-image img,
+.sermon-card .sermon-thumbnail img,
+.giving-card .giving-poster img,
+.stream-card .stream-thumbnail img,
+.ministry-feature-frame img.ministry-feature-image,
+html body .gallery-item img {
+  object-fit: contain;
+  object-position: center;
+  max-width: 100%;
+}
+
+.event-detail-image {
+  height: auto;
+  min-height: 240px;
+  max-height: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.event-detail-image img {
+  height: auto;
+  max-height: 600px;
+}
+
+.event-card .event-image { height: 220px; }
+.giving-card .giving-poster { height: 280px; }

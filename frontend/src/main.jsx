@@ -4,6 +4,7 @@ import App from './App.jsx'
 import { clearLegacySiteContent } from './data/siteContent'
 import './index.css'
 import './styles/SharedPages.css'
+import './styles/ImageFit.css'
 import './utils/scrollAnimations'
 
 clearLegacySiteContent()
