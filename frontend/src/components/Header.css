@@ -230,7 +230,7 @@
     width: 82%;
     max-width: 570px;
     height: 100vh;
-    background: #353535;
+    background: #0a300f;
     padding: 0;
     overflow-x: hidden;
     transform: translateX(-100%);
@@ -319,6 +319,12 @@
   .mobile-nav-list a:hover,
   .mobile-nav-list button:hover {
     background: rgba(255,255,255,.055);
+  }
+
+  .mobile-nav-list button {
+    background: none;
+    border: 0;
+    font-family: inherit;
   }
 
   .mobile-nav-icon {

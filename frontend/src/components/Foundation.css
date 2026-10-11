@@ -148,13 +148,13 @@
 .foundation-item {
   position: absolute;
 
-  inset: 0;
+  inset: 0 6%;
 
   display: grid;
 
-  grid-template-columns: 45% 55%;
+  grid-template-columns: minmax(0, 45fr) minmax(0, 55fr);
 
-  gap: 60px;
+  gap: clamp(24px, 4vw, 60px);
 
   align-items: center;
 
@@ -221,6 +221,10 @@
 
 .foundation-item-content {
   position: relative;
+
+  min-width: 0;
+
+  overflow-wrap: anywhere;
 
   padding: 40px 0;
 }

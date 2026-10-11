@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
+import { apiCall } from './api/client'
 import { STAFF_ROLES, dashboardPath } from './utils/permissions'
 import Home from './pages/Home'
 
@@ -43,6 +44,9 @@ if (typeof window !== 'undefined') {
     import('./pages/About'), import('./pages/WatchLive'), import('./pages/Giving'),
     import('./pages/Gallery'), import('./pages/Contact'),
   ]
+  const warmData = () => ['sermons', 'events', 'ministries', 'pastors', 'deacons', 'gallery', 'giving']
+    .forEach((name) => apiCall(`/api/${name}`).catch(() => {}))
+  ;(window.requestIdleCallback || ((fn) => setTimeout(fn, 500)))(warmData)
   ;(window.requestIdleCallback || ((fn) => setTimeout(fn, 2000)))(warm)
 }
 

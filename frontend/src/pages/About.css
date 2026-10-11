@@ -1145,12 +1145,13 @@
 .about-faith-image {
   position: relative;
 
-  width: 48%;
-  max-width: 720px;
+  width: 100%;
+  max-width: none;
   height: 360px;
   overflow: hidden;
+  border-radius: 28px;
 
-  margin: 12px 0 0 auto;
+  margin: 18px 0 0;
 
   z-index: 2;
 }

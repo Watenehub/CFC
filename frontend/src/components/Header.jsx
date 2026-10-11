@@ -172,7 +172,18 @@ function Header() {
                 </Link>
               </li>
             ))}
-            {!user && (
+            {user ? (
+              <>
+                <li><Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                  <span className="mobile-nav-icon"><NavIcon name="church" /></span>
+                  <span className="mobile-nav-text"><strong>Dashboard</strong></span>
+                </Link></li>
+                <li><button type="button" onClick={() => { setMobileMenuOpen(false); logout() }}>
+                  <span className="mobile-nav-icon"><NavIcon name="people" /></span>
+                  <span className="mobile-nav-text"><strong>Logout</strong></span>
+                </button></li>
+              </>
+            ) : (
               <li><Link to="/login" onClick={() => setMobileMenuOpen(false)}>
                 <span className="mobile-nav-icon"><NavIcon name="people" /></span>
                 <span className="mobile-nav-text"><strong>Login</strong></span>

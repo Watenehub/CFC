@@ -3,7 +3,7 @@ export const API_BASE = import.meta.env.VITE_API_BASE || ''
 let csrfToken = ''
 let csrfPromise = null
 const getCache = new Map()
-const GET_TTL_MS = 30000
+const GET_TTL_MS = 120000
 
 function isJsonMethod(method) {
   return method !== 'GET' && method !== 'HEAD' && method !== 'OPTIONS'
