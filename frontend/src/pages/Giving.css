@@ -652,8 +652,8 @@
 /* ---- Giving redesign: hero, compact cards, popup ---- */
 .giving-page { padding-top: 0; }
 
-.gv-hero { background: #fff; }
-.gv-hero img { display: block; width: 100%; max-width: 1200px; height: auto; margin: 0 auto; }
+.gv-hero { background: #fff; text-align: center; }
+.gv-hero img { display: block; width: 75%; max-width: none; height: auto; max-height: calc(100vh - var(--header-height, 72px)); object-fit: contain; margin: 0 auto; }
 
 .gv-grid {
   display: grid;
@@ -702,15 +702,16 @@
 
 .gv-modal {
   position: relative;
-  width: min(100%, 460px);
-  max-height: 90vh;
-  overflow-y: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: center;
+  width: min(100%, 880px);
   padding: 1.5rem;
-  border-radius: 24px;
+  border-radius: 28px;
   background: #fff;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
 }
-
 .gv-close {
   position: absolute;
   top: 0.6rem;
@@ -726,7 +727,9 @@
 .gv-intro h2 { margin: 0 0 0.6rem; font-size: 1.5rem; color: var(--color-primary); }
 .gv-intro p { margin: 0 0 0.6rem; font-size: 0.85rem; line-height: 1.5; color: var(--color-text-light); }
 
-.gv-modal-image { display: block; width: 100%; height: auto; margin: 0.75rem 0; border-radius: 14px; }
+.gv-modal-image { display: block; width: 100%; height: clamp(90px, 18vh, 160px); margin: 0 0 0.6rem; border-radius: 14px; object-fit: cover; }
+.gv-side { min-width: 0; }
+@media (max-width: 720px) { .gv-modal { grid-template-columns: 1fr; gap: 0.6rem; padding: 1rem; } .gv-intro p, .gv-pay { font-size: 0.75rem; } .gv-intro h2 { font-size: 1.1rem; } .gv-pay pre { padding: 0.4rem; margin: 0.2rem 0 0; } }
 
 .gv-tag {
   display: inline-block;

@@ -151,6 +151,7 @@ function Giving() {
                 <p>Your generosity helps us continue serving God, strengthening our ministries, supporting our community, and creating opportunities for people to grow in faith.</p>
                 <p>Whether supporting the church's ministry, missions, community outreach, or a specific project, every contribution can help us serve others and extend the impact of the church.</p>
               </div>
+              <div className="gv-side">
               <img
                 className="gv-modal-image"
                 src={activeOption.poster || '/chapel.jpg'}
@@ -167,6 +168,7 @@ function Giving() {
                   <strong>Payment Details:</strong>
                   <pre>{activeOption.payment_details}</pre>
                 </div>
+              </div>
               </div>
             </div>
           </div>
