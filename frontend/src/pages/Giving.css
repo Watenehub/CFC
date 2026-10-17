@@ -653,7 +653,7 @@
 .giving-page { padding-top: 0; }
 
 .gv-hero { background: #fff; text-align: center; }
-.gv-hero img { display: block; width: 75%; max-width: none; height: auto; max-height: calc(100vh - var(--header-height, 72px)); object-fit: contain; margin: 0 auto; }
+.gv-hero img { display: block; width: 100%; max-width: none; height: auto; margin: 0; }
 
 .gv-grid {
   display: grid;
