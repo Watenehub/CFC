@@ -78,13 +78,31 @@ function Giving() {
 
   return (
     <div className="giving-page">
-      <section className="gv-hero">
-        <img src="/giving.webp" alt="Lipa na M-PESA paybill number 400222" width="1200" decoding="async" fetchpriority="high" />
+      <header className="gv-head">
+        <h1>Give to Our Ministry</h1>
+        <p>Your generosity helps us serve our community and continue the work of the ministry.</p>
+      </header>
+
+      <section className="gv-banner" aria-label="Lipa na M-PESA paybill">
+        <div className="gv-banner-img">
+          <img src="/chapel.jpg" alt="Cornerstone Family Chapel building" decoding="async" fetchpriority="high" />
+        </div>
+        <div className="gv-banner-pay">
+          <div className="gv-mpesa">LIPA NA M-PESA</div>
+          <div className="gv-label"><span />PAYBILL NUMBER<span /></div>
+          <div className="gv-boxes">
+            {'400222'.split('').map((digit, index) => (
+              <div key={index}>{digit}</div>
+            ))}
+          </div>
+          <div className="gv-label"><span />ACCOUNT NUMBER<span /></div>
+          <p className="gv-note">Use the appropriate giving category as your account reference when making your contribution.</p>
+        </div>
       </section>
 
       <div className="container">
         <section className="giving-filters">
-          <h3>Filter by Category</h3>
+          <h2 className="gv-cat-title">Choose What You Would Like to Give Towards</h2>
           <div className="filter-buttons">
             <button 
               className={`filter-btn ${selectedCategory === '' ? 'active' : ''}`}
@@ -121,6 +139,7 @@ function Giving() {
                       decoding="async"
                       onError={(e) => { e.target.src = '/chapel.jpg' }}
                     />
+                    {option.category && <span className="gv-badge">{option.category}</span>}
                   </div>
                   <div className="gv-card-body">
                     <h3>{option.title}</h3>
