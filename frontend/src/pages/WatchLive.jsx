@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import useLiveSettings from '../hooks/useLiveSettings'
 import * as sermonsApi from '../api/sermons'
 import './WatchLive.css'
+import PageHero from '../components/PageHero'
 import '../styles/ModernDesignSystem.css'
 import '../utils/scrollAnimations'
 
@@ -35,13 +36,8 @@ function WatchLive() {
 
   return (
     <div className="watch-live-page">
+      <PageHero eyebrow="Worship" title="Worship With Us Wherever You Are" subtitle="Join the live stream when we are broadcasting, or catch up with recent messages below." image="/images/cornerstone/page_01/page01_photo002_worship_service_participants.jpg" />
       <div className="container">
-        <section className="live-header">
-          <h1 className="fade-up">Worship With Us Wherever You Are</h1>
-          <p className="live-subtitle fade-up">
-            Join the live stream when we are broadcasting, or catch up with recent messages below.
-          </p>
-        </section>
 
         {isLive ? (
           <section className="live-now-section">

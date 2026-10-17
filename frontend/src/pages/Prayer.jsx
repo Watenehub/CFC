@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import * as prayerApi from '../api/prayer'
 import './Prayer.css'
+import PageHero from '../components/PageHero'
 import '../styles/ModernDesignSystem.css'
 import '../utils/scrollAnimations'
 
@@ -60,12 +61,9 @@ function Prayer() {
 
   return (
     <div className="prayer-page">
+      <PageHero eyebrow="Prayer" title="We Would Love to Pray With You" subtitle="You don't have to walk through life's challenges alone." image="/images/cornerstone/page_06/page06_photo027_children_praying.jpg" />
       <div className="container">
         <section className="prayer-header">
-          <h1 className="fade-up">We Would Love to Pray With You</h1>
-          <p className="prayer-subtitle fade-up">
-            You don't have to walk through life's challenges alone.
-          </p>
           <p className="prayer-subtitle fade-up">
             Share your prayer request with us, and allow our church family to stand with you in prayer, encouragement, and support.
           </p>

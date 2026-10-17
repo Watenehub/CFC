@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import * as enquiriesApi from '../api/enquiries'
 import * as settingsApi from '../api/settings'
 import './Contact.css'
+import PageHero from '../components/PageHero'
 import '../styles/ModernDesignSystem.css'
 import '../utils/scrollAnimations'
 
@@ -63,14 +64,11 @@ function Contact() {
 
   return (
     <div className="contact-page">
+      <PageHero eyebrow="Connect" title="Contact Us" subtitle="We'd love to hear from you. Reach out and we'll get back to you as soon as possible." image="/images/cornerstone/contact_1.jpg" />
       <div className="container">
         <section className="contact-header">
-          <h1 className="fade-up">Contact Us</h1>
           <p className="contact-subtitle fade-up">
             We'd love to hear from you. Whether you have questions about our church, want to learn more about our ministries, or simply want to connect with our community, we're here to help.
-          </p>
-          <p className="contact-subtitle fade-up">
-            Reach out to us and we'll get back to you as soon as possible.
           </p>
         </section>
 

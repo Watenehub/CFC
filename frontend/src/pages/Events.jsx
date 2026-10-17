@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import * as eventsApi from '../api/events'
 import './Events.css'
+import PageHero from '../components/PageHero'
 import '../styles/ModernDesignSystem.css'
 import '../utils/scrollAnimations'
 
@@ -71,12 +72,9 @@ function Events() {
 
   return (
     <div className="events-page">
+      <PageHero eyebrow="Gather" title="Life Together" subtitle="Church is more than a weekly gathering. It is a community where we learn, fellowship, serve, and grow together." image="/images/cornerstone/page_03/page03_photo014_conference_audience.jpg" />
       <div className="container">
         <section className="events-header">
-          <h1 className="fade-up">Life Together</h1>
-          <p className="events-subtitle fade-up">
-            Church is more than a weekly gathering. It is a community where we learn, fellowship, serve, and grow together.
-          </p>
           <p className="events-subtitle fade-up">
             Throughout the year, Cornerstone Family Chapel participates in Bible conferences, leadership conferences, family-focused programs, membership classes, worship events, and community outreach initiatives.
           </p>

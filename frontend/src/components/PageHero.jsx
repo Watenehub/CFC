@@ -3,8 +3,7 @@ import '../styles/PageHero.css'
 function PageHero({ title, subtitle, eyebrow, image = '/images/cornerstone/hero-main.jpg', compact = false }) {
   return (
     <section className={`page-hero${compact ? ' page-hero--compact' : ''}`}>
-      <div className="page-hero-bg">
-        <img src={image} alt="" aria-hidden="true" />
+      <div className="page-hero-bg" style={{ backgroundImage: `url("${image}")` }}>
         <div className="page-hero-overlay" />
       </div>
       <div className="page-hero-content container">
