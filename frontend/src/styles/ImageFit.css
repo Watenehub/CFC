@@ -1,32 +1,21 @@
-﻿/* Uploaded images of any ratio show in full over a blurred copy of themselves. */
-.fit-media {
+﻿/* Images show in full: the frame takes the image's own proportions, no cropping, no blur. */
+html body .fit-media {
   position: relative;
   overflow: hidden;
-  background: #d8d8d3 var(--fit-src, none) center / cover no-repeat;
+  height: auto;
+  aspect-ratio: auto;
+  min-height: 0;
+  max-height: none;
+  background: transparent;
 }
 
-.fit-media::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  -webkit-backdrop-filter: blur(24px);
-  backdrop-filter: blur(24px);
-  background: rgba(255, 255, 255, 0.1);
-}
+html body .fit-media::before { content: none; }
 
-.fit-media > img {
-  position: relative;
+html body .fit-media > img,
+html body .event-card .event-image img,
+html body .gallery-item.fit-media > img {
   display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
   object-fit: contain;
-  object-position: center;
 }
-
-.fit-media--card { aspect-ratio: 16 / 10; }
-
-.conference-showcase-frame .fit-media { height: 300px; }
-.event-card .event-image { height: 220px; }
-.event-detail-image { height: clamp(240px, 46vw, 460px); }
-html body .gallery-item.fit-media { aspect-ratio: 4 / 3; }
-html body .gallery-item.fit-media > img { height: 100%; }

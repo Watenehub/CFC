@@ -1089,27 +1089,21 @@
   position: relative;
   z-index: 1;
   width: min(100%, 430px);
-  aspect-ratio: 0.86 / 1;
+  aspect-ratio: auto;
   margin-left: 3%;
   border-radius: 32px;
   box-shadow: 0 22px 55px rgba(20, 30, 20, 0.16);
-  background: #d8d8d3 var(--sermon-image) center / cover no-repeat;
-}
-
-.home .sermon-feature-media::before {
-  content: '';
-  position: absolute;
-  inset: -18px;
-  background: var(--sermon-image) center / cover no-repeat;
-  filter: blur(18px) saturate(0.85);
-  opacity: 0.55;
+  background: transparent;
 }
 
 .home .sermon-feature-media img {
   position: relative;
   z-index: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 32px;
   object-fit: contain;
-  object-position: center;
 }
 
 .home .sermon-feature-content {

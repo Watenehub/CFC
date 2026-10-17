@@ -1,4 +1,3 @@
-import { fitStyle } from '../utils/fitStyle'
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import * as givingApi from '../api/giving'
@@ -11,6 +10,18 @@ function Giving() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [selectedCategory, setSelectedCategory] = useState('')
+  const [activeOption, setActiveOption] = useState(null)
+
+  useEffect(() => {
+    if (!activeOption) return undefined
+    const onKey = (event) => { if (event.key === 'Escape') setActiveOption(null) }
+    document.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [activeOption])
 
   useEffect(() => {
     loadGivingOptions()
@@ -67,24 +78,11 @@ function Giving() {
 
   return (
     <div className="giving-page">
+      <section className="gv-hero">
+        <img src="/giving.webp" alt="Lipa na M-PESA paybill number 400222" width="1200" decoding="async" fetchpriority="high" />
+      </section>
+
       <div className="container">
-        <section className="giving-header">
-          <div className="giving-header-copy">
-            <span className="giving-eyebrow">Generosity in action</span>
-            <h1 className="fade-up">Give With Purpose</h1>
-            <p className="giving-subtitle fade-up">
-              Your generosity helps us continue serving God, strengthening our ministries, supporting our community, and creating opportunities for people to grow in faith.
-            </p>
-            <p className="giving-subtitle fade-up">
-              Whether supporting the church's ministry, missions, community outreach, or a specific project, every contribution can help us serve others and extend the impact of the church.
-            </p>
-          </div>
-        </section>
-
-        <section className="giving-intro">
-          <img loading="lazy" decoding="async" src="/giving.webp" width="1200" decoding="async" alt="Cornerstone Family Chapel giving information" className="giving-banner-image" />
-        </section>
-
         <section className="giving-filters">
           <h3>Filter by Category</h3>
           <div className="filter-buttons">
@@ -112,10 +110,10 @@ function Giving() {
               <p>No giving options found for this category.</p>
             </div>
           ) : (
-            <div className="giving-grid">
+            <div className="gv-grid">
               {filteredOptions.map((option) => (
-                <div key={option.id} className="ministry-feature-frame fade-up">
-                  <div className="fit-media fit-media--card" style={fitStyle(option.poster || '/chapel.jpg')}>
+                <article key={option.id} className="gv-card fade-up">
+                  <div className="gv-card-media">
                     <img
                       src={option.poster || '/chapel.jpg'}
                       alt={option.title}
@@ -124,40 +122,55 @@ function Giving() {
                       onError={(e) => { e.target.src = '/chapel.jpg' }}
                     />
                   </div>
-                  <div className="giving-category-badge">{option.category}</div>
-                  <div className="ministry-feature-content">
-                    <h3 className="ministry-feature-title">{option.title}</h3>
-                    <p className="giving-description">{option.description}</p>
-                    
-                    <div className="giving-payment">
-                      <h4>How to Give</h4>
-                      <div className="payment-method">
-                        <strong>Payment Method:</strong>
-                        <span>{option.payment_method}</span>
-                      </div>
-                      <div className="payment-details">
-                        <strong>Payment Details:</strong>
-                        <pre>{option.payment_details}</pre>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      className="ministry-feature-button"
-                      onClick={() => {
-                        const details = document.getElementById(`giving-details-${option.id}`)
-                        details?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                      }}
-                    >
+                  <div className="gv-card-body">
+                    <h3>{option.title}</h3>
+                    <p>{option.description}</p>
+                    <button type="button" className="gv-btn" onClick={() => setActiveOption(option)}>
                       How to give
                     </button>
-                    <div id={`giving-details-${option.id}`} />
                   </div>
-                </div>
+                </article>
               ))}
             </div>
           )}
         </section>
+
+        {activeOption && (
+          <div className="gv-overlay" onClick={() => setActiveOption(null)}>
+            <div
+              className="gv-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-label={`How to give: ${activeOption.title}`}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <button type="button" className="gv-close" onClick={() => setActiveOption(null)} aria-label="Close">&times;</button>
+              <div className="gv-intro">
+                <span className="giving-eyebrow">Generosity in action</span>
+                <h2>Give With Purpose</h2>
+                <p>Your generosity helps us continue serving God, strengthening our ministries, supporting our community, and creating opportunities for people to grow in faith.</p>
+                <p>Whether supporting the church's ministry, missions, community outreach, or a specific project, every contribution can help us serve others and extend the impact of the church.</p>
+              </div>
+              <img
+                className="gv-modal-image"
+                src={activeOption.poster || '/chapel.jpg'}
+                alt={activeOption.title}
+                onError={(e) => { e.target.src = '/chapel.jpg' }}
+              />
+              <div className="gv-detail">
+                {activeOption.category && <span className="gv-tag">{activeOption.category}</span>}
+                <h3>{activeOption.title}</h3>
+                <p>{activeOption.description}</p>
+                <div className="gv-pay">
+                  <h4>How to Give</h4>
+                  <p><strong>Payment Method:</strong> {activeOption.payment_method}</p>
+                  <strong>Payment Details:</strong>
+                  <pre>{activeOption.payment_details}</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <section className="giving-security">
           <h2 className="fade-up">Secure & Trusted Giving</h2>
