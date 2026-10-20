@@ -194,11 +194,11 @@ def megapay_status():
         return jsonify({"error": "Transaction not found"}), 404
     if doc.get("status") == "pending" or (doc.get("status") == "success" and not doc.get("receipt")):
         doc = _refresh(db, doc, api_key, email)
-    return jsonify({"status": doc.get("status"), "receipt": doc.get("receipt")}), 200
+    return jsonify({"status": doc.get("status")}), 200
 
 
 @megapay_bp.route("/api/megapay/transactions", methods=["GET"])
-@role_required("manage_giving")
+@role_required("manage_transactions")
 def megapay_transactions():
     db = get_db()
     api_key, email = _credentials()

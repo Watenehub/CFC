@@ -109,7 +109,7 @@ function AppRoutes() {
       <Route path="/admin/enquiries" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_enquiries"><AdminEnquiries /></ProtectedRoute>} />
       <Route path="/admin/prayer" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_enquiries"><AdminPrayer /></ProtectedRoute>} />
       <Route path="/admin/giving" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_giving"><AdminGiving /></ProtectedRoute>} />
-      <Route path="/admin/transactions" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_giving"><AdminTransactions /></ProtectedRoute>} />
+      <Route path="/admin/transactions" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_transactions"><AdminTransactions /></ProtectedRoute>} />
       <Route path="/admin/announcements" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_notifications"><AdminAnnouncements /></ProtectedRoute>} />
       <Route path="/admin/services" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_services"><AdminServices /></ProtectedRoute>} />
       <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><AdminSettings /></ProtectedRoute>} />

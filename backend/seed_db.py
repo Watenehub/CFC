@@ -15,6 +15,7 @@ ROLE_PERMISSIONS = {
         "manage_events",
         "manage_sermons",
         "manage_giving",
+        "manage_transactions",
         "manage_enquiries",
         "manage_pastors",
         "manage_deacons",
@@ -31,6 +32,7 @@ ROLE_PERMISSIONS = {
     ],
     "secretary": [
         "manage_giving",
+        "manage_transactions",
         "manage_enquiries",
         "manage_services",
     ],
