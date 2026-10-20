@@ -1,3 +1,4 @@
+import hashlib
 import logging
 import os
 from datetime import datetime, timedelta, timezone
@@ -22,6 +23,13 @@ HEADERS = {"Content-Type": "application/json"}
 TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 MAX_PROMPTS_PER_PHONE = 3
 PHONE_WINDOW_MINUTES = 10
+RISK_IP_ATTEMPTS = 2
+RISK_PHONE_ATTEMPTS = 1
+
+
+def _ip_hash():
+    key = (os.getenv("SECRET_KEY") or "cfc").encode()
+    return hashlib.sha256(key + (request.remote_addr or "").encode()).hexdigest()[:32]
 
 
 def _captcha_ok(token):
@@ -127,8 +135,17 @@ def megapay_stk_push():
     if error:
         return jsonify({"error": error}), 400
 
-    if not _captcha_ok(data.get("captcha_token")):
-        return jsonify({"error": "Please complete the security check and try again"}), 400
+    db = get_db()
+    ip_hash = _ip_hash()
+    since = _now() - timedelta(minutes=PHONE_WINDOW_MINUTES)
+    phone_local = "0" + phone[3:]
+    # Challenge only suspicious traffic: repeated attempts from one source or against one number.
+    risky = (
+        db.megapay_transactions.count_documents({"ip_hash": ip_hash, "created_at": {"$gte": since}}) >= RISK_IP_ATTEMPTS
+        or db.megapay_transactions.count_documents({"phone": phone_local, "created_at": {"$gte": since}}) >= RISK_PHONE_ATTEMPTS
+    )
+    if risky and os.getenv("TURNSTILE_SECRET_KEY") and not _captcha_ok(data.get("captcha_token")):
+        return jsonify({"error": "Please complete the quick security check to continue", "captcha_required": True}), 428
 
     try:
         giving_id = int(data.get("giving_id"))
@@ -138,9 +155,7 @@ def megapay_stk_push():
     if not giving:
         return jsonify({"error": "Giving option not found"}), 404
 
-    db = get_db()
-    since = _now() - timedelta(minutes=PHONE_WINDOW_MINUTES)
-    if db.megapay_transactions.count_documents({"phone": "0" + phone[3:], "created_at": {"$gte": since}}) >= MAX_PROMPTS_PER_PHONE:
+    if db.megapay_transactions.count_documents({"phone": phone_local, "created_at": {"$gte": since}}) >= MAX_PROMPTS_PER_PHONE:
         return jsonify({"error": "Too many payment requests for this number. Please wait a few minutes."}), 429
 
     reference = str(giving.get("title") or "Church giving").strip()[:60]
@@ -158,6 +173,7 @@ def megapay_stk_push():
         "amount": amount,
         "reference": reference,
         "status": "pending",
+        "ip_hash": ip_hash,
         "created_at": _now(),
         "updated_at": _now(),
     }

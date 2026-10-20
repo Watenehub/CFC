@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import * as givingApi from '../api/giving'
 import * as megapayApi from '../api/megapay'
-import Captcha, { captchaEnabled } from '../components/Captcha'
+import Captcha from '../components/Captcha'
 import './Giving.css'
 import '../styles/ModernDesignSystem.css'
 import '../utils/scrollAnimations'
@@ -20,6 +20,7 @@ function Giving() {
   const [payMessage, setPayMessage] = useState('')
   const [paySuccess, setPaySuccess] = useState(false)
   const [captchaToken, setCaptchaToken] = useState('')
+  const [needCaptcha, setNeedCaptcha] = useState(false)
   const [captchaReset, setCaptchaReset] = useState(0)
 
   useEffect(() => {
@@ -65,6 +66,7 @@ function Giving() {
       setPayMessage(result.message || 'Check your phone to complete the payment.')
       await waitForPayment(result.transaction_request_id)
     } catch (err) {
+      if (err.payload?.captcha_required) setNeedCaptcha(true)
       setPayMessage(err.message || 'Payment could not be started. Please try again.')
     } finally {
       setPaying(false)
@@ -235,7 +237,7 @@ function Giving() {
                                   <form className="gv-payform" onSubmit={handlePay}>
                                     <input type="tel" placeholder="M-PESA number (07XXXXXXXX)" value={payPhone} onChange={(e) => setPayPhone(e.target.value)} required />
                                     <input type="number" min="1" placeholder="Amount (KSh)" value={payAmount} onChange={(e) => setPayAmount(e.target.value)} required />
-                                    <Captcha onToken={setCaptchaToken} resetKey={captchaReset} />`n                                    <button type="submit" className="gv-btn gv-paybtn" disabled={paying || (captchaEnabled && !captchaToken)}>{paying ? 'Sending...' : 'Send M-PESA Prompt'}</button>
+                                    {needCaptcha && <Captcha onToken={setCaptchaToken} resetKey={captchaReset} />}`n                                    <button type="submit" className="gv-btn gv-paybtn" disabled={paying || (needCaptcha && !captchaToken)}>{paying ? 'Sending...' : 'Send M-PESA Prompt'}</button>
                                     {payMessage && <p className="gv-paymsg">{payMessage}</p>}
                     {paySuccess && <p className="gv-paysuccess" role="status">&#127881; Payment successful! Thank you for your generous giving.</p>}
                                   </form>
