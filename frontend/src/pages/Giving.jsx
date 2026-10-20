@@ -56,7 +56,7 @@ function Giving() {
       const result = await megapayApi.initiateMegapayPayment({
         phone: payPhone,
         amount: payAmount,
-        reference: activeOption?.title || 'Church giving',
+        giving_id: activeOption?.id,
       })
       setPayMessage(result.message || 'Check your phone to complete the payment.')
       await waitForPayment(result.transaction_request_id)

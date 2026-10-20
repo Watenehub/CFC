@@ -104,7 +104,15 @@ def megapay_stk_push():
     if error:
         return jsonify({"error": error}), 400
 
-    reference = str(data.get("reference") or "Church giving").strip()[:60]
+    try:
+        giving_id = int(data.get("giving_id"))
+    except (TypeError, ValueError):
+        return jsonify({"error": "Please choose what you are giving towards"}), 400
+    giving = get_db().giving.find_one({"id": giving_id})
+    if not giving:
+        return jsonify({"error": "Giving option not found"}), 404
+
+    reference = str(giving.get("title") or "Church giving").strip()[:60]
     payload = {
         "api_key": api_key,
         "email": email,

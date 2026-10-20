@@ -27,6 +27,8 @@ const AdminEventCreate = lazy(() => import('./pages/admin/EventsCreate'))
 const AdminSermonsCreate = lazy(() => import('./pages/admin/SermonsCreate'))
 const AdminEnquiries = lazy(() => import('./pages/admin/Enquiries'))
 const AdminGiving = lazy(() => import('./pages/admin/Giving'))
+const QuickGive = lazy(() => import('./pages/QuickGive'))
+const AdminGivingQr = lazy(() => import('./pages/admin/GivingQr'))
 const AdminTransactions = lazy(() => import('./pages/admin/Transactions'))
 const AdminSettings = lazy(() => import('./pages/admin/Settings'))
 const AdminPeople = lazy(() => import('./pages/admin/PeopleManager'))
@@ -91,6 +93,7 @@ function AppRoutes() {
       <Route path="/events" element={<Events />} />
       <Route path="/events/:id" element={<EventDetail />} />
       <Route path="/give" element={<Giving />} />
+      <Route path="/quick-give" element={<QuickGive />} />
       <Route path="/give/:id" element={<GivingDetail />} />
       <Route path="/prayer" element={<Prayer />} />
       <Route path="/contact" element={<Contact />} />
@@ -109,6 +112,7 @@ function AppRoutes() {
       <Route path="/admin/enquiries" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_enquiries"><AdminEnquiries /></ProtectedRoute>} />
       <Route path="/admin/prayer" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_enquiries"><AdminPrayer /></ProtectedRoute>} />
       <Route path="/admin/giving" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_giving"><AdminGiving /></ProtectedRoute>} />
+      <Route path="/admin/giving-qr" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_giving"><AdminGivingQr /></ProtectedRoute>} />
       <Route path="/admin/transactions" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_transactions"><AdminTransactions /></ProtectedRoute>} />
       <Route path="/admin/announcements" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_notifications"><AdminAnnouncements /></ProtectedRoute>} />
       <Route path="/admin/services" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_services"><AdminServices /></ProtectedRoute>} />
