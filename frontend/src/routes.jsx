@@ -27,6 +27,7 @@ const AdminEventCreate = lazy(() => import('./pages/admin/EventsCreate'))
 const AdminSermonsCreate = lazy(() => import('./pages/admin/SermonsCreate'))
 const AdminEnquiries = lazy(() => import('./pages/admin/Enquiries'))
 const AdminGiving = lazy(() => import('./pages/admin/Giving'))
+const AdminTransactions = lazy(() => import('./pages/admin/Transactions'))
 const AdminSettings = lazy(() => import('./pages/admin/Settings'))
 const AdminPeople = lazy(() => import('./pages/admin/PeopleManager'))
 const GalleryManager = lazy(() => import('./pages/admin/GalleryManager'))
@@ -108,6 +109,7 @@ function AppRoutes() {
       <Route path="/admin/enquiries" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_enquiries"><AdminEnquiries /></ProtectedRoute>} />
       <Route path="/admin/prayer" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_enquiries"><AdminPrayer /></ProtectedRoute>} />
       <Route path="/admin/giving" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_giving"><AdminGiving /></ProtectedRoute>} />
+      <Route path="/admin/transactions" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_giving"><AdminTransactions /></ProtectedRoute>} />
       <Route path="/admin/announcements" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_notifications"><AdminAnnouncements /></ProtectedRoute>} />
       <Route path="/admin/services" element={<ProtectedRoute allowedRoles={staffRoles} permission="manage_services"><AdminServices /></ProtectedRoute>} />
       <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><AdminSettings /></ProtectedRoute>} />

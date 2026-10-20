@@ -12,6 +12,7 @@ const STAFF_NAV = [
   { path: '/admin/events/manage', label: 'Events', permission: 'manage_events' },
   { path: '/admin/sermons/manage', label: 'Sermons', permission: 'manage_sermons' },
   { path: '/admin/giving', label: 'Giving', permission: 'manage_giving' },
+  { path: '/admin/transactions', label: 'Transactions', permission: 'manage_giving' },
   { path: '/admin/enquiries', label: 'Enquiries', permission: 'manage_enquiries' },
   { path: '/admin/prayer', label: 'Prayer', permission: 'manage_enquiries' },
   { path: '/admin/announcements', label: 'Announcements', permission: 'manage_notifications' },

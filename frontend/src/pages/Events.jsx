@@ -11,6 +11,7 @@ function Events() {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [activeEvent, setActiveEvent] = useState(null)
 
   useEffect(() => {
     loadEvents()
@@ -83,100 +84,55 @@ function Events() {
           </p>
         </section>
 
-        <section className="events-section">
-          <h2 className="section-title">Upcoming Events</h2>
-          {upcomingEvents.length === 0 ? (
-            <div className="empty-state">
-              <p>No upcoming events at this time. Check back soon!</p>
-            </div>
-          ) : (
-            <div className="events-grid">
-              {upcomingEvents.map((event) => (
-                <div key={event.id} className="conference-showcase-frame fade-up">
-                  <div className="conference-label">Upcoming</div>
-                  <div className="fit-media" style={fitStyle(event.image || '/chapel.jpg')}>
-                    <img
-                      src={event.image || '/chapel.jpg'}
-                      alt={event.title}
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </div>
-                  <div className="conference-content">
-                    <div className="event-organizer">{event.organizer}</div>
-                    <h3 className="conference-title">{event.title}</h3>
-                    <div className="event-meta">
-                      <div className="meta-item">
-                        <span className="meta-icon image-icon" aria-hidden="true"></span>
-                        <span>{formatDate(event.date)}</span>
+        {[['Upcoming Events', upcomingEvents, 'No upcoming events at this time. Check back soon!'], ['Past Events', pastEvents, '']].map(([title, list, emptyText]) => (
+          (list.length > 0 || emptyText) && (
+            <section key={title} className="events-section">
+              <h2 className="section-title">{title}</h2>
+              {list.length === 0 ? (
+                <div className="empty-state"><p>{emptyText}</p></div>
+              ) : (
+                <div className="ev-grid">
+                  {list.map((event) => (
+                    <article key={event.id} className="ev-card fade-up">
+                      <div className="ev-card-media fit-media" style={fitStyle(event.image || '/chapel.jpg')}>
+                        <img src={event.image || '/chapel.jpg'} alt={event.title} loading="lazy" decoding="async" onError={(e) => { e.target.src = '/chapel.jpg' }} />
                       </div>
-                      <div className="meta-item">
-                        <span className="meta-icon image-icon" aria-hidden="true"></span>
-                        <span>{formatTime(event.start_time)} - {formatTime(event.end_time)}</span>
+                      <div className="ev-card-body">
+                        <h3>{event.title}</h3>
+                        <p className="ev-card-date">{formatDate(event.date)}</p>
+                        <button type="button" className="ev-btn" onClick={() => setActiveEvent(event)}>View Details</button>
                       </div>
-                      <div className="meta-item">
-                        <span className="meta-icon image-icon" aria-hidden="true"></span>
-                        <span>{event.location}</span>
-                      </div>
-                    </div>
-                    <p className="conference-description">{event.description}</p>
-                    <div className="event-footer">
-                      <span className={`registration-status ${event.registration_status}`}>
-                        {event.registration_status === 'open' ? 'Registration Open' : 'Registration Closed'}
-                      </span>
-                      <Link to={`/events/${event.id}`} className="btn-premium btn-premium-primary">
-                        View Details
-                      </Link>
-                    </div>
-                  </div>
+                    </article>
+                  ))}
                 </div>
-              ))}
-            </div>
-          )}
-        </section>
+              )}
+            </section>
+          )
+        ))}
 
-        {pastEvents.length > 0 && (
-          <section className="events-section">
-            <h2 className="section-title">Past Events</h2>
-            <div className="events-grid">
-              {pastEvents.map((event) => (
-                <div key={event.id} className="event-card event-card-past">
-                  <div className="event-image fit-media" style={fitStyle(event.image || '/chapel.jpg')}>
-                    <img 
-                      src={event.image || '/chapel.jpg'} 
-                      alt={event.title}
-                      loading="lazy"
-                      decoding="async"
-                    />
-                    <div className="event-date-badge past">
-                      {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                    </div>
-                  </div>
-                  <div className="event-content">
-                    <div className="event-organizer">{event.organizer}</div>
-                    <h3>{event.title}</h3>
-                    <div className="event-meta">
-                      <div className="meta-item">
-                        <span className="meta-icon image-icon" aria-hidden="true"></span>
-                        <span>{formatDate(event.date)}</span>
-                      </div>
-                      <div className="meta-item">
-                        <span className="meta-icon image-icon" aria-hidden="true"></span>
-                        <span>{event.location}</span>
-                      </div>
-                    </div>
-                    <p className="event-description">{event.description}</p>
-                    <div className="event-footer">
-                      <span className="registration-status past">Past Event</span>
-                      <Link to={`/events/${event.id}`} className="btn-premium btn-premium-outline">
-                        View Details
-                      </Link>
-                    </div>
-                  </div>
+        {activeEvent && (
+          <div className="ev-overlay" onClick={() => setActiveEvent(null)}>
+            <div className="ev-modal" role="dialog" aria-modal="true" aria-label={activeEvent.title} onClick={(e) => e.stopPropagation()}>
+              <button type="button" className="ev-close" onClick={() => setActiveEvent(null)} aria-label="Close">&times;</button>
+              <img className="ev-modal-image" src={activeEvent.image || '/chapel.jpg'} alt={activeEvent.title} onError={(e) => { e.target.src = '/chapel.jpg' }} />
+              <div className="ev-modal-body">
+                {activeEvent.organizer && <div className="event-organizer">{activeEvent.organizer}</div>}
+                <h2>{activeEvent.title}</h2>
+                <p><strong>Date:</strong> {formatDate(activeEvent.date)}</p>
+                {(activeEvent.start_time || activeEvent.end_time) && (
+                  <p><strong>Time:</strong> {formatTime(activeEvent.start_time)} - {formatTime(activeEvent.end_time)}</p>
+                )}
+                {activeEvent.location && <p><strong>Location:</strong> {activeEvent.location}</p>}
+                <p>{activeEvent.description}</p>
+                <div className="event-footer">
+                  <span className={`registration-status ${new Date(activeEvent.date) < new Date() ? 'past' : activeEvent.registration_status}`}>
+                    {new Date(activeEvent.date) < new Date() ? 'Past Event' : activeEvent.registration_status === 'open' ? 'Registration Open' : 'Registration Closed'}
+                  </span>
+                  <Link to={`/events/${activeEvent.id}`} className="ev-btn">Full Page</Link>
                 </div>
-              ))}
+              </div>
             </div>
-          </section>
+          </div>
         )}
       </div>
     </div>

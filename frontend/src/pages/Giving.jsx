@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import * as givingApi from '../api/giving'
+import * as megapayApi from '../api/megapay'
 import './Giving.css'
 import '../styles/ModernDesignSystem.css'
 import '../utils/scrollAnimations'
@@ -11,6 +12,34 @@ function Giving() {
   const [error, setError] = useState(null)
   const [selectedCategory, setSelectedCategory] = useState('')
   const [activeOption, setActiveOption] = useState(null)
+  const [showPay, setShowPay] = useState(false)
+  const [payPhone, setPayPhone] = useState('')
+  const [payAmount, setPayAmount] = useState('')
+  const [paying, setPaying] = useState(false)
+  const [payMessage, setPayMessage] = useState('')
+
+  useEffect(() => {
+    setShowPay(false)
+    setPayMessage('')
+  }, [activeOption])
+
+  const handlePay = async (event) => {
+    event.preventDefault()
+    setPaying(true)
+    setPayMessage('')
+    try {
+      const result = await megapayApi.initiateMegapayPayment({
+        phone: payPhone,
+        amount: payAmount,
+        reference: activeOption?.title || 'Church giving',
+      })
+      setPayMessage(result.message || 'Check your phone to complete the payment.')
+    } catch (err) {
+      setPayMessage(err.message || 'Payment could not be started. Please try again.')
+    } finally {
+      setPaying(false)
+    }
+  }
 
   useEffect(() => {
     if (!activeOption) return undefined
@@ -169,7 +198,17 @@ function Giving() {
                 <h2>Give With Purpose</h2>
                 <p>Your generosity helps us continue serving God, strengthening our ministries, supporting our community, and creating opportunities for people to grow in faith.</p>
                 <p>Whether supporting the church's ministry, missions, community outreach, or a specific project, every contribution can help us serve others and extend the impact of the church.</p>
-              </div>
+                                {!showPay ? (
+                                  <button type="button" className="gv-btn gv-paybtn" onClick={() => setShowPay(true)}>Pay Digitally</button>
+                                ) : (
+                                  <form className="gv-payform" onSubmit={handlePay}>
+                                    <input type="tel" placeholder="M-PESA number (07XXXXXXXX)" value={payPhone} onChange={(e) => setPayPhone(e.target.value)} required />
+                                    <input type="number" min="1" placeholder="Amount (KSh)" value={payAmount} onChange={(e) => setPayAmount(e.target.value)} required />
+                                    <button type="submit" className="gv-btn gv-paybtn" disabled={paying}>{paying ? 'Sending...' : 'Send M-PESA Prompt'}</button>
+                                    {payMessage && <p className="gv-paymsg">{payMessage}</p>}
+                                  </form>
+                                )}
+                              </div>
               <div className="gv-side">
               <img
                 className="gv-modal-image"
