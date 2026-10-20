@@ -99,7 +99,7 @@ function Ministries() {
                   </div>
                   <div className="ministry-feature-content">
                     <h3 className="ministry-feature-title">{ministry.name}</h3>
-                    {ministry.meeting_time && <p className="ministry-card-time">{ministry.meeting_time}</p>}
+                    <p className="ministry-card-time">{ministry.meeting_time || 'No meeting time scheduled'}</p>
                     <button type="button" className="btn btn-primary" onClick={() => setActive(ministry)}>Learn more</button>
                   </div>
                 </div>
