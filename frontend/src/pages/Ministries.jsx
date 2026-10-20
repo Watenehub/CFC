@@ -1,9 +1,9 @@
-import { fitStyle } from '../utils/fitStyle'
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import * as ministriesApi from '../api/ministries'
 import PageHero from '../components/PageHero'
 import './Ministries.css'
+import './Giving.css'
 
 function Ministries() {
   const [ministries, setMinistries] = useState([])
@@ -86,23 +86,26 @@ function Ministries() {
           {ministries.length === 0 ? (
             <div className="empty-state"><p>No ministries listed yet. Check back soon.</p></div>
           ) : (
-            <div className="ministries-grid">
+            <div className="gv-grid">
               {ministries.map((ministry) => (
-                <div key={ministry.id} className="ministry-feature-frame ministry-card fade-up">
-                  <div className="fit-media fit-media--card" style={fitStyle(ministry.image || '/chapel.jpg')}>
+                <article key={ministry.id} className="gv-card fade-up">
+                  <div className="gv-card-media">
                     <img
                       src={ministry.image || '/chapel.jpg'}
                       alt={ministry.name}
                       loading="lazy"
                       decoding="async"
+                      onError={(e) => { e.target.src = '/chapel.jpg' }}
                     />
                   </div>
-                  <div className="ministry-feature-content">
-                    <h3 className="ministry-feature-title">{ministry.name}</h3>
-                    <p className="ministry-card-time">{ministry.meeting_time || 'No meeting time scheduled'}</p>
-                    <button type="button" className="btn btn-primary" onClick={() => setActive(ministry)}>Learn more</button>
+                  <div className="gv-card-body">
+                    <h3>{ministry.name}</h3>
+                    <p>{ministry.meeting_time || 'No meeting time scheduled'}</p>
+                    <button type="button" className="gv-btn" onClick={() => setActive(ministry)}>
+                      Learn more
+                    </button>
                   </div>
-                </div>
+                </article>
               ))}
             </div>
           )}
