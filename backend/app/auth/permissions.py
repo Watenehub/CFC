@@ -8,6 +8,7 @@ ALL_PERMISSIONS = [
     "manage_sermons",
     "manage_giving",
     "manage_transactions",
+    "manage_giving_qr",
     "manage_enquiries",
     "manage_pastors",
     "manage_deacons",
@@ -28,6 +29,7 @@ ROLE_PERMISSIONS = {
     "secretary": [
         "manage_giving",
         "manage_transactions",
+        "manage_giving_qr",
         "manage_enquiries",
         "manage_services",
     ],

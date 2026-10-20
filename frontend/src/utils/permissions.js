@@ -4,6 +4,7 @@ export const ALL_PERMISSIONS = [
   'manage_sermons',
   'manage_giving',
   'manage_transactions',
+  'manage_giving_qr',
   'manage_enquiries',
   'manage_ministries',
   'manage_pastors',
@@ -24,6 +25,7 @@ export const ROLE_PERMISSIONS = {
   secretary: [
     'manage_giving',
     'manage_transactions',
+    'manage_giving_qr',
     'manage_enquiries',
     'manage_services',
   ],
