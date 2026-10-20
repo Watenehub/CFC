@@ -17,16 +17,41 @@ function Giving() {
   const [payAmount, setPayAmount] = useState('')
   const [paying, setPaying] = useState(false)
   const [payMessage, setPayMessage] = useState('')
+  const [paySuccess, setPaySuccess] = useState(false)
 
   useEffect(() => {
     setShowPay(false)
     setPayMessage('')
+    setPaySuccess(false)
   }, [activeOption])
+
+  const waitForPayment = async (requestId) => {
+    if (!requestId) return
+    for (let attempt = 0; attempt < 30; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 4000))
+      try {
+        const { status } = await megapayApi.getMegapayStatus(requestId)
+        if (status === 'success') {
+          setPaySuccess(true)
+          setPayMessage('')
+          return
+        }
+        if (status === 'failed' || status === 'cancelled') {
+          setPayMessage(status === 'cancelled' ? 'The payment was cancelled.' : 'The payment was not completed. Please try again.')
+          return
+        }
+      } catch {
+        // keep waiting; the next poll may succeed
+      }
+    }
+    setPayMessage('We have not received confirmation yet. If money was deducted, it will reflect shortly.')
+  }
 
   const handlePay = async (event) => {
     event.preventDefault()
     setPaying(true)
     setPayMessage('')
+    setPaySuccess(false)
     try {
       const result = await megapayApi.initiateMegapayPayment({
         phone: payPhone,
@@ -34,6 +59,7 @@ function Giving() {
         reference: activeOption?.title || 'Church giving',
       })
       setPayMessage(result.message || 'Check your phone to complete the payment.')
+      await waitForPayment(result.transaction_request_id)
     } catch (err) {
       setPayMessage(err.message || 'Payment could not be started. Please try again.')
     } finally {
@@ -199,13 +225,14 @@ function Giving() {
                 <p>Your generosity helps us continue serving God, strengthening our ministries, supporting our community, and creating opportunities for people to grow in faith.</p>
                 <p>Whether supporting the church's ministry, missions, community outreach, or a specific project, every contribution can help us serve others and extend the impact of the church.</p>
                                 {!showPay ? (
-                                  <button type="button" className="gv-btn gv-paybtn" onClick={() => setShowPay(true)}>Pay Digitally</button>
+                                  <button type="button" className="gv-btn gv-paybtn" onClick={() => setShowPay(true)}>Give Digitally</button>
                                 ) : (
                                   <form className="gv-payform" onSubmit={handlePay}>
                                     <input type="tel" placeholder="M-PESA number (07XXXXXXXX)" value={payPhone} onChange={(e) => setPayPhone(e.target.value)} required />
                                     <input type="number" min="1" placeholder="Amount (KSh)" value={payAmount} onChange={(e) => setPayAmount(e.target.value)} required />
                                     <button type="submit" className="gv-btn gv-paybtn" disabled={paying}>{paying ? 'Sending...' : 'Send M-PESA Prompt'}</button>
                                     {payMessage && <p className="gv-paymsg">{payMessage}</p>}
+                    {paySuccess && <p className="gv-paysuccess" role="status">&#127881; Payment successful! Thank you for your generous giving.</p>}
                                   </form>
                                 )}
                               </div>

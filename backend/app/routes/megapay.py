@@ -52,6 +52,25 @@ def _classify(result):
     return "pending"
 
 
+def _find_receipt(value):
+    """Search a provider payload (any nesting) for an M-PESA receipt code."""
+    keys = ("receipt", "mpesa_code", "mpesa_ref", "transaction_code", "confirmation_code")
+    if isinstance(value, dict):
+        for key, item in value.items():
+            if isinstance(item, (str, int)) and item and any(k in key.lower().replace(" ", "_") for k in keys):
+                return str(item)
+        for item in value.values():
+            found = _find_receipt(item)
+            if found:
+                return found
+    elif isinstance(value, list):
+        for item in value:
+            found = _find_receipt(item)
+            if found:
+                return found
+    return None
+
+
 def _serialize(doc):
     return {
         "id": str(doc["_id"]),
@@ -61,8 +80,8 @@ def _serialize(doc):
         "reference": doc.get("reference"),
         "status": doc.get("status", "pending"),
         "receipt": doc.get("receipt"),
-        "created_at": doc["created_at"].isoformat() if doc.get("created_at") else None,
-        "updated_at": doc["updated_at"].isoformat() if doc.get("updated_at") else None,
+        "created_at": doc["created_at"].isoformat() + "Z" if doc.get("created_at") else None,
+        "updated_at": doc["updated_at"].isoformat() + "Z" if doc.get("updated_at") else None,
     }
 
 
@@ -146,13 +165,12 @@ def _refresh(db, doc, api_key, email):
         return doc
 
     status = _classify(result)
-    updates = {"updated_at": _now()}
+    updates = {"updated_at": _now(), "provider_response": result}
     if status != "pending":
         updates["status"] = status
-        if isinstance(result, dict):
-            receipt = result.get("mpesa_receipt_number") or result.get("MpesaReceiptNumber") or result.get("receipt")
-            if receipt:
-                updates["receipt"] = str(receipt)
+    receipt = _find_receipt(result)
+    if receipt:
+        updates["receipt"] = receipt
     db.megapay_transactions.update_one({"_id": doc["_id"]}, {"$set": updates})
     doc.update(updates)
     return doc
@@ -174,7 +192,7 @@ def megapay_status():
     doc = db.megapay_transactions.find_one({"transaction_request_id": str(request_id)})
     if not doc:
         return jsonify({"error": "Transaction not found"}), 404
-    if doc.get("status") == "pending":
+    if doc.get("status") == "pending" or (doc.get("status") == "success" and not doc.get("receipt")):
         doc = _refresh(db, doc, api_key, email)
     return jsonify({"status": doc.get("status"), "receipt": doc.get("receipt")}), 200
 
@@ -190,7 +208,8 @@ def megapay_transactions():
 
     if api_key and request.args.get("refresh") == "1":
         for doc in docs[:25]:
-            if doc.get("status") == "pending" and doc.get("transaction_request_id"):
+            needs_refresh = doc.get("status") == "pending" or (doc.get("status") == "success" and not doc.get("receipt"))
+            if needs_refresh and doc.get("transaction_request_id"):
                 _refresh(db, doc, api_key, email)
 
     return jsonify([_serialize(doc) for doc in docs])

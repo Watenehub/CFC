@@ -334,3 +334,5 @@
     align-items: stretch;
   }
 }
+
+.upload-hint { display: block; margin-top: 0.35rem; color: #475569; font-size: 0.78rem; }

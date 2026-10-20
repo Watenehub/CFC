@@ -75,6 +75,7 @@ function Transactions() {
             <thead>
               <tr style={{ textAlign: 'left', borderBottom: '2px solid #e2e8f0' }}>
                 <th style={{ padding: '0.6rem' }}>Date</th>
+                <th style={{ padding: '0.6rem' }}>Time</th>
                 <th style={{ padding: '0.6rem' }}>Phone</th>
                 <th style={{ padding: '0.6rem' }}>Amount (KSh)</th>
                 <th style={{ padding: '0.6rem' }}>Giving</th>
@@ -84,11 +85,12 @@ function Transactions() {
             </thead>
             <tbody>
               {transactions.length === 0 && !loading && (
-                <tr><td colSpan="6" style={{ padding: '1rem' }}>No transactions found.</td></tr>
+                <tr><td colSpan="7" style={{ padding: '1rem' }}>No transactions found.</td></tr>
               )}
               {transactions.map((item) => (
                 <tr key={item.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                  <td style={{ padding: '0.6rem' }}>{item.created_at ? new Date(item.created_at).toLocaleString() : '-'}</td>
+                  <td style={{ padding: '0.6rem' }}>{item.created_at ? new Date(item.created_at).toLocaleDateString() : '-'}</td>
+                  <td style={{ padding: '0.6rem' }}>{item.created_at ? new Date(item.created_at).toLocaleTimeString() : '-'}</td>
                   <td style={{ padding: '0.6rem' }}>{item.phone}</td>
                   <td style={{ padding: '0.6rem' }}>{Number(item.amount || 0).toLocaleString()}</td>
                   <td style={{ padding: '0.6rem' }}>{item.reference}</td>

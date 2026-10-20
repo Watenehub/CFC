@@ -42,6 +42,7 @@ function ImageUpload({ label, value, onChange }) {
         <span>{uploading ? 'Uploading…' : value ? 'Change image' : 'Upload image'}</span>
         <small>Choose from PC or drag and drop (max 8MB)</small>
       </div>
+      <small className="upload-hint">Landscape photos only (wider than tall). Best size: 1600 x 900 px (16:9), under 8MB.</small>
       {error && <p className="upload-error">{error}</p>}
       <input
         ref={inputRef}

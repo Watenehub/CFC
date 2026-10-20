@@ -838,3 +838,8 @@
   .gv-banner-img { min-height: 180px; }
   .gv-banner-img::after { background: linear-gradient(to bottom, rgba(255,255,255,0) 55%, #fff 100%); }
 }
+
+.gv-paysuccess { margin: 0.4rem 0 0; padding: 0.7rem 0.9rem; border-radius: 10px; background: #dcfce7; color: #166534; font-weight: 700; text-align: center; animation: gv-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both, gv-pulse 1.6s ease-in-out 0.6s 3; }
+@keyframes gv-pop { from { opacity: 0; transform: scale(0.6) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes gv-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+@media (prefers-reduced-motion: reduce) { .gv-paysuccess { animation: none; } }

@@ -115,7 +115,7 @@ function Announcements() {
                         <button type="button" className="btn btn-secondary" onClick={() => setFormData({ ...formData, image: '' })} style={{ marginLeft: '10px' }}>Remove</button>
                       </div>
                     )}
-                    <small>Upload an image for the announcement. Images will appear in the Coming Up section.</small>
+                    <small>Landscape photos only (wider than tall). Best size: 1600 x 900 px (16:9), under 8MB. Upload an image for the announcement. Images will appear in the Coming Up section.</small>
                   </div>
                   <div className="form-field">
                     <label>Optional link</label>

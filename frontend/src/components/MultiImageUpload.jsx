@@ -48,6 +48,7 @@ function MultiImageUpload({ files, onChange }) {
         <strong>{uploading ? 'Uploading…' : files.length ? 'Add more images' : 'Upload multiple images'}</strong>
         <small>Choose several files or drag and drop (max 8MB each)</small>
       </div>
+      <small className="upload-hint">Landscape photos only (wider than tall). Best size: 1600 x 900 px (16:9), under 8MB.</small>
       {error && <p className="upload-error">{error}</p>}
       <input ref={inputRef} type="file" accept="image/*" multiple className="visually-hidden" onChange={(event) => readFiles(event.target.files)} />
       {files.length > 0 && (
