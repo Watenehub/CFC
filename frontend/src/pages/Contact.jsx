@@ -64,7 +64,7 @@ function Contact() {
 
   return (
     <div className="contact-page">
-      <PageHero eyebrow="Connect" title="Contact Us" subtitle="We'd love to hear from you. Reach out and we'll get back to you as soon as possible." image="/images/cornerstone/contact_1.jpg" />
+      <PageHero eyebrow="Connect" title="Contact Us" subtitle="We'd love to hear from you. Reach out and we'll get back to you as soon as possible." image="/images/cornerstone/page_10/page10_photo055_medical_camp_tents_site.jpg" />
       <div className="container">
         <section className="contact-header">
           <p className="contact-subtitle fade-up">
