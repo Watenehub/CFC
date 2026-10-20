@@ -78,6 +78,8 @@
   }
 }
 
+.ministry-card .fit-media { height: 220px; aspect-ratio: 16/9; }
+.ministry-card .fit-media img { height: 100%; object-fit: cover; }
 .ministry-card .ministry-feature-content { display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; }
 .ministry-card .ministry-feature-title { margin: 0; overflow-wrap: break-word; }
 .ministry-card-time { margin: 0 0 0.5rem; color: var(--color-gray-600); font-size: 0.9rem; font-weight: 600; overflow-wrap: break-word; }
