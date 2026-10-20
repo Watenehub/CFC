@@ -237,7 +237,8 @@ function Giving() {
                                   <form className="gv-payform" onSubmit={handlePay}>
                                     <input type="tel" placeholder="M-PESA number (07XXXXXXXX)" value={payPhone} onChange={(e) => setPayPhone(e.target.value)} required />
                                     <input type="number" min="1" placeholder="Amount (KSh)" value={payAmount} onChange={(e) => setPayAmount(e.target.value)} required />
-                                    {needCaptcha && <Captcha onToken={setCaptchaToken} resetKey={captchaReset} />}`n                                    <button type="submit" className="gv-btn gv-paybtn" disabled={paying || (needCaptcha && !captchaToken)}>{paying ? 'Sending...' : 'Send M-PESA Prompt'}</button>
+                                    {needCaptcha && <Captcha onToken={setCaptchaToken} resetKey={captchaReset} />}
+                                    <button type="submit" className="gv-btn gv-paybtn" disabled={paying || (needCaptcha && !captchaToken)}>{paying ? 'Sending...' : 'Send M-PESA Prompt'}</button>
                                     {payMessage && <p className="gv-paymsg">{payMessage}</p>}
                     {paySuccess && <p className="gv-paysuccess" role="status">&#127881; Payment successful! Thank you for your generous giving.</p>}
                                   </form>

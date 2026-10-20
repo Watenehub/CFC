@@ -67,9 +67,9 @@ function QuickGive() {
   return (
     <div className="qg-page">
       <div className="qg-card" role="dialog" aria-label="Give digitally">
-        <img src="/logo.png" alt="Cornerstone Family Chapel" className="qg-logo" />
+        <img src="/logo-small.png" width="150" height="88" decoding="async" alt="Cornerstone Family Chapel" className="qg-logo" />
         <h1>Give Digitally</h1>
-        <p className="qg-sub">Choose what you are giving towards, then enter your M-PESA number and amount.</p>
+        <p className="qg-sub">Choose what you are giving towards, then enter your M&#8209;PESA number and amount.</p>
         <form onSubmit={handleSubmit}>
           <label htmlFor="qg-type">Giving type</label>
           <select id="qg-type" value={givingId} onChange={(e) => setGivingId(e.target.value)} required disabled={loadingOptions || paying}>
@@ -78,11 +78,12 @@ function QuickGive() {
               <option key={option.id} value={option.id}>{option.title}</option>
             ))}
           </select>
-          <label htmlFor="qg-phone">M-PESA phone number</label>
+          <label htmlFor="qg-phone">M&#8209;PESA phone number</label>
           <input id="qg-phone" type="tel" inputMode="tel" placeholder="07XXXXXXXX" value={phone} onChange={(e) => setPhone(e.target.value)} required disabled={paying} />
           <label htmlFor="qg-amount">Amount (KSh)</label>
           <input id="qg-amount" type="number" inputMode="numeric" min="1" max="150000" placeholder="e.g. 500" value={amount} onChange={(e) => setAmount(e.target.value)} required disabled={paying} />
-          {needCaptcha && <Captcha onToken={setCaptchaToken} resetKey={captchaReset} />}`n          <button type="submit" disabled={paying || (needCaptcha && !captchaToken)}>{paying ? 'Waiting for payment...' : 'Give Now'}</button>
+          {needCaptcha && <Captcha onToken={setCaptchaToken} resetKey={captchaReset} />}
+          <button type="submit" disabled={paying || (needCaptcha && !captchaToken)}>{paying ? 'Waiting for payment...' : 'Give Now'}</button>
         </form>
         {message && <p className="qg-message">{message}</p>}
         {success && <p className="qg-success" role="status">&#127881; Payment successful! Thank you for your generous giving.</p>}
