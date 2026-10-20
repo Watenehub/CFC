@@ -1,6 +1,6 @@
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import requests
 from flask import Blueprint, jsonify, request
@@ -17,6 +17,29 @@ megapay_bp = Blueprint("megapay", __name__)
 MEGAPAY_STK_URL = "https://megapay.co.ke/backend/v1/initiatestk"
 MEGAPAY_STATUS_URL = "https://megapay.co.ke/backend/v1/transactionstatus"
 HEADERS = {"Content-Type": "application/json"}
+
+
+TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+MAX_PROMPTS_PER_PHONE = 3
+PHONE_WINDOW_MINUTES = 10
+
+
+def _captcha_ok(token):
+    """Verify a Cloudflare Turnstile token. Enforced only when a secret is configured."""
+    secret = os.getenv("TURNSTILE_SECRET_KEY")
+    if not secret:
+        return True
+    if not isinstance(token, str) or not token or len(token) > 2048:
+        return False
+    try:
+        resp = requests.post(
+            TURNSTILE_VERIFY_URL,
+            data={"secret": secret, "response": token, "remoteip": request.remote_addr or ""},
+            timeout=8,
+        )
+        return bool(resp.json().get("success"))
+    except (requests.RequestException, ValueError):
+        return False
 
 
 def _credentials():
@@ -104,6 +127,9 @@ def megapay_stk_push():
     if error:
         return jsonify({"error": error}), 400
 
+    if not _captcha_ok(data.get("captcha_token")):
+        return jsonify({"error": "Please complete the security check and try again"}), 400
+
     try:
         giving_id = int(data.get("giving_id"))
     except (TypeError, ValueError):
@@ -111,6 +137,11 @@ def megapay_stk_push():
     giving = get_db().giving.find_one({"id": giving_id})
     if not giving:
         return jsonify({"error": "Giving option not found"}), 404
+
+    db = get_db()
+    since = _now() - timedelta(minutes=PHONE_WINDOW_MINUTES)
+    if db.megapay_transactions.count_documents({"phone": "0" + phone[3:], "created_at": {"$gte": since}}) >= MAX_PROMPTS_PER_PHONE:
+        return jsonify({"error": "Too many payment requests for this number. Please wait a few minutes."}), 429
 
     reference = str(giving.get("title") or "Church giving").strip()[:60]
     payload = {

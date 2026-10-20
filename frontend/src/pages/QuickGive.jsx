@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import * as givingApi from '../api/giving'
 import * as megapayApi from '../api/megapay'
+import Captcha, { captchaEnabled } from '../components/Captcha'
 import './QuickGive.css'
 
 function QuickGive() {
@@ -12,6 +13,8 @@ function QuickGive() {
   const [paying, setPaying] = useState(false)
   const [message, setMessage] = useState('')
   const [success, setSuccess] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState('')
+  const [captchaReset, setCaptchaReset] = useState(0)
 
   useEffect(() => {
     givingApi.getGiving()
@@ -48,13 +51,14 @@ function QuickGive() {
     setMessage('')
     setSuccess(false)
     try {
-      const result = await megapayApi.initiateMegapayPayment({ giving_id: Number(givingId), phone, amount })
+      const result = await megapayApi.initiateMegapayPayment({ giving_id: Number(givingId), phone, amount, captcha_token: captchaToken })
       setMessage(result.message || 'Check your phone to complete the payment.')
       await waitForPayment(result.transaction_request_id)
     } catch (err) {
       setMessage(err.message || 'Payment could not be started. Please try again.')
     } finally {
       setPaying(false)
+      setCaptchaReset((n) => n + 1)
     }
   }
 
@@ -76,7 +80,7 @@ function QuickGive() {
           <input id="qg-phone" type="tel" inputMode="tel" placeholder="07XXXXXXXX" value={phone} onChange={(e) => setPhone(e.target.value)} required disabled={paying} />
           <label htmlFor="qg-amount">Amount (KSh)</label>
           <input id="qg-amount" type="number" inputMode="numeric" min="1" max="150000" placeholder="e.g. 500" value={amount} onChange={(e) => setAmount(e.target.value)} required disabled={paying} />
-          <button type="submit" disabled={paying}>{paying ? 'Waiting for payment...' : 'Give Now'}</button>
+          <Captcha onToken={setCaptchaToken} resetKey={captchaReset} />`n          <button type="submit" disabled={paying || (captchaEnabled && !captchaToken)}>{paying ? 'Waiting for payment...' : 'Give Now'}</button>
         </form>
         {message && <p className="qg-message">{message}</p>}
         {success && <p className="qg-success" role="status">&#127881; Payment successful! Thank you for your generous giving.</p>}
