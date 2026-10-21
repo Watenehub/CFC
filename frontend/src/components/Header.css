@@ -50,14 +50,14 @@
 }
 
 .logo-image {
-  width: 80px;
-  height: 80px;
+  width: 160px;
+  height: 160px;
   border-radius: var(--radius-full);
   object-fit: contain;
 }
 
 .logo-text {
-  font-size: 1.5rem;
+  font-size: 3rem;
   font-weight: 700;
   color: var(--color-white);
   letter-spacing: -0.02em;
