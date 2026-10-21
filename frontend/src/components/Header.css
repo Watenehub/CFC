@@ -198,23 +198,6 @@
   background: var(--color-accent-light);
 }
 
-.header-cta--primary.is-live {
-  animation: live-button-pulse 2s ease-in-out infinite;
-  background: linear-gradient(135deg, #d63b3b, #ef4444);
-  box-shadow: 0 6px 25px rgba(214, 59, 59, 0.4);
-}
-
-@keyframes live-button-pulse {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow: 0 6px 25px rgba(214, 59, 59, 0.4);
-  }
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 6px 35px rgba(214, 59, 59, 0.6);
-  }
-}
-
 .header-actions .header-cta--ghost:first-of-type {
   display: none;
 }
