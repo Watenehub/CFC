@@ -206,7 +206,7 @@ function Header() {
 
         <div className="header-actions">
           <Link to="/contact" className="header-cta header-cta--ghost">Contact</Link>
-          <Link to="/watch-live" className="header-cta header-cta--primary">
+          <Link to="/watch-live" className="header-cta header-cta--ghost">
             {isLive && <span className="live-pulse" aria-hidden="true" />}
             Watch Live
           </Link>
