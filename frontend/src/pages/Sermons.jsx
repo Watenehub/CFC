@@ -21,7 +21,7 @@ function Sermons() {
   const loadSermons = async () => {
     try {
       const data = await sermonsApi.getSermons()
-      setSermons(data)
+      setSermons(data.sort((a, b) => new Date(b.date) - new Date(a.date)))
     } catch (err) {
       setError('Failed to load sermons')
       console.error(err)
@@ -121,26 +121,28 @@ function Sermons() {
           </div>
         ) : (
           <div className="sermons-grid">
-            {filteredSermons.map((sermon) => (
+            {filteredSermons.map((sermon, index) => (
               <Link key={sermon.id} to={`/sermons/${sermon.id}`} className="sermon-card fade-up">
-                <div className="sermon-thumbnail fit-media" style={fitStyle(sermon.thumbnail || '/CFC_CHURCH_PHOTO.jpg')}>
-                  <img 
-                    src={sermon.thumbnail || '/CFC_CHURCH_PHOTO.jpg'} 
-                    alt={sermon.title} 
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  {sermon.video_url && <span className="sermon-play-badge" aria-hidden="true">▶</span>}
-                </div>
+                {index === 0 && (
+                  <div className="sermon-thumbnail fit-media" style={fitStyle(sermon.thumbnail || '/CFC_CHURCH_PHOTO.jpg')}>
+                    <img
+                      src={sermon.thumbnail || '/CFC_CHURCH_PHOTO.jpg'}
+                      alt={sermon.title}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    {sermon.video_url && <span className="sermon-play-badge" aria-hidden="true">▶</span>}
+                  </div>
+                )}
                 <div className="sermon-content">
                   {sermon.category && <div className="sermon-category">{sermon.category}</div>}
                   <h3>{sermon.title}</h3>
                   <p className="sermon-speaker">{sermon.speaker}</p>
                   {sermon.date && (
-                    <p className="sermon-date">{new Date(sermon.date).toLocaleDateString('en-US', { 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
+                    <p className="sermon-date">{new Date(sermon.date).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
                     })}</p>
                   )}
                   {sermon.scripture && <p className="sermon-scripture">{sermon.scripture}</p>}
