@@ -73,7 +73,6 @@ function Header() {
 
   const navLinks = [
     { path: '/sermons', label: 'Sermons' },
-    { path: '/watch-live', label: 'Watch Live' },
     { path: '/events', label: 'Events' },
     { path: '/ministries', label: 'Ministries' },
     { path: '/give', label: 'Give' },
@@ -134,7 +133,6 @@ function Header() {
                   className={`nav-link ${isActive(link.path) ? 'nav-link-active' : ''}`}
                 >
                   {link.label}
-                  {link.path === '/watch-live' && isLive && <span className="live-pulse live-pulse--inline" aria-hidden="true" />}
                 </Link>
               </li>
             ))}
@@ -207,10 +205,6 @@ function Header() {
 
         <div className="header-actions">
           <Link to="/contact" className="header-cta header-cta--ghost">Contact</Link>
-          <Link to="/watch-live" className={`header-cta header-cta--primary${isLive ? ' is-live' : ''}`}>
-            {isLive && <span className="live-pulse" aria-hidden="true" />}
-            Watch Live
-          </Link>
 
           {user ? (
             <div className="user-menu">
