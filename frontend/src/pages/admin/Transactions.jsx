@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import DashboardLayout from '../../components/DashboardLayout'
 import * as megapayApi from '../../api/megapay'
+import * as givingApi from '../../api/giving'
 
 const FILTERS = [
   ['', 'All'],
@@ -19,7 +20,9 @@ const STATUS_COLORS = {
 
 function Transactions() {
   const [transactions, setTransactions] = useState([])
+  const [givingOptions, setGivingOptions] = useState([])
   const [status, setStatus] = useState('')
+  const [givingFilter, setGivingFilter] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -35,11 +38,53 @@ function Transactions() {
     }
   }, [status])
 
-  useEffect(() => { load(true) }, [load])
+  const loadGivingOptions = useCallback(async () => {
+    try {
+      const data = await givingApi.getGiving()
+      setGivingOptions(data)
+    } catch (err) {
+      console.error('Failed to load giving options:', err)
+    }
+  }, [])
 
-  const total = transactions
+  useEffect(() => { load(true) }, [load])
+  useEffect(() => { loadGivingOptions() }, [loadGivingOptions])
+
+  const filteredTransactions = givingFilter
+    ? transactions.filter(t => t.giving_id === parseInt(givingFilter))
+    : transactions
+
+  const total = filteredTransactions
     .filter((item) => item.status === 'success')
     .reduce((sum, item) => sum + Number(item.amount || 0), 0)
+
+  const downloadCSV = () => {
+    const headers = ['Date', 'Time', 'Phone', 'Amount (KSh)', 'Giving', 'Status', 'Receipt']
+    const rows = filteredTransactions.map(item => [
+      item.created_at ? new Date(item.created_at).toLocaleDateString() : '-',
+      item.created_at ? new Date(item.created_at).toLocaleTimeString() : '-',
+      item.phone,
+      Number(item.amount || 0).toLocaleString(),
+      item.reference,
+      item.status,
+      item.receipt || '-'
+    ])
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', `transactions_${new Date().toISOString().split('T')[0]}.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
 
   return (
     <DashboardLayout role="admin" title="Transactions">
@@ -50,14 +95,19 @@ function Transactions() {
 
         <div className="page-action-bar">
           <span>
-            {transactions.length} shown · Successful total: KSh {total.toLocaleString()}
+            {filteredTransactions.length} shown · Successful total: KSh {total.toLocaleString()}
           </span>
-          <button type="button" className="btn btn-primary" onClick={() => load(true)} disabled={loading}>
-            {loading ? 'Refreshing...' : 'Refresh'}
-          </button>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button type="button" className="btn btn-secondary" onClick={downloadCSV} disabled={filteredTransactions.length === 0}>
+              Download CSV
+            </button>
+            <button type="button" className="btn btn-primary" onClick={() => load(true)} disabled={loading}>
+              {loading ? 'Refreshing...' : 'Refresh'}
+            </button>
+          </div>
         </div>
 
-        <div className="filter-buttons" style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <div className="filter-buttons" style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
           {FILTERS.map(([value, label]) => (
             <button
               key={value || 'all'}
@@ -68,6 +118,16 @@ function Transactions() {
               {label}
             </button>
           ))}
+          <select
+            value={givingFilter}
+            onChange={(e) => setGivingFilter(e.target.value)}
+            style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', minWidth: '200px' }}
+          >
+            <option value="">All Giving Options</option>
+            {givingOptions.map(option => (
+              <option key={option.id} value={option.id}>{option.title}</option>
+            ))}
+          </select>
         </div>
 
         <div style={{ overflowX: 'auto' }}>
@@ -84,10 +144,10 @@ function Transactions() {
               </tr>
             </thead>
             <tbody>
-              {transactions.length === 0 && !loading && (
+              {filteredTransactions.length === 0 && !loading && (
                 <tr><td colSpan="7" style={{ padding: '1rem' }}>No transactions found.</td></tr>
               )}
-              {transactions.map((item) => (
+              {filteredTransactions.map((item) => (
                 <tr key={item.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
                   <td style={{ padding: '0.6rem' }}>{item.created_at ? new Date(item.created_at).toLocaleDateString() : '-'}</td>
                   <td style={{ padding: '0.6rem' }}>{item.created_at ? new Date(item.created_at).toLocaleTimeString() : '-'}</td>
